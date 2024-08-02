@@ -47,7 +47,7 @@ const Footer = () => {
                         </ul>
                     </div>
                 </div>
-                <p>&copy; Nguyễn Hà Bảo Khang, 2023</p>
+                <p title="&copy; Nguyễn Hà Bảo Khang, 2023">&copy; Nguyễn Hà Bảo Khang, 2023</p>
             </div>
         </footer>
     )

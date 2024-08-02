@@ -1,0 +1,13 @@
+.signup[type=submit] {
+    border: 1px solid whitesmoke;
+    color: whitesmoke;
+    font-size: large;
+    text-shadow: 2px 2px 4px rgba(0, 47, 255, 0.5);
+    background-color: rgba(205, 68, 0, 0.9);
+}
+
+.signup[type=submit]:hover {
+    border: 1px solid white;
+    color: whitesmoke;
+    background-color: rgba(180, 50, 0, 1);
+}

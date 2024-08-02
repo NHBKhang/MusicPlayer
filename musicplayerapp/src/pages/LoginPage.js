@@ -4,10 +4,11 @@ import '../styles/LoginPage.css';
 const LoginPage = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState(null);
 
-    const handleSubmit = (e) => {
+    const onLogin = async (e) => {
         e.preventDefault();
-        // Handle form submission logic here
+        setError(null)
         console.log('Email:', username);
         console.log('Password:', password);
     };
@@ -23,35 +24,37 @@ const LoginPage = () => {
                     </div>
                     <div className="card bg-dark">
                         <div className="card-body">
-                            <h3 className="card-title text-center mb-2 p-1 text-white">Đăng nhập</h3>
-                            <form onSubmit={handleSubmit} className='p-2'>
-                                <div className="form-group mb-3">
-                                    <label htmlFor="email" className='input-label'>Tên tài khoản</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        id="username"
-                                        value={username}
-                                        onChange={(e) => setUsername(e.target.value)}
-                                        required />
-                                </div>
-                                <div className="form-group mb-3">
-                                    <label htmlFor="password" className='input-label'>Mật khẩu</label>
-                                    <input
-                                        type="password"
-                                        className="form-control"
-                                        id="password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        required />
-                                </div>
-                                <button type="submit" className="btn login btn-block mt-4">
-                                    Đăng nhập
-                                </button>
-                                <div className="custom-text mt-4 mb-2 ms-1 fadeIn third">
-                                    Bạn chưa có tài khoản? <a href="/signup/">Đăng ký</a>
-                                </div>
-                            </form>
+                            <h3 className="card-title text-center mb-2 p-2 text-white">Đăng nhập</h3>
+                            <div className="form-group mb-3">
+                                <label htmlFor="username" className='input-label'>Tên tài khoản</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    id="username"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    required />
+                            </div>
+                            <div className="form-group mb-3">
+                                <label htmlFor="password" className='input-label'>Mật khẩu</label>
+                                <input
+                                    type="password"
+                                    className="form-control"
+                                    id="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required />
+                            </div>
+                            <div className="error-text">{error}</div>
+                            <button
+                                type="submit"
+                                className="btn login btn-block mt-4"
+                                onClick={onLogin}>
+                                Đăng nhập
+                            </button>
+                            <div className="custom-text mt-4 mb-2 ms-1 fadeIn third">
+                                Bạn chưa có tài khoản? <a href="/signup/">Đăng ký</a>
+                            </div>
                         </div>
                     </div>
                 </div>
