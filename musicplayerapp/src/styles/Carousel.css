@@ -1,0 +1,28 @@
+.carousel-container {
+    width: 80%;
+    margin: auto;
+    padding: 40px 0;
+}
+
+.carousel-item {
+    background: #181717;
+    padding: 40px;
+    text-align: center;
+}
+
+.slick-prev,
+.slick-next {
+    z-index: 1;
+}
+
+.label {
+    text-align: start;
+    color: whitesmoke;
+    padding: 5px 5px 12px 0;
+}
+
+@media screen and (max-width: 600px) {
+    .carousel-container {
+        width: 75%;
+    }
+}

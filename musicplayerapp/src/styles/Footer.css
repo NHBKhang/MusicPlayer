@@ -1,0 +1,45 @@
+footer .container a:hover > .fa-brands.fa-facebook {
+    color: #385898;
+    background: radial-gradient(circle at center, #faf9f9 10%, #faf9f9 64%, #faf9f9 47%, rgba(27, 27, 27, 1.00) 47%, rgba(27, 27, 27, 1.00) 48%);
+}
+
+footer .container a:hover > .fa-brands.fa-twitter {
+    color: #1DA1F2;
+}
+
+footer .container a:hover > .fa-brands.fa-instagram {
+    background: linear-gradient(45deg, #405de6, #5851db, #833ab4, #c13584, #e1306c, #fd1d1d);
+}
+
+footer .container a:hover > .fa-brands.fa-youtube {
+    color: red;
+    background: radial-gradient(ellipse at center, #faf9f9 0%, #faf9f9 47%, #faf9f9 47%, rgba(27, 27, 27, 1.00) 47%, rgba(27, 27, 27, 1.00) 48%);
+}
+
+a {
+    color: whitesmoke !important;
+}
+
+.social-icon li a i {
+    margin-right: .5rem;
+}
+
+footer ul {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: baseline;
+}
+
+footer li {
+    font-size: 0.75rem;
+}
+
+footer {
+    z-index: 1000;
+    width: 100%;
+}
+
+.footer {
+    border-top: 1px solid rgb(100, 100, 100);
+}

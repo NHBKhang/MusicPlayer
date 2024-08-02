@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  background-color: #282c34;
 }
 
 .App-logo {
@@ -32,7 +33,33 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
+  }
+}
+
+a {
+  text-decoration: none;
+}
+
+.sidebar {
+  width: 4rem;
+}
+
+.content {
+  margin-top: 75px;
+  margin-left: 3rem;
+}
+
+@media screen and (max-width: 1100px) {
+  .content {
+    margin-left: 2.5rem;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .content {
+    margin-left: 2rem;
   }
 }
