@@ -15,9 +15,9 @@
     z-index: 1;
 }
 
-.label {
+.carousel-label {
     text-align: start;
-    color: whitesmoke;
+    color: whitesmoke !important;
     padding: 5px 5px 12px 0;
 }
 

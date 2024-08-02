@@ -40,7 +40,7 @@ const Carousel = ({ label }) => {
 
     return (
         <div className="carousel-container">
-            {label && <h3 className='label'>{label}</h3>}
+            {label && <h3 className='carousel-label'>{label}</h3>}
             <Slider {...settings}>
                 <div className="carousel-item">
                     <h3>Item 1</h3>

@@ -1,0 +1,53 @@
+.input-label {
+    color: rgba(245, 245, 245, 0.75);
+    padding: 5px;
+    margin: 5px;
+    padding-left: 0;
+    margin-left: 0;
+    text-align: start;
+    display: block;
+}
+
+.card {
+    border: 1px solid rgba(245, 245, 245, 0.2);
+}
+
+.login[type=submit] {
+    border: 1px solid whitesmoke;
+    color: whitesmoke;
+    font-size: large;
+    text-shadow: 2px 2px 4px rgba(0, 47, 255, 0.5);
+    background-color: rgba(205, 68, 0, 0.9);
+}
+
+.login[type=submit]:hover {
+    border: 1px solid white;
+    color: whitesmoke;
+    background-color: rgba(180, 50, 0, 1);
+}
+
+.custom-text {
+    color: rgb(147, 255, 255);
+    font-size: 0.95em;
+    margin: auto;
+}
+
+.custom-text a {
+    text-decoration: underline !important;
+    color: rgb(156, 255, 255);
+}
+
+.custom-text a:hover {
+    color: #1DA1F2;
+    text-decoration: none !important;
+}
+
+.social-name {
+    padding: 5px;
+    margin: 0;
+}
+
+.social-link {
+    padding: 0 10px;
+    margin: 0 5px;
+}

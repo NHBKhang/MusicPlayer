@@ -37,31 +37,32 @@
     margin: auto;
 }
 
-.login, .signin {
+.login[type=button], .signin[type=button] {
     padding: 5px;
     border: 1px solid whitesmoke;
+    color: whitesmoke !important;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-.login:hover, .signin:hover {
+.login[type=button]:hover, .signin[type=button]:hover {
     border: 1px solid white;
     transition: transform 0.3s ease;
     transform: scale(1.2);
 }
 
-.login {
+.login[type=button] {
     background-color: rgba(235, 75, 0, 0.9);
 }
 
-.signin {
+.signin[type=button] {
     background-color: rgba(235, 150, 0, 0.9);
 }
 
-.login:hover {
+.login[type=button]:hover {
     background-color: rgba(180, 50, 0, 1);
 }
 
-.signin:hover {
+.signin[type=button]:hover {
     background-color: rgb(200, 100, 0, 1);
 }
 

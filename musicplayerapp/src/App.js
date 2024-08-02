@@ -1,6 +1,7 @@
 import './App.css';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { HomePage } from './pages';
+import { endpoints } from './configs/API';
+// import { useEffect } from 'react';
 
 const App = () => {
 
@@ -9,9 +10,9 @@ const App = () => {
       <Router>
         <div>
           <Routes>
-            <Route exact path="/" element={<HomePage />} />
-            {/* <Route path="/about" component={AboutPage} />
-            <Route path="/contact" component={ContactPage} /> */}
+            {Object.values(endpoints).map((route, index) => (
+              <Route key={index} path={route.url} element={<route.component />} />
+            ))}
           </Routes>
         </div>
       </Router>
