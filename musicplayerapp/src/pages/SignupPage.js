@@ -1,17 +1,48 @@
 import { useState } from "react";
 import '../styles/SignupPage.css';
+import API, { endpoints } from "../configs/API";
+import { useNavigate } from "react-router-dom";
 
 const SignupPage = () => {
     const [user, setUser] = useState(null);
     const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
     const updateUser = (field, value) => {
         setUser(current => ({ ...current, [field]: value }));
     };
 
     const onSignup = async (e) => {
-        if (user?.password !== user.re_password)
+        e.preventDefault();
+        if (user?.password !== user?.re_password)
             setError('Mật khẩu không khớp');
+        else {
+            setError(null);
+            setLoading(true);
+
+            let form = new FormData();
+            for (let key in user)
+                if (key !== 're_password')
+                    form.append(key, user[key]);
+
+            try {
+                const res = await API.post(endpoints.users, form, {
+                    headers: {
+                        "Content-Type": "multipart/form-data"
+                    }
+                });
+
+                if (res.status === 201) {
+                    navigate("/login/");
+                }
+            } catch (error) {
+                setError(error);
+            } finally {
+                setLoading(false);
+            }
+
+        }
     }
 
     return (
@@ -23,61 +54,62 @@ const SignupPage = () => {
                             <img src="../logo.png" height={70} className="me-1" alt="logo" />
                             <strong>SoundScape</strong></a>
                     </div>
-                    <div className="card bg-dark">
-                        <div className="card-body">
-                            <h3 className="card-title text-center mb-2 p-2 text-white">Đăng ký</h3>
-                            <div className="form-group mb-3">
-                                <label htmlFor="username" className='input-label'>Tên tài khoản</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    id="username"
-                                    value={user?.username}
-                                    onChange={(e) => updateUser('username', e.target.value)}
-                                    required />
-                            </div>
-                            <div className="form-group mb-3">
-                                <label htmlFor="email" className='input-label'>Email</label>
-                                <input
-                                    type="email"
-                                    className="form-control"
-                                    id="email"
-                                    value={user?.email}
-                                    onChange={(e) => updateUser('email', e.target.value)}
-                                    required />
-                            </div>
-                            <div className="form-group mb-3">
-                                <label htmlFor="password" className='input-label'>Mật khẩu</label>
-                                <input
-                                    type="password"
-                                    className="form-control"
-                                    id="password"
-                                    value={user?.password}
-                                    onChange={(e) => updateUser('password', e.target.value)}
-                                    required />
-                            </div>
-                            <div className="form-group mb-3">
-                                <label htmlFor="re_password" className='input-label'>Nhập lại mật khẩu</label>
-                                <input
-                                    type="password"
-                                    className="form-control"
-                                    id="re_password"
-                                    value={user?.re_password}
-                                    onChange={(e) => updateUser('re_password', e.target.value)}
-                                    required />
-                            </div>
-                            <div className="error-text">{error}</div>
-                            <button
-                                type="submit"
-                                className="btn login btn-block mt-3"
-                                onClick={onSignup}>
-                                Đăng ký
-                            </button>
-                            <div className="custom-text mt-4 mb-2 ms-1 fadeIn third">
-                                Bạn đã có tài khoản? <a href="/login/">Đăng nhập</a>
+                    <form onSubmit={onSignup}>
+                        <div className="card bg-dark">
+                            <div className="card-body">
+                                <h3 className="card-title text-center mb-2 p-2 text-white">Đăng ký</h3>
+                                <div className="form-group mb-3">
+                                    <label htmlFor="username" className='input-label'>Tên tài khoản</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        id="username"
+                                        value={user?.username}
+                                        onChange={(e) => updateUser('username', e.target.value)}
+                                        required />
+                                </div>
+                                <div className="form-group mb-3">
+                                    <label htmlFor="email" className='input-label'>Email</label>
+                                    <input
+                                        type="email"
+                                        className="form-control"
+                                        id="email"
+                                        value={user?.email}
+                                        onChange={(e) => updateUser('email', e.target.value)}
+                                        required />
+                                </div>
+                                <div className="form-group mb-3">
+                                    <label htmlFor="password" className='input-label'>Mật khẩu</label>
+                                    <input
+                                        type="password"
+                                        className="form-control"
+                                        id="password"
+                                        value={user?.password}
+                                        onChange={(e) => updateUser('password', e.target.value)}
+                                        required />
+                                </div>
+                                <div className="form-group mb-3">
+                                    <label htmlFor="re_password" className='input-label'>Nhập lại mật khẩu</label>
+                                    <input
+                                        type="password"
+                                        className="form-control"
+                                        id="re_password"
+                                        value={user?.re_password}
+                                        onChange={(e) => updateUser('re_password', e.target.value)}
+                                        required />
+                                </div>
+                                <div className="error-text">{error}</div>
+                                <button
+                                    type="submit"
+                                    className="btn login btn-block mt-3">
+                                    {loading ? <div className='spinner'></div> : 'Đăng ký'}
+                                </button>
+                                <div className="custom-text mt-4 mb-2 ms-1 fadeIn third">
+                                    Bạn đã có tài khoản? <a href="/login/">Đăng nhập</a>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
             <div className="row justify-content-center p-1 pb-5">

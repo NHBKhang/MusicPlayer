@@ -1,16 +1,31 @@
 import React, { useState } from 'react';
 import '../styles/LoginPage.css';
+import API, { endpoints } from '../configs/API';
 
 const LoginPage = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
     const onLogin = async (e) => {
         e.preventDefault();
-        setError(null)
-        console.log('Email:', username);
-        console.log('Password:', password);
+        setLoading(true);
+
+        try {
+            const res = await API.post(endpoints.login, {
+                "username": username,
+                "password": password,
+                "client_id": process.env.REACT_APP_CLIENT_ID,
+                "client_secret": process.env.REACT_APP_CLIENT_SECRET,
+                "grant_type": "password"
+            });
+    
+        } catch (error) {
+            setError(error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -50,7 +65,7 @@ const LoginPage = () => {
                                 type="submit"
                                 className="btn login btn-block mt-4"
                                 onClick={onLogin}>
-                                Đăng nhập
+                                {loading ? <div className='spinner'></div> : 'Đăng nhập'}
                             </button>
                             <div className="custom-text mt-4 mb-2 ms-1 fadeIn third">
                                 Bạn chưa có tài khoản? <a href="/signup/">Đăng ký</a>

@@ -1,6 +1,6 @@
 import './App.css';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { endpoints } from './configs/API';
+import { routes } from './configs/API';
 // import { useEffect } from 'react';
 
 const App = () => {
@@ -10,7 +10,7 @@ const App = () => {
       <Router>
         <div>
           <Routes>
-            {Object.values(endpoints).map((route, index) => (
+            {Object.values(routes).map((route, index) => (
               <Route key={index} path={route.url} element={<route.component />} />
             ))}
           </Routes>
