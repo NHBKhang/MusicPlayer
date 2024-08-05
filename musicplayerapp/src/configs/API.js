@@ -1,4 +1,8 @@
-import { HomePage, LoginPage, SignupPage } from "../pages";
+import {
+    HomePage,
+    LoginPage, SignupPage,
+    SongDetailsPage
+} from "../pages";
 import axios from "axios";
 
 export const routes = {
@@ -15,12 +19,19 @@ export const routes = {
         component: SignupPage,
 
     },
+    song: {
+        url: '/songs/:id/',
+        component: SongDetailsPage
+    }
 }
 
 export const endpoints = {
     'users': '/users/',
+    'user': (userId) => `/users/${userId}`,
     'login': '/o/token/',
-
+    'genres': '/genres/',
+    'songs': '/songs/',
+    'song': (songId) => `/songs/${songId}/`,
 }
 
 export const authAPI = (accessToken) => axios.create({

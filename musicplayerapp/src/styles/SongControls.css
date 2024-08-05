@@ -1,0 +1,28 @@
+.song-control {
+    height: 60px;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease-in-out;
+    transform: translateY(100%);
+    border: 1px solid rgba(211, 211, 211, 0.2);
+}
+
+.song-info h6,
+.song-info p {
+    margin: 0;
+}
+
+.controls button {
+    padding: 0.5rem 1rem;
+    background-color: inherit;
+    color: whitesmoke;
+}
+
+.controls i {
+    font-size: 1.2rem;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.show {
+    transform: translateY(0) !important;
+}

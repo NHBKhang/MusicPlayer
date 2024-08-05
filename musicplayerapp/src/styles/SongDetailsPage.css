@@ -1,0 +1,125 @@
+.song-container {
+    border: 1px solid rgba(211, 211, 211, 0.5);
+    margin: 20px 10px 20px 30px;
+
+}
+
+@media screen and (max-width: 600px) {
+    .song-container {
+        margin-left: 40px;
+    }
+}
+
+.song-detail {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    padding: 10px;
+    width: 100%;
+}
+
+.song-cover {
+    margin-right: 20px;
+
+}
+
+.song-cover img {
+    object-fit: cover;
+    width: 100%;
+    width: 300px;
+    height: 300px;
+}
+
+.song-info {
+    flex: 1;
+}
+
+.song-info p {
+    font-size: 1.1rem;
+}
+
+.song-info h1 {
+    font-size: 2.5rem;
+}
+
+.song-lyrics {
+    margin-top: 20px;
+}
+
+.other-info {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 1em;
+}
+
+.other-info img {
+    margin-right: 0.75em;
+}
+
+.other-info span {
+    font-size: 1.2rem;
+}
+
+.genre {
+    background-color: rgba(211, 211, 211, 0.5);
+    padding: 5px;
+    border-radius: 10px;
+}
+
+.genre:hover {
+    background-color: rgba(200, 200, 200, 0.25);
+}
+
+.divider {
+    width: 100%;
+    height: 1px;
+    background-color: #ffffff;
+    margin: 20px 0;
+}
+
+.button-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.button-group button {
+    background-color: whitesmoke;
+    border-color: rgba(128, 128, 128, 0.5);
+    border-radius: 5px;
+    padding: 2px 7px;
+}
+
+/* .play-button {
+    color: whitesmoke;
+    background-color: #f50 !important;
+    border-radius: 50% !important;
+    width: 60px;
+    height: 60px;
+    margin-right: 20px !important;
+}
+
+.play-button i {
+    font-size: 30px;
+    text-align: center;
+    vertical-align: middle;
+} */
+
+.button-group .play-button {
+    background-color: #f50 !important;
+    color: whitesmoke;
+    font-weight: 600;
+    font-size: 1.25rem;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.button-group .play-button:hover {
+    background-color: rgb(210, 70, 0) !important;
+    color: white;
+}
+
+.button-group .play-button i {
+    font-size: 1.5rem;
+}

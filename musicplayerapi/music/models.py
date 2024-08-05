@@ -26,7 +26,7 @@ class UserInfo(models.Model):
     def __str__(self):
         if self.display_name:
             return self.display_name
-        
+
         return super().__str__()
 
 
@@ -67,24 +67,31 @@ class Song(ImageBaseModel, BaseModel):
         return super(Song, self).save(*args, **kwargs)
 
 
+class Stream(models.Model):
+    song = models.ForeignKey(Song, on_delete=models.CASCADE, related_name='streams')
+    streamed_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.song.title} đã phát trực tuyến vào {self.streamed_at}"
+
+
 class Interaction(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    song = models.ForeignKey(Song, on_delete=models.CASCADE)
 
     class Meta:
         abstract = True
         ordering = ('-created_date',)
+        unique_together = ('song', 'user')
 
 
-# class Comment(Interaction):
-#     content = models.CharField(max_length=255)
-#
-#     def __str__(self):
-#         return f'{self.user} đã bình luận {self}'
-#
-#
-# class Like(Interaction):
-#     class Meta:
-#         unique_together = ('outline', 'user')
-#
-#     def __str__(self):
-#         return f'{self.user} đã thích {self}'
+class Comment(Interaction):
+    content = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f'{self.user} đã bình luận {self}'
+
+
+class Like(Interaction):
+    def __str__(self):
+        return f'{self.user} đã thích {self}'

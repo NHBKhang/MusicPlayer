@@ -51,7 +51,7 @@ const SignupPage = () => {
                 <div className="col-lg-6 col-md-9 col-sm-12">
                     <div className='mb-5 fs-1'>
                         <a className="navbar-brand p-1 m-0" href="/">
-                            <img src="../logo.png" height={70} className="me-1" alt="logo" />
+                            <img src="/logo.png" height={70} className="me-1" alt="logo" />
                             <strong>SoundScape</strong></a>
                     </div>
                     <form onSubmit={onSignup}>

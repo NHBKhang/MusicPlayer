@@ -19,9 +19,9 @@ const Header = () => {
         <div>
             <nav className="navbar navbar-expand-sm navbar-dark bg-dark">
                 <div className="container-fluid">
-                    <a className="navbar-brand" href="/">
-                        <img src="../logo.png" height={40} className="me-2 ms-1" alt="logo" />
-                        <strong>SoundScape</strong></a>
+                    <div className="navbar-brand" onClick={() => navigate("/")}>
+                        <img src="/logo.png" height={40} className="me-2 ms-1" alt="logo" />
+                        <strong>SoundScape</strong></div>
                     <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
                         <span className="navbar-toggler-icon"></span>
                     </button>
@@ -37,8 +37,8 @@ const Header = () => {
                             </button>
                         </div>
                         <div className="account">
-                            <button onClick={() => navigate("/login/")} className="btn me-2 login" type="button">Đăng nhập</button>
-                            <button onClick={() => navigate("/signup/")} className="btn signin" type="button">Đăng ký</button>
+                            <a href="/login/" className="btn me-2 login" type="button">Đăng nhập</a>
+                            <a href="/signup/" className="btn signin" type="button">Đăng ký</a>
                         </div>
                     </div>
                 </div>

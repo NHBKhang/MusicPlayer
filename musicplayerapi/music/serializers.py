@@ -2,6 +2,14 @@ from rest_framework import serializers
 from music.models import *
 
 
+class ImageSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        rep['image'] = instance.image.url
+
+        return rep
+
+
 class PublicUserSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
 
@@ -12,8 +20,8 @@ class PublicUserSerializer(serializers.ModelSerializer):
         return rep
 
     def get_name(self, user):
-        # if user.user_info and user.user_info.display_name:
-        #     return user.user_info.display_name
+        if user.info and user.info.display_name:
+            return user.info.display_name
         if user.first_name:
             if user.last_name:
                 return f'{user.last_name} {user.first_name}'
@@ -51,10 +59,29 @@ class UserSerializer(PublicUserSerializer):
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
-        fields = '__all__'
+        fields = ['id', 'name']
 
 
-class SongSerializer(serializers.ModelSerializer):
+class SongSerializer(ImageSerializer):
+    uploader = PublicUserSerializer(read_only=True)
+    genres = GenreSerializer(many=True)
+    likes = serializers.SerializerMethodField()
+    streams = serializers.SerializerMethodField()
+
+    def get_likes(self, song):
+        return song.like_set.count()
+
+    def get_streams(self,song):
+        return song.streams.count()
+
     class Meta:
         model = Song
         fields = '__all__'
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    user = PublicUserSerializer(read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = ['id', 'user', 'outline', 'content', 'created_date', 'updated_date']
