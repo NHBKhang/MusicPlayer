@@ -1,9 +1,11 @@
 import { memo, useState } from "react";
 import '../styles/Header.css';
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../configs/UserContext";
 
 const Header = () => {
     const [query, setQuery] = useState('');
+    const { user, logout } = useUser();
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -11,9 +13,13 @@ const Header = () => {
     };
 
     const handleSearch = () => {
-        // Add search functionality here
         console.log(query);
     };
+
+    const onLogout = (e) => {
+        e.preventDefault();
+        logout();
+    }
 
     return (
         <div>
@@ -36,10 +42,30 @@ const Header = () => {
                                 <i className="fas fa-search"></i>
                             </button>
                         </div>
-                        <div className="account">
+                        {user ? <div className="account">
+                            <div className="dropdown">
+                                <button
+                                    className="dropdown-toggle bg-dark"
+                                    id="dropdownMenuButton"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false" >
+                                    <img
+                                        src={user?.avatar}
+                                        alt={user?.name}
+                                        width={40}
+                                        className="rounded-circle" />
+                                </button>
+                                <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+                                    <li><a className="dropdown-item" href="#/profile">Profile</a></li>
+                                    <li><a className="dropdown-item" href="#/settings">Settings</a></li>
+                                    <li><hr className="dropdown-divider" /></li>
+                                    <li><a className="dropdown-item" onClick={onLogout} href="/logout/">Logout</a></li>
+                                </ul>
+                            </div>
+                        </div> : <div className="account">
                             <a href="/login/" className="btn me-2 login" type="button">Đăng nhập</a>
                             <a href="/signup/" className="btn signin" type="button">Đăng ký</a>
-                        </div>
+                        </div>}
                     </div>
                 </div>
             </nav>

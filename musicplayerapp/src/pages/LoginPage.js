@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import '../styles/LoginPage.css';
-import API, { endpoints } from '../configs/API';
+import API, { authAPI, endpoints } from '../configs/API';
+import { useUser } from '../configs/UserContext';
+import { useNavigate } from 'react-router-dom';
 
 const LoginPage = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const { login } = useUser();
+    const navigate = useNavigate();
 
     const onLogin = async (e) => {
         e.preventDefault();
@@ -20,7 +24,13 @@ const LoginPage = () => {
                 "client_secret": process.env.REACT_APP_CLIENT_SECRET,
                 "grant_type": "password"
             });
-    
+
+            const token = res.data.access_token;
+            localStorage.setItem('token', token);
+
+            const userResponse = await authAPI(token).get(endpoints['current-user']);
+            login(userResponse.data);
+            navigate('/');
         } catch (error) {
             setError(error);
         } finally {

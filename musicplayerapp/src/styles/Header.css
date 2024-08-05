@@ -121,3 +121,21 @@
         justify-content: center;
     }
 }
+
+.dropdown-toggle {
+    border: none;
+}
+
+.dropdown-menu {
+    background-color: #292c2f;
+    border: 1px solid rgba(224, 255, 255, 0.25);
+}
+
+.dropdown-item {
+    font-size: 1.05rem;
+    margin: 2px;
+}
+
+.dropdown-item:hover {
+    background-color: #464b50;
+}

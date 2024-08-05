@@ -1,4 +1,4 @@
-# Music Player
+# SoundScape Music Player
 
 Đồ án ngành cho ngành công nghệ thông tin được viết bởi Nguyễn Hà Bảo Khang dưới sự hướng dẫn của giảng viên Phan Trần Minh Khuê. Website nghe nhạc trực tiếp mô phỏng website Soundcloud
 

@@ -29,6 +29,7 @@ export const endpoints = {
     'users': '/users/',
     'user': (userId) => `/users/${userId}`,
     'login': '/o/token/',
+    'current-user': '/users/current-user/',
     'genres': '/genres/',
     'songs': '/songs/',
     'song': (songId) => `/songs/${songId}/`,
