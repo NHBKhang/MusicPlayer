@@ -42,7 +42,7 @@
     text-decoration: none !important;
 }
 
-.social-name {
+/* .social-name {
     padding: 5px;
     margin: 0;
 }
@@ -50,7 +50,43 @@
 .social-link {
     padding: 0 10px;
     margin: 0 5px;
+    width: 100px;
+    height: 100px;
+} */
+
+.google-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #4285f4;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
+
+.google-button:hover {
+    background-color: #357ae8;
+}
+
+.google-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.google-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+}
+
+.button-text {
+    font-weight: bold;
+}
+
 
 .error-text {
     color: red;

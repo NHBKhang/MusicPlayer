@@ -26,7 +26,7 @@ const Header = () => {
             <nav className="navbar navbar-expand-sm navbar-dark bg-dark">
                 <div className="container-fluid">
                     <div className="navbar-brand" onClick={() => navigate("/")}>
-                        <img src="/logo.png" height={40} className="me-2 ms-1" alt="logo" />
+                        <img src="/logo.png" height={30} className="me-2 ms-1" alt="logo" />
                         <strong>SoundScape</strong></div>
                     <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
                         <span className="navbar-toggler-icon"></span>

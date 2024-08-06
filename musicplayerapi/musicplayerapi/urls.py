@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.urls import path, include
 from music.admin import admin_site
+from oauth2_provider.views import AuthorizationView, TokenView, RevokeTokenView
 
 urlpatterns = [
     path('', include('music.urls')),

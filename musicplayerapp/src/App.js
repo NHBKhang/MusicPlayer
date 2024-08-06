@@ -9,18 +9,18 @@ const App = () => {
 
   return (
     <UserProvider>
-      <AudioProvider>
-        <div className="App">
-          <Router>
-            <SongControls />
-            <Routes>
-              {Object.values(routes).map((route, index) => (
-                <Route key={index} path={route.url} element={<route.component />} />
-              ))}
-            </Routes>
-          </Router>
-        </div>
-      </AudioProvider>
+        <AudioProvider>
+          <div className="App">
+            <Router>
+              <SongControls />
+              <Routes>
+                {Object.values(routes).map((route, index) => (
+                  <Route key={index} path={route.url} element={<route.component />} />
+                ))}
+              </Routes>
+            </Router>
+          </div>
+        </AudioProvider>
     </UserProvider>
   );
 }

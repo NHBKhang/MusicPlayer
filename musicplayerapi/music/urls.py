@@ -9,4 +9,6 @@ r.register('songs', views.SongViewSet, basename='songs')
 
 urlpatterns = [
     path('', include(r.urls)),
+    path('auth/google/', views.google_login, name='google-login'),
+    path('auth/set-password/', views.set_password, name='set-password'),
 ]

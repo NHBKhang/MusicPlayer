@@ -1,6 +1,6 @@
 import {
     HomePage,
-    LoginPage, SignupPage,
+    LoginPage, SetPasswordPage, SignupPage,
     SongDetailsPage
 } from "../pages";
 import axios from "axios";
@@ -16,12 +16,16 @@ export const routes = {
     },
     signup: {
         url: '/signup/',
-        component: SignupPage,
+        component: SignupPage
 
     },
     song: {
         url: '/songs/:id/',
         component: SongDetailsPage
+    },
+    SetPassword: {
+        url: '/set-password/',
+        component: SetPasswordPage
     }
 }
 
@@ -29,6 +33,8 @@ export const endpoints = {
     'users': '/users/',
     'user': (userId) => `/users/${userId}`,
     'login': '/o/token/',
+    'login-google': '/auth/google/',
+    'set-password': '/auth/set-password/',
     'current-user': '/users/current-user/',
     'genres': '/genres/',
     'songs': '/songs/',

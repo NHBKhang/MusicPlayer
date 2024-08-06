@@ -3,6 +3,7 @@ import '../styles/LoginPage.css';
 import API, { authAPI, endpoints } from '../configs/API';
 import { useUser } from '../configs/UserContext';
 import { useNavigate } from 'react-router-dom';
+import { GoogleButton } from '../components';
 
 const LoginPage = () => {
     const [username, setUsername] = useState('');
@@ -47,41 +48,42 @@ const LoginPage = () => {
                             <img src="/logo.png" height={50} className="me-2 ms-1" alt="logo" />
                             <strong>SoundScape</strong></a>
                     </div>
-                    <div className="card bg-dark">
-                        <div className="card-body">
-                            <h3 className="card-title text-center mb-2 p-2 text-white">Đăng nhập</h3>
-                            <div className="form-group mb-3">
-                                <label htmlFor="username" className='input-label'>Tên tài khoản</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    id="username"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
-                                    required />
-                            </div>
-                            <div className="form-group mb-3">
-                                <label htmlFor="password" className='input-label'>Mật khẩu</label>
-                                <input
-                                    type="password"
-                                    className="form-control"
-                                    id="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required />
-                            </div>
-                            <div className="error-text">{error}</div>
-                            <button
-                                type="submit"
-                                className="btn login btn-block mt-4"
-                                onClick={onLogin}>
-                                {loading ? <div className='spinner'></div> : 'Đăng nhập'}
-                            </button>
-                            <div className="custom-text mt-4 mb-2 ms-1 fadeIn third">
-                                Bạn chưa có tài khoản? <a href="/signup/">Đăng ký</a>
+                    <form onSubmit={onLogin}>
+                        <div className="card bg-dark">
+                            <div className="card-body">
+                                <h3 className="card-title text-center mb-2 p-2 text-white">Đăng nhập</h3>
+                                <div className="form-group mb-3">
+                                    <label htmlFor="username" className='input-label'>Tên tài khoản</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        id="username"
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                        required />
+                                </div>
+                                <div className="form-group mb-3">
+                                    <label htmlFor="password" className='input-label'>Mật khẩu</label>
+                                    <input
+                                        type="password"
+                                        className="form-control"
+                                        id="password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required />
+                                </div>
+                                <div className="error-text">{error}</div>
+                                <button
+                                    type="submit"
+                                    className="btn login btn-block mt-4">
+                                    {loading ? <div className='spinner'></div> : 'Đăng nhập'}
+                                </button>
+                                <div className="custom-text mt-4 mb-2 ms-1 fadeIn third">
+                                    Bạn chưa có tài khoản? <a href="/signup/">Đăng ký</a>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
             <div className="row justify-content-center p-1 pb-5">
@@ -89,18 +91,7 @@ const LoginPage = () => {
                     <div className="card bg-dark">
                         <p className='text-white mt-3'>Hoặc đăng nhập bằng tài khoản:</p>
                         <div className='d-flex p-1 pb-4 justify-content-center'>
-                            <a className='social-link' href="/">
-                                <img height={50} width={50} alt="Facebook" importance="low" loading="lazy" src="https://cdn.tgdd.vn/2020/03/GameApp/Facebook-200x200.jpg" />
-                                <div className='social-name'>Facebook</div>
-                            </a>
-                            <a className='social-link' href="/">
-                                <img height={50} width={50} alt="X" importance="low" loading="lazy" src="https://images2.thanhnien.vn/528068263637045248/2023/7/24/f1x5vdqx0aa9sgt-16901896163331463104829.jpg" />
-                                <div className='social-name'>X</div>
-                            </a>
-                            <a className='social-link' href="/">
-                                <img height={50} width={50} alt="Google" importance="low" loading="lazy" src="https://d1785e74lyxkqq.cloudfront.net/_next/static/v2/c/c6bf231775a1d162b567c0882e1d7e3b.svg" />
-                                <div className='social-name'>Google</div>
-                            </a>
+                            <GoogleButton />
                         </div>
                     </div>
                 </div>

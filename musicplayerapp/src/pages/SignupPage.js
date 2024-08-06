@@ -2,6 +2,7 @@ import { useState } from "react";
 import '../styles/SignupPage.css';
 import API, { endpoints } from "../configs/API";
 import { useNavigate } from "react-router-dom";
+import { GoogleButton } from "../components";
 
 const SignupPage = () => {
     const [user, setUser] = useState(null);
@@ -117,18 +118,7 @@ const SignupPage = () => {
                     <div className="card bg-dark">
                         <p className='text-white mt-3'>Hoặc đăng ký bằng tài khoản:</p>
                         <div className='d-flex p-1 pb-4 justify-content-center'>
-                            <a className='social-link' href="/">
-                                <img height={50} width={50} alt="Facebook" importance="low" loading="lazy" src="https://cdn.tgdd.vn/2020/03/GameApp/Facebook-200x200.jpg" />
-                                <div className='social-name'>Facebook</div>
-                            </a>
-                            <a className='social-link' href="/">
-                                <img height={50} width={50} alt="X" importance="low" loading="lazy" src="https://images2.thanhnien.vn/528068263637045248/2023/7/24/f1x5vdqx0aa9sgt-16901896163331463104829.jpg" />
-                                <div className='social-name'>X</div>
-                            </a>
-                            <a className='social-link' href="/">
-                                <img height={50} width={50} alt="Google" importance="low" loading="lazy" src="https://d1785e74lyxkqq.cloudfront.net/_next/static/v2/c/c6bf231775a1d162b567c0882e1d7e3b.svg" />
-                                <div className='social-name'>Google</div>
-                            </a>
+                            <GoogleButton />
                         </div>
                     </div>
                 </div>

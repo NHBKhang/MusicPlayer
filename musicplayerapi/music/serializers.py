@@ -5,7 +5,10 @@ from music.models import *
 class ImageSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         rep = super().to_representation(instance)
-        rep['image'] = instance.image.url
+        if type(instance.image) is cloudinary.CloudinaryResource:
+            rep['image'] = instance.image.url
+        else:
+            rep['image'] = instance.image
 
         return rep
 

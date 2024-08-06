@@ -58,6 +58,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'oauth2_provider.middleware.OAuth2TokenMiddleware',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -201,6 +202,15 @@ OAUTH2_PROVIDER = {
     'REFRESH_TOKEN_EXPIRE_SECONDS': 36000,
     'AUTHORIZATION_CODE_EXPIRE_SECONDS': 600,
 }
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+LOGIN_URL = 'login'
+LOGOUT_URL = 'logout'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
 
 CLIENT_ID = '37FSXoMu2mNeUONLrNPmaLTgPQZ9g1f6YFADiDoM'
 CLIENT_SECRET = '8VAUzTpGByz3dw8HLCJHA5zJJZC037X93tcOZofPwBmi7y9OORyi6MOdmfdKZ35pmlgbTXD1E26Aef2uZru9H2LRmYkiGZqhQuHHxfG7T1nva1dYgwYAH8Fp0LN7p68c'
