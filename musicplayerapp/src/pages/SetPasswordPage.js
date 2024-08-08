@@ -3,12 +3,13 @@ import { authAPI, endpoints } from '../configs/API';
 import { useLocation, useNavigate } from 'react-router-dom';
 import '../styles/SetPasswordPage.css';
 
-const SetPasswordPage = ({ userToken }) => {
+const SetPasswordPage = () => {
     const location = useLocation();
     const { user } = location.state || {};
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
     const handleSubmit = async (event) => {
@@ -52,6 +53,11 @@ const SetPasswordPage = ({ userToken }) => {
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         required />
+                                    <button
+                                        className="form-icon" type='button'
+                                        onClick={() => setShowPassword(!showPassword)}>
+                                        {showPassword ? <i class="fa-solid fa-eye"></i> : <i class="fa-solid fa-eye-slash"></i>}
+                                    </button>
                                 </div>
                                 <div className="error-text">{error}</div>
                                 <button

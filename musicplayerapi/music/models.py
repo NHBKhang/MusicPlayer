@@ -89,9 +89,9 @@ class Comment(Interaction):
     content = models.CharField(max_length=255)
 
     def __str__(self):
-        return f'{self.user} đã bình luận {self}'
+        return f'{self.user} đã bình luận {self.song}'
 
 
 class Like(Interaction):
     def __str__(self):
-        return f'{self.user} đã thích {self}'
+        return f'{self.user} đã thích {self.song}'

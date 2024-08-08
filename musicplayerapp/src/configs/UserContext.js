@@ -1,4 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { authAPI, endpoints } from './API';
+import { googleLogout } from '@react-oauth/google';
 
 const UserContext = createContext();
 
@@ -16,11 +18,16 @@ export const UserProvider = ({ children }) => {
         }
     }, [user]);
 
-    const login = (userData) => {
-        setUser(userData);
+    const login = async (token) => {
+        localStorage.setItem('token', token);
+
+        const res = await authAPI(token).get(endpoints['current-user'])
+        setUser(res.data);
     };
 
     const logout = () => {
+        googleLogout();
+        
         setUser(null);
     };
 

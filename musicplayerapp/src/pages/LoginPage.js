@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import '../styles/LoginPage.css';
-import API, { authAPI, endpoints } from '../configs/API';
+import API, { endpoints } from '../configs/API';
 import { useUser } from '../configs/UserContext';
 import { useNavigate } from 'react-router-dom';
-import { GoogleButton } from '../components';
+import { GoogleButton, FacebookButton } from '../components';
 
 const LoginPage = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [showPassword, setShowPassword] = useState(false);
     const { login } = useUser();
     const navigate = useNavigate();
 
@@ -27,10 +28,8 @@ const LoginPage = () => {
             });
 
             const token = res.data.access_token;
-            localStorage.setItem('token', token);
+            login(token);
 
-            const userResponse = await authAPI(token).get(endpoints['current-user']);
-            login(userResponse.data);
             navigate('/');
         } catch (error) {
             setError(error);
@@ -61,16 +60,24 @@ const LoginPage = () => {
                                         value={username}
                                         onChange={(e) => setUsername(e.target.value)}
                                         required />
+                                    <div className="form-icon">
+                                        <i class="fa-solid fa-user"></i>
+                                    </div>
                                 </div>
                                 <div className="form-group mb-3">
                                     <label htmlFor="password" className='input-label'>Mật khẩu</label>
                                     <input
-                                        type="password"
+                                        type={showPassword ? 'text' : 'password'}
                                         className="form-control"
                                         id="password"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         required />
+                                    <button
+                                        className="form-icon" type='button'
+                                        onClick={() => setShowPassword(!showPassword)}>
+                                        {showPassword ? <i class="fa-solid fa-eye"></i> : <i class="fa-solid fa-eye-slash"></i>}
+                                    </button>
                                 </div>
                                 <div className="error-text">{error}</div>
                                 <button
@@ -90,8 +97,9 @@ const LoginPage = () => {
                 <div className="col-lg-9 col-md-12">
                     <div className="card bg-dark">
                         <p className='text-white mt-3'>Hoặc đăng nhập bằng tài khoản:</p>
-                        <div className='d-flex p-1 pb-4 justify-content-center'>
-                            <GoogleButton />
+                        <div className='d-flex p-1 pb-4 justify-content-center w-100 flex-wrap'>
+                            <div className='mb-4 justify-content-center d-flex'><GoogleButton /></div>
+                            <div className='mb-1 w-100'><FacebookButton /></div>
                         </div>
                     </div>
                 </div>

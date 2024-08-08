@@ -34,22 +34,24 @@ export const endpoints = {
     'user': (userId) => `/users/${userId}`,
     'login': '/o/token/',
     'login-google': '/auth/google/',
+    'login-facebook': '/auth/facebook/',
     'set-password': '/auth/set-password/',
     'current-user': '/users/current-user/',
     'genres': '/genres/',
     'songs': '/songs/',
     'song': (songId) => `/songs/${songId}/`,
+    'like': (songId) => `/songs/${songId}/like/`,
 }
 
 export const authAPI = (accessToken) => axios.create({
     baseURL: process.env.REACT_APP_API_URL,
-    timeout: 2000,
+    timeout: 5000,
     headers: {
-        "Authorization": `bearer ${accessToken}`
+        "Authorization": `Bearer ${accessToken}`
     }
 });
 
 export default axios.create({
     baseURL: process.env.REACT_APP_API_URL,
-    timeout: 2000
+    timeout: 5000,
 });

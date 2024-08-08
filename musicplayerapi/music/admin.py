@@ -36,7 +36,7 @@ class UserAdmin(admin.ModelAdmin):
 
 
 class SongAdmin(admin.ModelAdmin):
-    list_display = ['title', 'artists', ]
+    list_display = ['id', 'title', 'artists', ]
     search_fields = ['id', 'title', 'artists']
     list_filter = ['genres']
     readonly_fields = ['song_image', 'created_date', 'updated_date']
@@ -51,6 +51,8 @@ class SongAdmin(admin.ModelAdmin):
 admin_site.register(User, UserAdmin)
 admin_site.register(Genre)
 admin_site.register(Song, SongAdmin)
+admin_site.register(Comment)
+admin_site.register(Like)
 admin_site.register(Application)
 admin_site.register(AccessToken)
 admin_site.register(RefreshToken)

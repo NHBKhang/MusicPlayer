@@ -34,6 +34,7 @@
     width: 35%;
     display: inline-flex;
     justify-content: flex-end;
+    flex-wrap: wrap;
     margin: auto;
 }
 

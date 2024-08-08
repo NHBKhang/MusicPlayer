@@ -42,18 +42,6 @@
     text-decoration: none !important;
 }
 
-/* .social-name {
-    padding: 5px;
-    margin: 0;
-}
-
-.social-link {
-    padding: 0 10px;
-    margin: 0 5px;
-    width: 100px;
-    height: 100px;
-} */
-
 .google-button {
     display: flex;
     align-items: center;
@@ -91,4 +79,24 @@
 .error-text {
     color: red;
     padding: 5px;
+}
+
+.form-group {
+    position: relative;
+}
+
+.form-icon {
+    background-color: inherit;
+    position: absolute;
+    border: none;
+    top: 42px;
+    font-size: 1.25em;
+}
+
+button.form-icon {
+    right: 5px;
+}
+
+div.form-icon {
+    right: 12px;
 }

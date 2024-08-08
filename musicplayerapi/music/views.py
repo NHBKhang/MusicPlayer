@@ -3,18 +3,14 @@ from rest_framework.response import Response
 from rest_framework.decorators import action, api_view
 from rest_framework import serializers as rest_serializers
 from music.models import *
-from music import serializers, paginators, perms
-from music.utils import upload_image_from_url
+from music import serializers, paginators, perms, utils
 from django.shortcuts import get_object_or_404
 from django.conf import settings
-from django.utils import timezone
 from django.contrib.auth import update_session_auth_hash
-from datetime import timedelta
 from google.oauth2 import id_token
-from google.auth.transport import requests
-from oauth2_provider.models import AccessToken, RefreshToken, Application
+from google.auth.transport import requests as gg_requests
 from oauth2_provider.settings import oauth2_settings
-from oauthlib.common import generate_token
+import requests
 
 
 @api_view(['POST'])
@@ -24,7 +20,7 @@ def google_login(request):
         return Response({'error': 'Mã xác thực không được cung cấp'}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        idinfo = id_token.verify_oauth2_token(id_token_from_client, requests.Request())
+        idinfo = id_token.verify_oauth2_token(id_token_from_client, gg_requests.Request())
 
         user_email = idinfo.get('email')
         user_name = idinfo.get('name')
@@ -34,24 +30,10 @@ def google_login(request):
 
         user, created = User.objects.get_or_create(
             username=user_email,
-            defaults={'first_name': user_name, 'email': user_email, 'avatar': upload_image_from_url(user_picture)})
+            defaults={'first_name': user_name, 'email': user_email,
+                      'avatar': utils.upload_image_from_url(user_picture)})
 
-        application = get_object_or_404(Application, name="SoundScapeMusicPlayer")
-        expires = timezone.now() + timedelta(seconds=oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS)
-        access_token = AccessToken.objects.create(
-            user=user,
-            scope='read write',
-            expires=expires,
-            token=generate_token(),
-            application=application
-        )
-
-        refresh_token = RefreshToken.objects.create(
-            user=user,
-            token=generate_token(),
-            application=application,
-            access_token=access_token
-        )
+        access_token, refresh_token = utils.create_user_token(user=user)
 
         return Response({
             'user': {
@@ -72,6 +54,50 @@ def google_login(request):
     except ValueError as e:
         print(e)
         return Response({'error': 'Xác thực không thành công', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def facebook_login(request):
+    access_token = request.data.get('access_token')
+    if not access_token:
+        return Response({'error': 'Access token not provided'}, status=status.HTTP_400_BAD_REQUEST)
+
+    facebook_url = f'https://graph.facebook.com/me?access_token={access_token}&fields=id,name,email,picture'
+
+    response = requests.get(facebook_url)
+    if response.status_code != 200:
+        return Response({'error': 'Invalid access token'}, status=status.HTTP_400_BAD_REQUEST)
+
+    user_info = response.json()
+    user_email = user_info.get('email')
+    user_name = user_info.get('name')
+    user_picture = user_info.get('picture', {}).get('data', {}).get('url')
+
+    if not user_email:
+        return Response({'error': 'Email not found in access token'}, status=status.HTTP_400_BAD_REQUEST)
+
+    user, created = User.objects.get_or_create(
+        username=user_email,
+        defaults={'first_name': user_name, 'email': user_email, 'avatar': utils.upload_image_from_url(user_picture)})
+
+    access_token, refresh_token = utils.create_user_token(user=user)
+
+    return Response({
+        'user': {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'name': user.first_name,
+        },
+        'created': created,
+        'token': {
+            'access_token': access_token.token,
+            'expires_in': oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS,
+            'refresh_token': refresh_token.token,
+            'token_type': 'Bearer',
+            'scope': access_token.scope,
+        }
+    })
 
 
 class PasswordChangeSerializer(rest_serializers.Serializer):
@@ -142,3 +168,29 @@ class GenreViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retrie
 class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
     queryset = Song.objects.filter(active=True).all()
     serializer_class = serializers.SongSerializer
+
+    def get_serializer_class(self):
+        if self.action in ['retrieve', 'update', 'partial_update']:
+            if self.request.user.is_authenticated:
+                return serializers.AuthenticatedSongDetailsSerializer
+            else:
+                return serializers.SongDetailsSerializer
+        else:
+            if self.request.user.is_authenticated:
+                return serializers.AuthenticatedSongSerializer
+            else:
+                return self.serializer_class
+
+    @action(methods=['post'], url_path='like', detail=True)
+    def like(self, request, pk):
+        if not request.user.is_authenticated:
+            raise NotAuthenticated("User must be authenticated to like a song")
+
+        song = self.get_object()
+        li, created = Like.objects.get_or_create(song=song, user=request.user)
+
+        li.active = not li.active
+        if not created:
+            li.save()
+
+        return Response(serializers.AuthenticatedSongDetailsSerializer(song, context={'request': request}).data)

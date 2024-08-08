@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from music.models import *
+import cloudinary
 
 
 class ImageSerializer(serializers.ModelSerializer):
@@ -18,7 +19,8 @@ class PublicUserSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)
-        rep['avatar'] = instance.avatar.url if instance.avatar else ''
+        rep['avatar'] = instance.avatar.url if instance.avatar else \
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlfqFFx7I61FM-RVN76_PLzbkZ-oWWvdxvNA&s'
 
         return rep
 
@@ -67,19 +69,46 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class SongSerializer(ImageSerializer):
     uploader = PublicUserSerializer(read_only=True)
+
+    class Meta:
+        model = Song
+        fields = ['id', 'title', 'uploader', 'image', 'artists', 'file']
+
+
+class AuthenticatedSongSerializer(SongSerializer):
+    liked = serializers.SerializerMethodField()
+
+    def get_liked(self, song):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return song.like_set.filter(user=request.user, active=True).exists()
+        return False
+
+    class Meta:
+        model = SongSerializer.Meta.model
+        fields = SongSerializer.Meta.fields + ['liked', ]
+
+
+class SongDetailsSerializer(SongSerializer):
     genres = GenreSerializer(many=True)
     likes = serializers.SerializerMethodField()
     streams = serializers.SerializerMethodField()
 
     def get_likes(self, song):
-        return song.like_set.count()
+        return song.like_set.filter(active=True).count()
 
-    def get_streams(self,song):
+    def get_streams(self, song):
         return song.streams.count()
 
     class Meta:
-        model = Song
-        fields = '__all__'
+        model = SongSerializer.Meta.model
+        fields = SongSerializer.Meta.fields + ['created_date', 'genres', 'likes', 'streams']
+
+
+class AuthenticatedSongDetailsSerializer(SongDetailsSerializer, AuthenticatedSongSerializer):
+    class Meta:
+        model = SongDetailsSerializer.Meta.model
+        fields = SongDetailsSerializer.Meta.fields + AuthenticatedSongSerializer.Meta.fields
 
 
 class CommentSerializer(serializers.ModelSerializer):

@@ -2,7 +2,7 @@ import React from 'react';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../configs/UserContext';
-import API, { authAPI, endpoints } from '../configs/API';
+import API, { endpoints } from '../configs/API';
 
 const GoogleButton = () => {
     const navigate = useNavigate();
@@ -16,10 +16,7 @@ const GoogleButton = () => {
             });
 
             const { user, token, created } = res.data;
-            localStorage.setItem('token', token.access_token);
-
-            const userRes = await authAPI(token.access_token).get(endpoints['current-user']);
-            login(userRes.data);
+            login(token.access_token);
 
             if (created)
                 navigate('/set-password/', {
@@ -32,7 +29,7 @@ const GoogleButton = () => {
                 navigate('/');
         } catch (error) {
             console.error(error)
-            alert('Đăng nhập thất bại. Vui lòng kiểm tra thông tin và thử lại.');
+            alert(`Đăng nhập thất bại. Vui lòng kiểm tra thông tin và thử lại.\nDetails: ${error}`);
         }
     };
 

@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { Footer, Header, Sidebar } from "../components";
 import '../styles/SongDetailsPage.css';
 import { useEffect, useState } from "react";
-import API, { endpoints } from "../configs/API";
+import { authAPI, endpoints } from "../configs/API";
 import moment from "moment";
 import { useAudio } from "../configs/AudioContext";
 
@@ -14,7 +14,8 @@ const SongDetailsPage = () => {
     useEffect(() => {
         const loadSong = async () => {
             try {
-                let res = await API.get(endpoints.song(id));
+                let token = localStorage.getItem("token");
+                let res = await authAPI(token).get(endpoints.song(id));
                 setSong(res.data);
             } catch (error) {
                 alert("Không thể tải được bài hát");
@@ -27,6 +28,9 @@ const SongDetailsPage = () => {
     const like = async () => {
         try {
 
+            let token = localStorage.getItem("token");
+            let res = await authAPI(token).post(endpoints.like(id));
+            setSong(res.data);
         } catch (error) {
             alert(error);
         }
@@ -84,8 +88,11 @@ const SongDetailsPage = () => {
                                             <span><i class="fa-solid fa-pause me-1"></i> Tạm dừng</span> :
                                             <span><i class="fa-solid fa-play me-1"></i> Phát bài hát</span>}
                                     </button>
-                                    <button type="button" onClick={like} className="me-4">
-                                        <i class="fa-solid fa-heart me-1"></i> Thích
+                                    <button
+                                        type="button"
+                                        onClick={like}
+                                        className={`me-4 ${song?.liked ? 'liked' : ''}`}>
+                                        <i class="fa-solid fa-heart me-1"></i> {song?.liked ? 'Bỏ thích' : 'Thích'}
                                     </button>
                                     <div className="mt-md-2">
                                         <span className="me-4">

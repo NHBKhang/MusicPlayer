@@ -2,16 +2,21 @@ import { useState } from "react";
 import '../styles/SignupPage.css';
 import API, { endpoints } from "../configs/API";
 import { useNavigate } from "react-router-dom";
-import { GoogleButton } from "../components";
+import { GoogleButton, FacebookButton } from '../components';
 
 const SignupPage = () => {
     const [user, setUser] = useState(null);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
     const updateUser = (field, value) => {
         setUser(current => ({ ...current, [field]: value }));
+    };
+
+    const updateShowPassword = (field, value) => {
+        setShowPassword(current => ({ ...current, [field]: value }));
     };
 
     const onSignup = async (e) => {
@@ -50,7 +55,7 @@ const SignupPage = () => {
         <div className="container">
             <div className="row justify-content-center p-5 pb-4">
                 <div className="col-lg-6 col-md-9 col-sm-12">
-                    <div className='mb-5 fs-1'>
+                    <div className='mb-5 fs-1 cursor-pointer'>
                         <a className="navbar-brand p-1 m-0" href="/">
                             <img src="/logo.png" height={70} className="me-1" alt="logo" />
                             <strong>SoundScape</strong></a>
@@ -68,6 +73,9 @@ const SignupPage = () => {
                                         value={user?.username}
                                         onChange={(e) => updateUser('username', e.target.value)}
                                         required />
+                                    <div className="form-icon">
+                                        <i class="fa-solid fa-user"></i>
+                                    </div>
                                 </div>
                                 <div className="form-group mb-3">
                                     <label htmlFor="email" className='input-label'>Email</label>
@@ -78,26 +86,44 @@ const SignupPage = () => {
                                         value={user?.email}
                                         onChange={(e) => updateUser('email', e.target.value)}
                                         required />
+                                    <div className="form-icon"
+                                        title='Ví dụ: example@gmail.com'>
+                                        <i class="fa-solid fa-envelope"></i>
+                                    </div>
                                 </div>
                                 <div className="form-group mb-3">
                                     <label htmlFor="password" className='input-label'>Mật khẩu</label>
                                     <input
-                                        type="password"
+                                        type={showPassword?.password ? 'text' : 'password'}
                                         className="form-control"
                                         id="password"
                                         value={user?.password}
                                         onChange={(e) => updateUser('password', e.target.value)}
                                         required />
+                                    <button
+                                        className="form-icon" type='button'
+                                        onClick={() => updateShowPassword('password', !showPassword?.password)}>
+                                        {showPassword?.password ?
+                                            <i class="fa-solid fa-eye"></i> :
+                                            <i class="fa-solid fa-eye-slash"></i>}
+                                    </button>
                                 </div>
                                 <div className="form-group mb-3">
                                     <label htmlFor="re_password" className='input-label'>Nhập lại mật khẩu</label>
                                     <input
-                                        type="password"
+                                        type={showPassword?.re_password ? 'text' : 'password'}
                                         className="form-control"
                                         id="re_password"
                                         value={user?.re_password}
                                         onChange={(e) => updateUser('re_password', e.target.value)}
                                         required />
+                                    <button
+                                        className="form-icon" type='button'
+                                        onClick={() => updateShowPassword('re_password', !showPassword?.re_password)}>
+                                        {showPassword?.re_password ?
+                                            <i class="fa-solid fa-eye"></i> :
+                                            <i class="fa-solid fa-eye-slash"></i>}
+                                    </button>
                                 </div>
                                 <div className="error-text">{error}</div>
                                 <button
@@ -117,8 +143,9 @@ const SignupPage = () => {
                 <div className="col-lg-9 col-md-12">
                     <div className="card bg-dark">
                         <p className='text-white mt-3'>Hoặc đăng ký bằng tài khoản:</p>
-                        <div className='d-flex p-1 pb-4 justify-content-center'>
-                            <GoogleButton />
+                        <div className='d-flex p-1 pb-4 justify-content-center w-100 flex-wrap'>
+                            <div className='mb-4 justify-content-center d-flex'><GoogleButton /></div>
+                            <div className='mb-1 w-100'><FacebookButton /></div>
                         </div>
                     </div>
                 </div>
