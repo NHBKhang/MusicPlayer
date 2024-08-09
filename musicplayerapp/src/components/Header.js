@@ -56,10 +56,10 @@ const Header = () => {
                                         className="rounded-circle" />
                                 </button>
                                 <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-                                    <li><a className="dropdown-item" href="#/profile">Profile</a></li>
-                                    <li><a className="dropdown-item" href="#/settings">Settings</a></li>
+                                    <li><a className="dropdown-item" href="#/profile">Hồ sơ</a></li>
+                                    <li><a className="dropdown-item" href="#/settings">Cài đặt</a></li>
                                     <li><hr className="dropdown-divider" /></li>
-                                    <li><a className="dropdown-item" onClick={onLogout} href="/logout/">Logout</a></li>
+                                    <li><a className="dropdown-item" onClick={onLogout} href="/logout/">Đăng xuất</a></li>
                                 </ul>
                             </div>
                         </div> : <div className="account">

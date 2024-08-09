@@ -102,7 +102,7 @@ class SongDetailsSerializer(SongSerializer):
 
     class Meta:
         model = SongSerializer.Meta.model
-        fields = SongSerializer.Meta.fields + ['created_date', 'genres', 'likes', 'streams']
+        fields = SongSerializer.Meta.fields + ['created_date', 'genres', 'likes', 'streams', 'lyrics']
 
 
 class AuthenticatedSongDetailsSerializer(SongDetailsSerializer, AuthenticatedSongSerializer):

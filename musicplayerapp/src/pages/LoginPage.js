@@ -4,8 +4,10 @@ import API, { endpoints } from '../configs/API';
 import { useUser } from '../configs/UserContext';
 import { useNavigate } from 'react-router-dom';
 import { GoogleButton, FacebookButton } from '../components';
+import { usePageTitle } from '../configs/PageTitle';
 
 const LoginPage = () => {
+    usePageTitle("Log in");
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);

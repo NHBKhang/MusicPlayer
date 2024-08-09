@@ -1,9 +1,16 @@
 .song-control {
-    height: 60px;
+    height: 65px;
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
     transition: transform 0.3s ease-in-out;
     transform: translateY(100%);
     border: 1px solid rgba(211, 211, 211, 0.2);
+    /* flex-wrap: wrap;
+    display: flex; */
+}
+
+.song-info {
+    width: 15%;
+    overflow: hidden;
 }
 
 .song-info h6,
@@ -12,17 +19,130 @@
 }
 
 .controls button {
-    padding: 0.5rem 1rem;
+    padding: 0.5rem;
     background-color: inherit;
     color: whitesmoke;
 }
 
-.controls i {
-    font-size: 1.2rem;
-    text-align: center;
-    vertical-align: middle;
+.controls .MuiSvgIcon-root {
+    font-size: 1.5rem;
+}
+
+.controls button:focus {
+    outline: none;
 }
 
 .show {
     transform: translateY(0) !important;
+}
+
+.duration-slider {
+    flex-grow: 1;
+    margin: 0 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.duration-slider input[type="range"] {
+    width: 100%;
+    margin-bottom: 0.3rem;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 5px;
+    border-radius: 5px;
+    background: linear-gradient(to right,
+            #007bff 0%,
+            #007bff var(--value),
+            #ddd var(--value),
+            #ddd 100%);
+    outline: none;
+}
+
+.duration-slider input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #007bff;
+    cursor: pointer;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+}
+
+.duration-slider input[type="range"]::-moz-range-thumb {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #007bff;
+    cursor: pointer;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+}
+
+.duration-slider input[type="range"]::-ms-fill-lower {
+    background: #007bff;
+    border-radius: 5px;
+}
+
+.duration-slider input[type="range"]::-ms-fill-upper {
+    background: #ddd;
+    border-radius: 5px;
+}
+
+.time-info {
+    width: 100%;
+    font-size: 0.75rem;
+    color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+}
+
+.song-control .btn-group button {
+    background: none !important;
+    border: none !important;
+    color: #ffffff !important;
+    font-size: 1.25rem;
+    padding: 0;
+    margin: 0;
+
+}
+
+.song-control .btn-group button.liked {
+    color: red !important;
+}
+
+.song-control .btn-group button.followed {
+    color: red !important;
+}
+
+.volume-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: aliceblue;
+}
+
+.volume-button-container {
+    position: relative;
+}
+
+.volume-slider-container {
+    position: absolute;
+    bottom: 300%;
+    left: -150%;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.5);
+    height: 30px;
+    width: 150px;
+    transform: rotate(-90deg);
+    display: flex;
+    justify-content: center;
+}
+
+.volume-slider {
+    background: #ddd;
+    width: 80%;
+    border-radius: 10px;
 }

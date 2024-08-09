@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { authAPI, endpoints } from "../configs/API";
 import moment from "moment";
 import { useAudio } from "../configs/AudioContext";
+import PageTitle from "../configs/PageTitle";
 
 const SongDetailsPage = () => {
     const { isPlaying, pauseSong, playSong } = useAudio();
@@ -20,7 +21,7 @@ const SongDetailsPage = () => {
             } catch (error) {
                 alert("Không thể tải được bài hát");
             }
-        }
+        };
 
         loadSong();
     }, [id]);
@@ -45,6 +46,7 @@ const SongDetailsPage = () => {
 
     return (
         <div className='d-flex' style={{ flexDirection: 'row' }}>
+            <PageTitle title={`${song?.artists} - ${song?.title}`} />
             <Header />
             <div className='sidebar'>
                 <Sidebar />
@@ -52,10 +54,10 @@ const SongDetailsPage = () => {
             <div className='content w-100'>
                 <div className="song-container">
                     <div className="song-detail row">
-                        <div className="song-cover col-xl-3 col-lg-4 col-md-6 col-sm-12">
+                        <div className="song-cover col-xxl-3 col-xl-4 col-lg-4 col-md-6 col-sm-12">
                             <img src={song?.image} alt={song?.title} />
                         </div>
-                        <div className="song-info col-xl-9 col-lg-8 col-md-6">
+                        <div className="song-info col-xxl-9 col-xl-8 col-lg-8 col-md-6">
                             {/* <button className="me-2 play-button" title="Phát bài hát">
                                     <i class="fa-solid fa-play"></i>
                                 </button> */}

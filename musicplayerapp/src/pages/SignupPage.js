@@ -3,8 +3,10 @@ import '../styles/SignupPage.css';
 import API, { endpoints } from "../configs/API";
 import { useNavigate } from "react-router-dom";
 import { GoogleButton, FacebookButton } from '../components';
+import { usePageTitle } from "../configs/PageTitle";
 
 const SignupPage = () => {
+    usePageTitle("Sign up");
     const [user, setUser] = useState(null);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);

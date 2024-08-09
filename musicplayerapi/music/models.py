@@ -1,21 +1,40 @@
-from django.db import models
 from cloudinary.models import CloudinaryField
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import TemporaryUploadedFile
+from django.db import models
+from django.conf import settings
+from music.validate import validate_audio_file
+import imghdr
 
 
 class ImageBaseModel(models.Model):
-    image = CloudinaryField(null=True)
+    image = CloudinaryField(null=True, resource_type='image')
 
     class Meta:
         abstract = True
 
+    def clean(self):
+        super().clean()
+        if self.image and isinstance(self.image, TemporaryUploadedFile):
+            file_type = imghdr.what(self.image.file)
+            if file_type not in ['jpeg', 'png', 'gif']:
+                raise ValidationError("File uploaded must be an image (JPEG, PNG, or GIF).")
+
 
 class User(AbstractUser):
-    avatar = CloudinaryField(null=True, blank=True)
+    avatar = CloudinaryField(null=True, blank=True, resource_type='image')
 
     def __str__(self):
         if self.username:
             return self.username
+
+    def clean(self):
+        super().clean()
+        if self.avatar and isinstance(self.avatar, TemporaryUploadedFile):
+            file_type = imghdr.what(self.avatar.file)
+            if file_type not in ['jpeg', 'png', 'gif']:
+                raise ValidationError("File uploaded must be an image (JPEG, PNG, or GIF).")
 
 
 class UserInfo(models.Model):
@@ -54,17 +73,19 @@ class Genre(BaseModel):
 class Song(ImageBaseModel, BaseModel):
     title = models.CharField(max_length=255, null=False, blank=False)
     uploader = models.ForeignKey(User, related_name='songs', on_delete=models.CASCADE, null=False, blank=False)
-    file = models.FileField(upload_to='songs/')
+    file = models.FileField(upload_to='songs/', validators=[validate_audio_file])
     artists = models.CharField(max_length=100, null=True, blank=True)
     genres = models.ManyToManyField(Genre, related_name='songs', null=True, blank=True)
+    lyrics = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
-        if self.artists is None:
+        if self.artists is None or self.artists.strip() == '':
             self.artists = 'Various artists'
-        return super(Song, self).save(*args, **kwargs)
+
+        super().save(*args, **kwargs)
 
 
 class Stream(models.Model):

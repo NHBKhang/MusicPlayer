@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { authAPI, endpoints } from '../configs/API';
 import { useLocation, useNavigate } from 'react-router-dom';
 import '../styles/SetPasswordPage.css';
+import { usePageTitle } from '../configs/PageTitle';
 
 const SetPasswordPage = () => {
+    usePageTitle("Set password");
     const location = useLocation();
     const { user } = location.state || {};
     const [password, setPassword] = useState('');

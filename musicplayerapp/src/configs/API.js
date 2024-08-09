@@ -41,6 +41,7 @@ export const endpoints = {
     'songs': '/songs/',
     'song': (songId) => `/songs/${songId}/`,
     'like': (songId) => `/songs/${songId}/like/`,
+    'stream': (songId) => `/songs/${songId}/stream/`,
 }
 
 export const authAPI = (accessToken) => axios.create({

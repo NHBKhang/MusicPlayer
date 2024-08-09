@@ -194,3 +194,12 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
             li.save()
 
         return Response(serializers.AuthenticatedSongDetailsSerializer(song, context={'request': request}).data)
+
+    @action(detail=True, methods=['post'], url_path='stream')
+    def stream(self, request, pk=None):
+        try:
+            song = self.get_object()
+            Stream.objects.create(song=song)
+            return Response({'message': 'Stream count incremented successfully'}, status=status.HTTP_200_OK)
+        except Song.DoesNotExist:
+            return Response({'error': 'Song not found'}, status=status.HTTP_404_NOT_FOUND)
