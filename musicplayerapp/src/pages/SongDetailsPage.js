@@ -8,7 +8,7 @@ import { useAudio } from "../configs/AudioContext";
 import PageTitle from "../configs/PageTitle";
 
 const SongDetailsPage = () => {
-    const { isPlaying, pauseSong, playSong } = useAudio();
+    const { isPlaying, pauseSong, playSong, currentSong } = useAudio();
     const { id } = useParams();
     const [song, setSong] = useState(null);
 
@@ -24,11 +24,10 @@ const SongDetailsPage = () => {
         };
 
         loadSong();
-    }, [id]);
+    }, [id, currentSong]);
 
     const like = async () => {
         try {
-
             let token = localStorage.getItem("token");
             let res = await authAPI(token).post(endpoints.like(id));
             setSong(res.data);
@@ -42,6 +41,10 @@ const SongDetailsPage = () => {
             pauseSong();
         else
             playSong(song);
+    }
+
+    const searchByGenre = async (e, genreId) => {
+        e.preventDefault();
     }
 
     return (
@@ -66,7 +69,9 @@ const SongDetailsPage = () => {
                             <div className="d-flex justify-content-end mb-3">
                                 <div>
                                     {song?.genres.map(g =>
-                                        <a href="/" className="ms-3 genre">
+                                        <a
+                                            href="/" className="ms-3 genre"
+                                            onClick={(e) => searchByGenre(e, g.id)}>
                                             # {g.name}
                                         </a>)}
                                 </div>

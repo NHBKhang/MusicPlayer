@@ -130,7 +130,7 @@
 .volume-slider-container {
     position: absolute;
     bottom: 300%;
-    left: -150%;
+    left: -160%;
     background: rgba(255, 255, 255, 0.9);
     border-radius: 5px;
     box-shadow: 0 4px 8px rgba(255, 255, 255, 0.5);

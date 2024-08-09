@@ -9,15 +9,18 @@ import SkipNextIcon from '@mui/icons-material/SkipNext';
 import { RepeatOneOutlined, RepeatOutlined } from '@mui/icons-material';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
+import { useUser } from '../configs/UserContext';
+import { authAPI, endpoints } from '../configs/API';
 
 const SongControls = () => {
     const {
         isPlaying, togglePlayPause, visible, toggleLoop, loop,
-        currentSong, duration, currentTime, setCurrentTime,
-        volume, setVolume
+        currentSong, setCurrentSong, duration,
+        currentTime, setCurrentTime, volume, setVolume
     } = useAudio();
     const audio = getAudioInstance();
     const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+    const { user } = useUser();
 
     const handleSliderChange = (e) => {
         const value = (e.target.value / e.target.max) * 100;
@@ -78,6 +81,16 @@ const SongControls = () => {
         const minutes = Math.floor(time / 60);
         const seconds = Math.floor(time % 60).toString().padStart(2, '0');
         return `${minutes}:${seconds}`;
+    };
+
+    const like = async () => {
+        try {
+            let token = localStorage.getItem("token");
+            let res = await authAPI(token).post(endpoints.like(currentSong.id));
+            setCurrentSong(res.data);
+        } catch (error) {
+            alert(error);
+        }
     };
 
     return (
@@ -150,10 +163,10 @@ const SongControls = () => {
                     <h5 className='mb-0'>{currentSong?.title}</h5>
                     <p className='fs-6'>{currentSong?.artists}</p>
                 </div>
-                {currentSong?.liked && <div className='btn-group ms-1'>
+                {user && <div className='btn-group ms-1'>
                     <button
                         type="button"
-                        // onClick={like}
+                        onClick={like}
                         className={`me-4${currentSong?.liked ? ' liked' : ''}`}>
                         <i class="fa-solid fa-heart"></i>
                     </button>

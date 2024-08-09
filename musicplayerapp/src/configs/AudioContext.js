@@ -127,7 +127,7 @@ export const AudioProvider = ({ children }) => {
         <AudioContext.Provider value={{
             isPlaying,
             visible,
-            currentSong,
+            currentSong, setCurrentSong,
             duration,
             loop, toggleLoop,
             volume, setVolume,
