@@ -89,24 +89,9 @@
     padding: 2px 7px;
 }
 
-/* .play-button {
-    color: whitesmoke;
-    background-color: #f50 !important;
-    border-radius: 50% !important;
-    width: 60px;
-    height: 60px;
-    margin-right: 20px !important;
-}
-
-.play-button i {
-    font-size: 30px;
-    text-align: center;
-    vertical-align: middle;
-} */
-
 .button-group .play-button {
-    background-color: #f50 !important;
-    color: whitesmoke;
+    color: rgba(245, 245, 245);
+    background-color: rgba(255, 85, 0) !important;
     font-weight: 600;
     font-size: 1.25rem;
     text-align: center;

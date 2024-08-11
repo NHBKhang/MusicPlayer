@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import '../styles/LoginPage.css';
-import API, { endpoints } from '../configs/API';
 import { useUser } from '../configs/UserContext';
 import { useNavigate } from 'react-router-dom';
 import { GoogleButton, FacebookButton } from '../components';
@@ -21,17 +20,7 @@ const LoginPage = () => {
         setLoading(true);
 
         try {
-            const res = await API.post(endpoints.login, {
-                "username": username,
-                "password": password,
-                "client_id": process.env.REACT_APP_CLIENT_ID,
-                "client_secret": process.env.REACT_APP_CLIENT_SECRET,
-                "grant_type": "password"
-            });
-
-            const token = res.data.access_token;
-            login(token);
-
+            login(username, password);
             navigate('/');
         } catch (error) {
             setError(error);

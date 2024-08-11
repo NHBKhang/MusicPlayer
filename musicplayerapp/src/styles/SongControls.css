@@ -4,18 +4,26 @@
     transition: transform 0.3s ease-in-out;
     transform: translateY(100%);
     border: 1px solid rgba(211, 211, 211, 0.2);
-    /* flex-wrap: wrap;
-    display: flex; */
 }
 
-.song-info {
-    width: 15%;
+.song-control .song-info {
+    width: 20%;
+    text-align: start;
+    padding: 0 10px;
+}
+
+.song-control .song-info h5,
+.song-control .song-info p {
+    margin: 0;
     overflow: hidden;
 }
 
-.song-info h6,
-.song-info p {
-    margin: 0;
+.song-control .song-info h5 {
+    height: 30px;
+}
+
+.song-control .song-info p {
+    height: 25px;
 }
 
 .controls button {

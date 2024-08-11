@@ -6,7 +6,7 @@ import API, { endpoints } from '../configs/API';
 
 const GoogleButton = () => {
     const navigate = useNavigate();
-    const { login } = useUser();
+    const { loginWithToken } = useUser();
 
     const handleLoginSuccess = async (response) => {
         try {
@@ -16,7 +16,7 @@ const GoogleButton = () => {
             });
 
             const { user, token, created } = res.data;
-            login(token.access_token);
+            loginWithToken(token);
 
             if (created)
                 navigate('/set-password/', {

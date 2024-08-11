@@ -88,22 +88,26 @@ class Song(ImageBaseModel, BaseModel):
         super().save(*args, **kwargs)
 
 
-class Stream(models.Model):
-    song = models.ForeignKey(Song, on_delete=models.CASCADE, related_name='streams')
-    streamed_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.song.title} đã phát trực tuyến vào {self.streamed_at}"
-
-
 class Interaction(BaseModel):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     song = models.ForeignKey(Song, on_delete=models.CASCADE)
 
     class Meta:
         abstract = True
         ordering = ('-created_date',)
         unique_together = ('song', 'user')
+
+
+class Stream(models.Model):
+    streamed_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    song = models.ForeignKey(Song, on_delete=models.CASCADE, related_name='streams')
+
+    def __str__(self):
+        return f"{self.song.title} đã phát trực tuyến vào {self.streamed_at}"
+
+    class Meta:
+        ordering = ('-streamed_at',)
 
 
 class Comment(Interaction):

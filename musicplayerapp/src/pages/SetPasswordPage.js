@@ -3,11 +3,13 @@ import { authAPI, endpoints } from '../configs/API';
 import { useLocation, useNavigate } from 'react-router-dom';
 import '../styles/SetPasswordPage.css';
 import { usePageTitle } from '../configs/PageTitle';
+import { useUser } from '../configs/UserContext';
 
 const SetPasswordPage = () => {
     usePageTitle("Set password");
     const location = useLocation();
     const { user } = location.state || {};
+    const { getAccessToken } = useUser();
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -20,9 +22,9 @@ const SetPasswordPage = () => {
         setError(null);
 
         try {
-            const token = localStorage.getItem('token');
-            await authAPI(token).post(endpoints['set-password'],
-                { new_password: password });
+            await authAPI(await getAccessToken())
+                .post(endpoints['set-password'],
+                    { new_password: password });
             setPassword('');
             navigate('/');
         } catch (error) {

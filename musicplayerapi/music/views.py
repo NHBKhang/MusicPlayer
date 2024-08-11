@@ -2,11 +2,13 @@ from rest_framework import viewsets, generics, status, parsers, permissions
 from rest_framework.response import Response
 from rest_framework.decorators import action, api_view
 from rest_framework import serializers as rest_serializers
+from rest_framework.exceptions import AuthenticationFailed
 from music.models import *
 from music import serializers, paginators, perms, utils
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from django.contrib.auth import update_session_auth_hash
+from django.db.models import Count, Max
 from google.oauth2 import id_token
 from google.auth.transport import requests as gg_requests
 from oauth2_provider.settings import oauth2_settings
@@ -166,8 +168,9 @@ class GenreViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retrie
 
 
 class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
-    queryset = Song.objects.filter(active=True).all()
+    queryset = Song.objects.filter(active=True).order_by('-id').all()
     serializer_class = serializers.SongSerializer
+    pagination_class = paginators.SongPaginator
 
     def get_serializer_class(self):
         if self.action in ['retrieve', 'update', 'partial_update']:
@@ -181,10 +184,22 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
             else:
                 return self.serializer_class
 
+    def get_queryset(self):
+        queryset = self.queryset
+
+        cate = self.request.query_params.get('cate')
+        if cate == '1':
+            queryset = queryset.filter(active=True).annotate(num_streams=Count('streams')).order_by('-num_streams')
+        elif cate == '2':
+            queryset = queryset.filter(active=True).annotate(latest_streamed_at=Max('streams__streamed_at')) \
+                           .order_by('-latest_streamed_at')
+
+        return queryset
+
     @action(methods=['post'], url_path='like', detail=True)
     def like(self, request, pk):
         if not request.user.is_authenticated:
-            raise NotAuthenticated("User must be authenticated to like a song")
+            raise AuthenticationFailed("User must be authenticated to like a song")
 
         song = self.get_object()
         li, created = Like.objects.get_or_create(song=song, user=request.user)
@@ -195,11 +210,47 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
         return Response(serializers.AuthenticatedSongDetailsSerializer(song, context={'request': request}).data)
 
-    @action(detail=True, methods=['post'], url_path='stream')
+    @action(methods=['post'], url_path='stream', detail=True)
     def stream(self, request, pk=None):
         try:
             song = self.get_object()
-            Stream.objects.create(song=song)
+            Stream.objects.create(song=song, user=request.user if request.user.is_authenticated else None)
             return Response({'message': 'Stream count incremented successfully'}, status=status.HTTP_200_OK)
         except Song.DoesNotExist:
             return Response({'error': 'Song not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    @action(methods=['get'], url_path='next', detail=True)
+    def next(self, request, pk=None):
+        try:
+            current_song = self.get_object()
+            next_song = Song.objects.filter(active=True, id__gt=current_song.id).first()
+            if next_song:
+                serializer = self.get_serializer(next_song)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
+            first_song = Song.objects.filter(active=True).first()
+            if first_song:
+                serializer = self.get_serializer(first_song)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
+            return Response({"detail": "No songs available."}, status=status.HTTP_404_NOT_FOUND)
+        except Song.DoesNotExist:
+            return Response({"detail": "Song not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    @action(methods=['get'], url_path='previous', detail=True)
+    def previous(self, request, pk=None):
+        try:
+            current_song = self.get_object()
+            next_song = Song.objects.filter(active=True, id__lt=current_song.id).last()
+            if next_song:
+                serializer = self.get_serializer(next_song)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
+            last_song = Song.objects.filter(active=True).last()
+            if last_song:
+                serializer = self.get_serializer(last_song)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
+            return Response({"detail": "No next song available."}, status=status.HTTP_404_NOT_FOUND)
+        except Song.DoesNotExist:
+            return Response({"detail": "Song not found."}, status=status.HTTP_404_NOT_FOUND)

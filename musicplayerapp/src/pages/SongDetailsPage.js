@@ -6,16 +6,20 @@ import { authAPI, endpoints } from "../configs/API";
 import moment from "moment";
 import { useAudio } from "../configs/AudioContext";
 import PageTitle from "../configs/PageTitle";
+import { useUser } from "../configs/UserContext";
+import LoginRequiredModal from "../components/LoginRequiredModal";
 
 const SongDetailsPage = () => {
-    const { isPlaying, pauseSong, playSong, currentSong } = useAudio();
+    const { isPlaying, pauseSong, playSong, setCurrentSong, currentSong } = useAudio();
+    const { getAccessToken, user } = useUser();
     const { id } = useParams();
     const [song, setSong] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         const loadSong = async () => {
             try {
-                let token = localStorage.getItem("token");
+                let token = await getAccessToken();
                 let res = await authAPI(token).get(endpoints.song(id));
                 setSong(res.data);
             } catch (error) {
@@ -24,17 +28,23 @@ const SongDetailsPage = () => {
         };
 
         loadSong();
-    }, [id, currentSong]);
+    }, [id, setCurrentSong, getAccessToken]);
 
     const like = async () => {
-        try {
-            let token = localStorage.getItem("token");
-            let res = await authAPI(token).post(endpoints.like(id));
-            setSong(res.data);
-        } catch (error) {
-            alert(error);
+        if (user) {
+            try {
+                let res = await authAPI(await getAccessToken()).post(endpoints.like(id));
+                setSong(res.data);
+
+                if (isPlaying)
+                    setCurrentSong(res.data);
+            } catch (error) {
+                alert(error);
+            }
+        } else {
+            setIsModalOpen(true);
         }
-    }
+    };
 
     const play = () => {
         if (isPlaying)
@@ -69,7 +79,7 @@ const SongDetailsPage = () => {
                             <div className="d-flex justify-content-end mb-3">
                                 <div>
                                     {song?.genres.map(g =>
-                                        <a
+                                        <a key={g.id}
                                             href="/" className="ms-3 genre"
                                             onClick={(e) => searchByGenre(e, g.id)}>
                                             # {g.name}
@@ -80,10 +90,10 @@ const SongDetailsPage = () => {
                                 <div className="">
                                     <img
                                         className="rounded-circle"
-                                        src={song?.uploader.avatar}
-                                        alt={song?.uploader.name}
+                                        src={song?.uploader?.avatar}
+                                        alt={song?.uploader?.name}
                                         width={40} />
-                                    <span><strong>{song?.uploader.name}</strong></span>
+                                    <span><strong>{song?.uploader?.name}</strong></span>
                                 </div>
                                 <span>{moment(song?.created_date).fromNow()}</span>
                             </div>
@@ -91,7 +101,7 @@ const SongDetailsPage = () => {
                             <div className="d-flex align-items-center mb-3">
                                 <div className="button-group">
                                     <button type="button" onClick={play} className="me-4 play-button">
-                                        {isPlaying ?
+                                        {isPlaying && currentSong?.id === song?.id ?
                                             <span><i class="fa-solid fa-pause me-1"></i> Tạm dừng</span> :
                                             <span><i class="fa-solid fa-play me-1"></i> Phát bài hát</span>}
                                     </button>
@@ -124,6 +134,9 @@ const SongDetailsPage = () => {
                         </div>
                     </div>
                 </div>
+                <LoginRequiredModal
+                    isModalOpen={isModalOpen}
+                    setIsModalOpen={setIsModalOpen} />
                 <Footer />
             </div>
         </div>

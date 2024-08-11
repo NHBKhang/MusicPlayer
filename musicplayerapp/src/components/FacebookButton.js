@@ -7,7 +7,7 @@ import FacebookLogin from '@greatsumini/react-facebook-login';
 
 const FacebookButton = () => {
     const navigate = useNavigate();
-    const { login } = useUser();
+    const { loginWithToken } = useUser();
 
     const handleLoginSuccess = async (response) => {
         try {
@@ -17,7 +17,7 @@ const FacebookButton = () => {
             });
 
             const { user, token, created } = res.data;
-            login(token.access_token);
+            loginWithToken(token);
 
             if (created)
                 navigate('/set-password/', {

@@ -1,65 +1,118 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import Slider from 'react-slick';
 import '../styles/Carousel.css';
+import { useNavigate } from 'react-router-dom';
+import { useAudio } from '../configs/AudioContext';
 
-const Carousel = ({ label }) => {
+const Carousel = ({ label, items, type = 'song' }) => {
+    const sliderRef = useRef(null);
+
+    useEffect(() => {
+        sliderRef.current.slickGoTo(0);
+    }, []);
+
     const settings = {
         dots: true,
         infinite: true,
         speed: 500,
         slidesToShow: 8,
-        slidesToScroll: 8,
+        slidesToScroll: 1,
+        initialSlide: 0,
         responsive: [
             {
-                breakpoint: 1200,
+                breakpoint: 1600,
                 settings: {
                     slidesToShow: 7,
-                    slidesToScroll: 7,
-                    infinite: true,
-                    dots: true
                 }
             },
             {
-                breakpoint: 1024,
+                breakpoint: 1400,
+                settings: {
+                    slidesToShow: 6,
+                }
+            },
+            {
+                breakpoint: 1200,
                 settings: {
                     slidesToShow: 5,
-                    slidesToScroll: 5,
-                    infinite: true,
-                    dots: true
+                }
+            },
+            {
+                breakpoint: 1000,
+                settings: {
+                    slidesToShow: 4,
+                }
+            },
+            {
+                breakpoint: 800,
+                settings: {
+                    slidesToShow: 3,
                 }
             },
             {
                 breakpoint: 600,
                 settings: {
                     slidesToShow: 2,
-                    slidesToScroll: 2,
                 }
             }
         ]
     };
 
+    const navigate = useNavigate();
+    const {
+        playSong, pauseSong, isPlaying, currentSong, setCurrentTime
+    } = useAudio();
+
+    const goToDetails = (songId) => {
+        navigate(`/songs/${songId}/`);
+    }
+
+    const togglePlayPause = (song) => {
+        if (currentSong && song.id === currentSong.id) {
+            if (isPlaying) {
+                pauseSong();
+
+            }
+            else {
+                playSong(song);
+            }
+        } else {
+            playSong(song);
+        }
+    };
+
     return (
         <div className="carousel-container">
             {label && <h3 className='carousel-label'>{label}</h3>}
-            <Slider {...settings}>
-                <div className="carousel-item">
-                    <h3>Item 1</h3>
-                </div>
-                <div className="carousel-item">
-                    <h3>Item 2</h3>
-                </div>
-                <div className="carousel-item">
-                    <h3>Item 3</h3>
-                </div>
-                <div className="carousel-item">
-                    <h3>Item 4</h3>
-                </div>
-                <div className="carousel-item">
-                    <h3>Item 5</h3>
-                </div>
-                <div className="carousel-item">
-                    <h3>Item 6</h3>
-                </div>
+            <Slider ref={sliderRef} {...settings}>
+                {type === 'song' &&
+                    items.map((song) => <div
+                        key={song.id}
+                        className="carousel-item rounded" >
+                        <img
+                            src={song.image}
+                            alt={song.title}
+                            className='song-cover'
+                            onClick={() => goToDetails(song.id)} />
+                        <marquee scrollamount="2" behavior="sliding">
+                            <h6
+                                onClick={() => goToDetails(song.id)}
+                                className='song-title'>
+                                {`${song.artists} - ${song?.title}`}
+                            </h6>
+                        </marquee>
+                        <p>{song.uploader.name}</p>
+                        <div className='btn-group'>
+                            <button
+                                className="play-button"
+                                title="Phát bài hát"
+                                onClick={() => togglePlayPause(song)}>
+                                {isPlaying && currentSong?.id === song.id ?
+                                    <i class="fa-solid fa-pause"></i> :
+                                    <i class="fa-solid fa-play"></i>}
+                            </button>
+                        </div>
+                    </div>)}
             </Slider>
         </div>
     );

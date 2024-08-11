@@ -11,16 +11,20 @@ import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import { useUser } from '../configs/UserContext';
 import { authAPI, endpoints } from '../configs/API';
+import { useNavigate } from 'react-router-dom';
+import PageTitle from '../configs/PageTitle';
 
 const SongControls = () => {
     const {
         isPlaying, togglePlayPause, visible, toggleLoop, loop,
         currentSong, setCurrentSong, duration,
-        currentTime, setCurrentTime, volume, setVolume
+        currentTime, setCurrentTime, volume, setVolume,
+        playNextSong, playPreviousSong
     } = useAudio();
     const audio = getAudioInstance();
     const [showVolumeSlider, setShowVolumeSlider] = useState(false);
-    const { user } = useUser();
+    const { user, getAccessToken } = useUser();
+    const navigate = useNavigate();
 
     const handleSliderChange = (e) => {
         const value = (e.target.value / e.target.max) * 100;
@@ -64,12 +68,12 @@ const SongControls = () => {
         };
     }, [audio]);
 
-    const handleNext = () => {
-        // Implement logic to play the next song
+    const handleNext = async () => {
+        await playNextSong();
     };
 
-    const handlePrevious = () => {
-        // Implement logic to play the previous song
+    const handlePrevious = async () => {
+        await playPreviousSong();
     };
 
     const handleVolumeChange = (event) => {
@@ -85,16 +89,21 @@ const SongControls = () => {
 
     const like = async () => {
         try {
-            let token = localStorage.getItem("token");
-            let res = await authAPI(token).post(endpoints.like(currentSong.id));
+            let res = await authAPI(await getAccessToken())
+                .post(endpoints.like(currentSong.id));
             setCurrentSong(res.data);
         } catch (error) {
             alert(error);
         }
     };
 
+    const goToDetails = () => {
+        navigate(`/songs/${currentSong.id}/`);
+    }
+
     return (
         <div className={`song-control fixed-bottom bg-dark text-white d-flex align-items-center p-2${visible ? ' show' : ''}`}>
+            <PageTitle title={`${currentSong?.artists} - ${currentSong?.title}`} />
             <div className="container d-flex justify-content-between align-items-center">
                 <div className="controls d-flex align-items-center">
                     <button className="me-2" onClick={handlePrevious}>
@@ -152,14 +161,14 @@ const SongControls = () => {
                         </div>
                     )}
                 </div>
-                <div className='ms-2'>
+                <div className='ms-2' onClick={goToDetails}>
                     <img
                         src={currentSong?.image}
                         alt={currentSong?.title}
                         width={50}
                         height={50} />
                 </div>
-                <div className="song-info">
+                <div className="song-info" onClick={goToDetails}>
                     <h5 className='mb-0'>{currentSong?.title}</h5>
                     <p className='fs-6'>{currentSong?.artists}</p>
                 </div>
@@ -170,12 +179,12 @@ const SongControls = () => {
                         className={`me-4${currentSong?.liked ? ' liked' : ''}`}>
                         <i class="fa-solid fa-heart"></i>
                     </button>
-                    <button
+                    {currentSong?.uploader.id !== user.id && <button
                         type="button"
                         // onClick={follow}
                         className={`me-4${currentSong?.followed ? ' followed' : ''}`}>
                         <i class="fa-solid fa-user-plus"></i>
-                    </button>
+                    </button>}
                 </div>}
             </div>
         </div>

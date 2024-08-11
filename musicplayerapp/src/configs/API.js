@@ -5,6 +5,7 @@ import {
 } from "../pages";
 import axios from "axios";
 
+
 export const routes = {
     home: {
         url: '/',
@@ -40,17 +41,20 @@ export const endpoints = {
     'genres': '/genres/',
     'songs': '/songs/',
     'song': (songId) => `/songs/${songId}/`,
+    'previous-song': (songId) => `/songs/${songId}/previous/`,
+    'next-song': (songId) => `/songs/${songId}/next/`,
     'like': (songId) => `/songs/${songId}/like/`,
     'stream': (songId) => `/songs/${songId}/stream/`,
 }
 
-export const authAPI = (accessToken) => axios.create({
-    baseURL: process.env.REACT_APP_API_URL,
-    timeout: 5000,
-    headers: {
-        "Authorization": `Bearer ${accessToken}`
-    }
-});
+export const authAPI = (accessToken) =>
+    axios.create({
+        baseURL: process.env.REACT_APP_API_URL,
+        timeout: 5000,
+        headers: {
+            "Authorization": `Bearer ${accessToken}`
+        }
+    });
 
 export default axios.create({
     baseURL: process.env.REACT_APP_API_URL,
