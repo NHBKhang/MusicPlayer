@@ -41,6 +41,7 @@ class UserInfo(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name='info')
     display_name = models.CharField(max_length=30, null=True, blank=True)
     bio = models.TextField(blank=True, null=True)
+    artist_verified = models.BooleanField(default=False)
 
     def __str__(self):
         if self.display_name:
@@ -77,6 +78,7 @@ class Song(ImageBaseModel, BaseModel):
     artists = models.CharField(max_length=100, null=True, blank=True)
     genres = models.ManyToManyField(Genre, related_name='songs', null=True, blank=True)
     lyrics = models.TextField(null=True, blank=True)
+    description = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.title
@@ -86,6 +88,45 @@ class Song(ImageBaseModel, BaseModel):
             self.artists = 'Various artists'
 
         super().save(*args, **kwargs)
+
+
+class Playlist(BaseModel, ImageBaseModel):
+    ALBUM = 1
+    SINGLE = 2
+    EP = 3
+    PLAYLIST = 4
+
+    PLAYLIST_TYPE_CHOICES = [
+        (ALBUM, 'Album'),
+        (SINGLE, 'Single'),
+        (EP, 'EP'),
+        (PLAYLIST, 'Playlist'),
+    ]
+
+    title = models.CharField(max_length=255, null=False, blank=False)
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name='playlists')
+    description = models.TextField(blank=True, null=True)
+    genres = models.ManyToManyField(Genre, related_name='playlists')
+    is_public = models.BooleanField(default=True)
+    playlist_type = models.IntegerField(choices=PLAYLIST_TYPE_CHOICES, default=PLAYLIST)
+
+    def __str__(self):
+        return f"{self.title} ({self.get_playlist_type_display()})"
+
+
+class PlaylistDetails(models.Model):
+    playlist = models.OneToOneField(Playlist, on_delete=models.CASCADE, related_name='details')
+    song = models.ForeignKey(Song, on_delete=models.CASCADE)
+    order = models.PositiveIntegerField()
+
+    class Meta:
+        ordering = ['order']
+        unique_together = [['playlist', 'song']]
+        verbose_name = "playlist detail"
+        verbose_name_plural = "playlists details"
+
+    def __str__(self):
+        return f"{self.song.title} thuộc {self.playlist.name} ở vị trí {self.order}"
 
 
 class Interaction(BaseModel):
@@ -120,3 +161,27 @@ class Comment(Interaction):
 class Like(Interaction):
     def __str__(self):
         return f'{self.user} đã thích {self.song}'
+
+
+class Transaction(models.Model):
+    transaction_id = models.BigIntegerField(null=False, blank=False)
+    transaction_date = models.DateTimeField(auto_now_add=True)
+    bank_code = models.CharField(max_length=20, null=False, blank=False)
+    description = models.TextField(null=False)
+
+    def __str__(self):
+        return self.bank_code + str(self.transaction_id)
+
+
+class Follow(models.Model):
+    follower = models.ForeignKey(User, related_name='following', on_delete=models.CASCADE)
+    followed = models.ForeignKey(User, related_name='followers', on_delete=models.CASCADE)
+    followed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('follower', 'followed')
+        verbose_name = 'Follow'
+        verbose_name_plural = 'Follows'
+
+    def __str__(self):
+        return f"{self.follower} theo dõi {self.followed}"

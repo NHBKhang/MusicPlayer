@@ -16,6 +16,7 @@
 .song-control .song-info p {
     margin: 0;
     overflow: hidden;
+    cursor: pointer;
 }
 
 .song-control .song-info h5 {

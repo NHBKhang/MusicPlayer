@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { getAudioInstance } from './Singleton';
-import API, { authAPI, endpoints } from './API';
+import { authAPI, endpoints } from './API';
 import { useUser } from './UserContext';
 
 const AudioContext = createContext();
@@ -37,13 +37,13 @@ export const AudioProvider = ({ children }) => {
                 return;
             }
             setCurrentTime(0);
-            let res = await API.get(endpoints['next-song'](currentSong.id));
+            let res = await authAPI(await getAccessToken()).get(endpoints['next-song'](currentSong.id));
             playSong(res.data);
         } catch (error) {
             console.error('Playback failed:', error);
             alert('Playback failed: ' + (error.response?.data?.detail || 'An unknown error occurred'));
         }
-    }, [currentSong]);
+    }, [currentSong, getAccessToken]);
 
     const playPreviousSong = useCallback(async () => {
         try {
@@ -52,13 +52,13 @@ export const AudioProvider = ({ children }) => {
                 return;
             }
             setCurrentTime(0);
-            let res = await API.get(endpoints['previous-song'](currentSong.id));
+            let res = await authAPI(await getAccessToken()).get(endpoints['previous-song'](currentSong.id));
             playSong(res.data);
         } catch (error) {
             console.error('Playback failed:', error);
             alert('Playback failed: ' + (error.response?.data?.detail || 'An unknown error occurred'));
         }
-    }, [currentSong]);
+    }, [currentSong, getAccessToken]);
 
     useEffect(() => {
         let postStreamTimer = null;
@@ -144,6 +144,11 @@ export const AudioProvider = ({ children }) => {
             setLoop(storedLoop);
         }
     }, []);
+
+    useEffect(() => {
+        if (isPlaying)
+            setVisible(true);
+    }, [isPlaying]);
 
     const playSong = (song) => {
         const event = new CustomEvent('playSong', { detail: { song } });
