@@ -192,7 +192,7 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
             queryset = queryset.filter(active=True).annotate(num_streams=Count('streams')).order_by('-num_streams')
         elif cate == '2':
             queryset = queryset.filter(active=True).annotate(latest_streamed_at=Max('streams__streamed_at')) \
-                           .order_by('-latest_streamed_at')
+                .order_by('-latest_streamed_at')
 
         return queryset
 
@@ -209,6 +209,26 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
             li.save()
 
         return Response(serializers.AuthenticatedSongDetailsSerializer(song, context={'request': request}).data)
+
+    @action(methods=['get'], url_path='comments', detail=True)
+    def get_comments(self, request, pk):
+        comments = self.get_object().comment_set.select_related('user').all()
+
+        paginator = paginators.CommentPaginator()
+        page = paginator.paginate_queryset(comments, request)
+        if page is not None:
+            serializer = serializers.CommentSerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
+
+        return Response(serializers.CommentSerializer(comments, many=True).data,
+                        status=status.HTTP_200_OK)
+
+    @action(methods=['post'], url_path='comment', detail=True)
+    def add_comment(self, request, pk):
+        c = self.get_object().comment_set.create(user=request.user, content=request.data.get('content'))
+
+        return Response(serializers.CommentSerializer(c).data,
+                        status=status.HTTP_201_CREATED)
 
     @action(methods=['post'], url_path='stream', detail=True)
     def stream(self, request, pk=None):

@@ -1,0 +1,73 @@
+.comments-container {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid rgba(211, 211, 211, 0.1);
+    border-radius: 8px;
+    background-color: rgba(50, 50, 50, 0.2);
+}
+
+.comment-input {
+    width: calc(100% - 200px);
+    height: 45px;
+    padding: 8px 15px;
+    margin: 0 10px;
+    border: 1px solid rgb(0, 0, 0);
+    background-color: rgba(245, 245, 245, 0.85);
+    border-radius: 50px;
+}
+
+.add-comment-button {
+    width: 45px;
+    height: 45px;
+    margin: 0 0 0 5px;
+    border: none;
+    border-radius: 50%;
+    background-color: rgba(0, 145, 255, 0.75);
+    color: white;
+    cursor: pointer;
+}
+
+.comment-item {
+    padding: 10px;
+    padding-left: 5px;
+    border-top: 1px solid #e0e0e038;
+    text-align: start;
+}
+
+.uploader-cover {
+    width: 75%;
+}
+
+@media (max-width: 600px) {
+    .uploader-cover {
+        width: 100%;
+    }
+}
+
+@media (min-width: 1400px) {
+    .uploader-cover {
+        width: 50%;
+    }
+}
+
+.text-align-start {
+    text-align: start;
+}
+
+.created-date {
+    padding: 0;
+    margin: 0;
+    text-align: end;
+    font-size: 0.75rem;
+    right: 10px;
+    bottom: 10px;
+    color: skyblue;
+    position: absolute;
+}
+
+@media (max-width: 991.98px) {
+    .fs-ms-6 {
+        font-size: 0.8rem;
+    }
+}

@@ -1,13 +1,7 @@
 .song-container {
     border: 1px solid rgba(211, 211, 211, 0.5);
-    margin: 20px 10px 20px 30px;
+    margin: 20px 0;
 
-}
-
-@media screen and (max-width: 600px) {
-    .song-container {
-        margin-left: 40px;
-    }
 }
 
 .song-detail {

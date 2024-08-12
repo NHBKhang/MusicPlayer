@@ -5,3 +5,5 @@ export { default as SongControls } from './SongControls';
 export { default as Carousel } from './Carousel';
 export { default as GoogleButton } from './GoogleButton';
 export { default as FacebookButton } from './FacebookButton';
+export { default as LoginRequiredModal } from './LoginRequiredModal';
+export { default as Comments } from './Comments';

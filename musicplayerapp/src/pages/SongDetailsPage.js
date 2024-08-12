@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { Footer, Header, Sidebar } from "../components";
+import { Comments, Footer, Header, LoginRequiredModal, Sidebar } from "../components";
 import '../styles/SongDetailsPage.css';
 import { useEffect, useState } from "react";
 import { authAPI, endpoints } from "../configs/API";
@@ -7,7 +7,6 @@ import moment from "moment";
 import { useAudio } from "../configs/AudioContext";
 import PageTitle from "../configs/PageTitle";
 import { useUser } from "../configs/UserContext";
-import LoginRequiredModal from "../components/LoginRequiredModal";
 
 const SongDetailsPage = () => {
     const { isPlaying, pauseSong, playSong, setCurrentSong, currentSong } = useAudio();
@@ -15,19 +14,29 @@ const SongDetailsPage = () => {
     const { id } = useParams();
     const [song, setSong] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [comments, setComments] = useState([]);
 
     useEffect(() => {
         const loadSong = async () => {
             try {
-                let token = await getAccessToken();
-                let res = await authAPI(token).get(endpoints.song(id));
+                let res = await authAPI(await getAccessToken()).get(endpoints.song(id));
                 setSong(res.data);
             } catch (error) {
                 alert("Không thể tải được bài hát");
             }
         };
 
+        const loadComments = async () => {
+            try {
+                let res = await authAPI(await getAccessToken()).get(endpoints.comments(id));
+                setComments(res.data.results);
+            } catch (error) {
+                alert("Không thể tải được bình luận");
+            }
+        };
+
         loadSong();
+        loadComments();
     }, [id, setCurrentSong, getAccessToken]);
 
     const like = async () => {
@@ -36,7 +45,7 @@ const SongDetailsPage = () => {
                 let res = await authAPI(await getAccessToken()).post(endpoints.like(id));
                 setSong(res.data);
 
-                if (isPlaying)
+                if (isPlaying && currentSong.id === song.id)
                     setCurrentSong(res.data);
             } catch (error) {
                 alert(error);
@@ -65,7 +74,7 @@ const SongDetailsPage = () => {
                 <Sidebar />
             </div>
             <div className='content w-100'>
-                <div className="song-container">
+                <div className="song-container content-container">
                     <div className="song-detail row">
                         <div className="song-cover col-xxl-3 col-xl-4 col-lg-4 col-md-6 col-sm-12">
                             <img src={song?.image} alt={song?.title} />
@@ -132,6 +141,19 @@ const SongDetailsPage = () => {
                             </div> */}
                             <br />
                         </div>
+                    </div>
+                </div>
+                <div className="content-container row">
+                    <div className="col-md-8">
+                        <Comments
+                            comments={comments}
+                            count={song?.comments}
+                            user={user}
+                            uploader={song?.uploader}
+                            songId={song?.id} />
+                    </div>
+                    <div className="col-md-4">
+
                     </div>
                 </div>
                 <LoginRequiredModal

@@ -87,3 +87,28 @@
         width: 75%;
     }
 }
+
+@keyframes slideText {
+    0% {
+        transform: translateX(0);
+    }
+
+    20% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+.song-title-wrapper {
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.song-title {
+    display: inline-block;
+    animation: slideText 7s linear infinite;
+    padding: 0 5px;
+}

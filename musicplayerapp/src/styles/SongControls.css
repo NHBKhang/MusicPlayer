@@ -20,7 +20,9 @@
 }
 
 .song-control .song-info h5 {
-    height: 30px;
+    height: 28px;
+    padding-bottom: 0;
+    margin-bottom: 0;
 }
 
 .song-control .song-info p {

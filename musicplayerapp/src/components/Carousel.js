@@ -8,7 +8,9 @@ const Carousel = ({ label, items, type = 'song' }) => {
     const sliderRef = useRef(null);
 
     useEffect(() => {
-        sliderRef.current.slickGoTo(0);
+        setTimeout(() => {
+            sliderRef.current.slickGoTo(0);
+        }, 200);
     }, []);
 
     const settings = {
@@ -60,7 +62,7 @@ const Carousel = ({ label, items, type = 'song' }) => {
 
     const navigate = useNavigate();
     const {
-        playSong, pauseSong, isPlaying, currentSong, setCurrentTime
+        playSong, pauseSong, isPlaying, currentSong
     } = useAudio();
 
     const goToDetails = (songId) => {
@@ -94,13 +96,13 @@ const Carousel = ({ label, items, type = 'song' }) => {
                             alt={song.title}
                             className='song-cover'
                             onClick={() => goToDetails(song.id)} />
-                        <marquee scrollamount="2" behavior="sliding">
+                        <div className="song-title-wrapper">
                             <h6
                                 onClick={() => goToDetails(song.id)}
                                 className='song-title'>
                                 {`${song.artists} - ${song?.title}`}
                             </h6>
-                        </marquee>
+                        </div>
                         <p>{song.uploader.name}</p>
                         <div className='btn-group'>
                             <button

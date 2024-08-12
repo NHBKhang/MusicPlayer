@@ -45,6 +45,7 @@ export const endpoints = {
     'next-song': (songId) => `/songs/${songId}/next/`,
     'like': (songId) => `/songs/${songId}/like/`,
     'stream': (songId) => `/songs/${songId}/stream/`,
+    'comments': (songId) => `/songs/${songId}/comments/`,
 }
 
 export const authAPI = (accessToken) =>

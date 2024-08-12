@@ -109,6 +109,7 @@ class Playlist(BaseModel, ImageBaseModel):
     genres = models.ManyToManyField(Genre, related_name='playlists')
     is_public = models.BooleanField(default=True)
     playlist_type = models.IntegerField(choices=PLAYLIST_TYPE_CHOICES, default=PLAYLIST)
+    published_date = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.title} ({self.get_playlist_type_display()})"
