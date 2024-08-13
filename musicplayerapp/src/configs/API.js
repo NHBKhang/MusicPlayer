@@ -43,6 +43,7 @@ export const endpoints = {
     'song': (songId) => `/songs/${songId}/`,
     'previous-song': (songId) => `/songs/${songId}/previous/`,
     'next-song': (songId) => `/songs/${songId}/next/`,
+    'related-songs': (songId) => `/songs/${songId}/related/`,
     'like': (songId) => `/songs/${songId}/like/`,
     'stream': (songId) => `/songs/${songId}/stream/`,
     'comments': (songId) => `/songs/${songId}/comments/`,

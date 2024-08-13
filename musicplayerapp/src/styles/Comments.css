@@ -33,19 +33,7 @@
 }
 
 .uploader-cover {
-    width: 75%;
-}
-
-@media (max-width: 600px) {
-    .uploader-cover {
-        width: 100%;
-    }
-}
-
-@media (min-width: 1400px) {
-    .uploader-cover {
-        width: 50%;
-    }
+    width: 55%;
 }
 
 .text-align-start {
@@ -63,8 +51,26 @@
     position: absolute;
 }
 
+.follow-button {
+    border-radius: 4px;
+    font-size: 0.95rem;
+}
+
+.followed {
+    color: rgba(255, 85, 0) !important;
+    border: 1px solid rgba(255, 85, 0) !important;
+}
+
+.followed p {
+    color: rgba(255, 85, 0) !important;
+}
+
 @media (max-width: 991.98px) {
     .fs-ms-6 {
-        font-size: 0.8rem;
+        font-size: 0.9rem !important;
+    }
+
+    .uploader-cover {
+        width: 75%;
     }
 }

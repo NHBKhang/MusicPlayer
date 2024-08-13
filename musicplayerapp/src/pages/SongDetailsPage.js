@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Comments, Footer, Header, LoginRequiredModal, Sidebar, TabView } from "../components";
 import '../styles/SongDetailsPage.css';
 import { useEffect, useState } from "react";
@@ -9,12 +9,16 @@ import PageTitle from "../configs/PageTitle";
 import { useUser } from "../configs/UserContext";
 
 const SongDetailsPage = () => {
-    const { isPlaying, pauseSong, playSong, setCurrentSong, currentSong } = useAudio();
+    const {
+        isPlaying, setCurrentSong, currentSong, togglePlayPauseNewSong
+    } = useAudio();
     const { getAccessToken, user } = useUser();
     const { id } = useParams();
     const [song, setSong] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [comments, setComments] = useState([]);
+    const [relatedSongs, setRelatedSong] = useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const loadSong = async () => {
@@ -35,8 +39,18 @@ const SongDetailsPage = () => {
             }
         };
 
+        const loadRelatedSongs = async () => {
+            try {
+                let res = await authAPI(await getAccessToken()).get(endpoints["related-songs"](id));
+                setRelatedSong(res.data);
+            } catch (error) {
+                alert("Không thể tải được bài hát liên quan");
+            }
+        }
+
         loadSong();
         loadComments();
+        loadRelatedSongs();
     }, [id, setCurrentSong, getAccessToken]);
 
     const like = async () => {
@@ -56,15 +70,16 @@ const SongDetailsPage = () => {
     };
 
     const play = () => {
-        if (isPlaying)
-            pauseSong();
-        else
-            playSong(song);
-    }
+        togglePlayPauseNewSong(song);
+    };
+
+    const playNewSong = (song) => { togglePlayPauseNewSong(song); };
 
     const searchByGenre = async (e, genreId) => {
         e.preventDefault();
-    }
+    };
+
+    const goToDetails = (songId) => { navigate(`/songs/${songId}/`); };
 
     const renderDescription = (description) => {
         if (!description) {
@@ -95,9 +110,9 @@ const SongDetailsPage = () => {
             label: "Mô tả",
             content: <div
                 className={`song-description ${song?.description ? '' : 'center'}`}>
-                    <pre>
-                        {renderDescription(song?.description)}
-                    </pre>
+                <pre>
+                    {renderDescription(song?.description)}
+                </pre>
             </div>
         }, {
             label: "Lời bài hát",
@@ -127,9 +142,6 @@ const SongDetailsPage = () => {
                             <img src={song?.image} alt={song?.title} />
                         </div>
                         <div className="song-info col-xxl-9 col-xl-8 col-lg-8 col-md-6">
-                            {/* <button className="me-2 play-button" title="Phát bài hát">
-                                    <i class="fa-solid fa-play"></i>
-                                </button> */}
                             <h1 className="mt-2 mb-2">{song?.title}</h1>
                             <p className="mt-2 mb-4 p-1">Nghệ sĩ: {song?.artists}</p>
                             <div className="d-flex justify-content-end mb-3">
@@ -184,10 +196,37 @@ const SongDetailsPage = () => {
                 <div className="content-container row">
                     <div className="col-md-8 p-0">
                         <TabView tabs={tabs} />
-
                     </div>
-                    <div className="col-md-4">
-
+                    <div className="col-md-4 text-start mt-2">
+                        <h5>Bài hát liên quan</h5>
+                        <hr />
+                        {relatedSongs.map(r =>
+                            <div key={r.id}
+                                className="related-song d-flex ms-lg-1">
+                                <img
+                                    src={r.image} alt={r.title} width={75} height={75}
+                                    onClick={() => goToDetails(r.id)} />
+                                <div className="ms-3" onClick={() => goToDetails(r.id)}>
+                                    <h5 className="mb-0">{r.title}</h5>
+                                    <p style={{ marginTop: 2, marginBottom: 3 }}>{r.artists}</p>
+                                    <div>
+                                        <span className="me-4">
+                                            <i class="fa-solid fa-heart me-1"></i> {r.likes}
+                                        </span>
+                                        <span>
+                                            <i class="fa-solid fa-play me-1"></i> {r.streams}
+                                        </span>
+                                    </div>
+                                </div>
+                                <button
+                                    className="play-button"
+                                    title="Phát bài hát"
+                                    onClick={() => playNewSong(r)}>
+                                    {isPlaying && currentSong?.id === r.id ?
+                                        <i class="fa-solid fa-pause"></i> :
+                                        <i class="fa-solid fa-play"></i>}
+                                </button>
+                            </div>)}
                     </div>
                 </div>
                 <LoginRequiredModal

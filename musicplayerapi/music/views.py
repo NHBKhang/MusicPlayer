@@ -281,3 +281,29 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
             return Response({"detail": "No next song available."}, status=status.HTTP_404_NOT_FOUND)
         except Song.DoesNotExist:
             return Response({"detail": "Song not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    @action(methods=['get'], url_path='related', detail=True)
+    def related(self, request, pk=None):
+        try:
+            song = self.get_object()
+        except Song.DoesNotExist:
+            return Response({'detail': 'Song not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        related_song_ids = set()
+
+        if song.genres.exists():
+            genre_related_songs = Song.objects.filter(
+                genres__in=song.genres.all()
+            ).exclude(id=song.id).values_list('id', flat=True)[:3]
+            related_song_ids.update(genre_related_songs)
+
+        if len(related_song_ids) < 3 and song.artists:
+            artist_related_songs = Song.objects.filter(
+                artists__icontains=song.artists
+            ).exclude(id=song.id).values_list('id', flat=True)[:3]
+            related_song_ids.update(artist_related_songs)
+
+        final_related_songs = Song.objects.filter(id__in=related_song_ids).distinct().order_by('-created_date')[:3]
+
+        serializer = serializers.SongSerializer(final_related_songs, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

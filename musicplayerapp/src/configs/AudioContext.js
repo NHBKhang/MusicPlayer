@@ -168,6 +168,20 @@ export const AudioProvider = ({ children }) => {
         }
     };
 
+    const togglePlayPauseNewSong = (song) => {
+        if (currentSong && song.id === currentSong.id) {
+            if (isPlaying) {
+                pauseSong();
+
+            }
+            else {
+                playSong(song);
+            }
+        } else {
+            playSong(song);
+        }
+    };
+
     const toggleLoop = () => {
         setLoop((prevLoop) => {
             let newLoop;
@@ -199,7 +213,8 @@ export const AudioProvider = ({ children }) => {
             loop, toggleLoop,
             volume, setVolume,
             currentTime, setCurrentTime,
-            playSong, pauseSong, togglePlayPause,
+            playSong, pauseSong, 
+            togglePlayPause, togglePlayPauseNewSong,
             playNextSong, playPreviousSong,
         }}>
             {children}

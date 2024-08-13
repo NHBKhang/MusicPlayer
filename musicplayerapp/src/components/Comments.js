@@ -64,14 +64,31 @@ const Comments = ({ comments, setComments, count, user, uploader, songId }) => {
                 </button>
             </div>
             <div className='row w-100'>
-                <div className='col-md-3 d-md-block d-none d-flex justify-content-center flex-wrap'>
+                <div className='col-md-3 d-md-flex d-none justify-content-center 
+                align-items-center flex-wrap'>
                     <img
                         src={uploader?.avatar}
                         alt={uploader?.name}
                         className='rounded-circle m-auto mt-1 uploader-cover' />
-                    <h6 className='w-100 text-align-start ms-xxl-5 ms-xl-4 ms-lg-3 ms-2 mt-2 fs-ms-6'>
+                    <h6 className='w-100 mt-2 fs-ms-6 fs-5'>
                         {uploader?.name}
                     </h6>
+                    <div className='mb-2 d-flex justify-content-evenly w-100'>
+                        <div className='d-flex align-items-center'>
+                            <i class="fa-solid fa-users text-white"></i>
+                            <p className='mb-0 ms-1'>12</p>
+                        </div>
+                        <div className='align-items-center d-none d-lg-flex'>
+                            <i class="fa-solid fa-music text-white"></i>
+                            <p className='mb-0 ms-1'>12</p>
+                        </div>
+                    </div>
+                    <button className={`mb-2 follow-button `}>
+                        <i class="fa-solid fa-user-plus"></i>
+                        <p className='d-none d-lg-inline text-black'> Theo dõi</p>
+                        {/* <i class="fa-solid fa-user-check"></i>
+                        <p className='d-none d-lg-inline text-black'> Đã theo dõi</p> */}
+                    </button>
                 </div>
                 <div className='col-md-9 col-sm-12'>
                     {comments.length > 0 ? comments.map((comment, index) => (

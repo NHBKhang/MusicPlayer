@@ -14,6 +14,7 @@
 
 .song-cover {
     margin-right: 20px;
+    position: relative;
 }
 
 .song-cover img {
@@ -166,4 +167,32 @@ pre {
 .center {
     justify-content: center !important;
     align-items: center !important;
+    text-align: center;
+}
+
+.related-song {
+    padding: 5px 0 20px;
+    position: relative;
+}
+
+.related-song .play-button {
+    opacity: 0;
+    color: rgba(245, 245, 245, 0.9);
+    background-color: rgba(255, 85, 0, 0.9) !important;
+    border-radius: 50% !important;
+    position: absolute;
+    left: 15px;
+    top: 20px;
+    border: none;
+    width: 45px;
+    height: 45px;
+}
+
+.related-song .play-button:hover {
+    opacity: 1;
+    transition-delay: 0s;
+}
+
+.related-song .play-button i {
+    font-size: 18px;
 }

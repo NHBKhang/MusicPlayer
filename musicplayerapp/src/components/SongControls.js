@@ -99,7 +99,7 @@ const SongControls = () => {
 
     const goToDetails = () => {
         navigate(`/songs/${currentSong.id}/`);
-    }
+    };
 
     return (
         <div className={`song-control fixed-bottom bg-dark text-white d-flex align-items-center p-2${visible ? ' show' : ''}`}>

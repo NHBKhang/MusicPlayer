@@ -69,10 +69,18 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class SongSerializer(ImageSerializer):
     uploader = PublicUserSerializer(read_only=True)
+    likes = serializers.SerializerMethodField()
+    streams = serializers.SerializerMethodField()
+
+    def get_likes(self, song):
+        return song.like_set.filter(active=True).count()
+
+    def get_streams(self, song):
+        return song.streams.count()
 
     class Meta:
         model = Song
-        fields = ['id', 'title', 'uploader', 'image', 'artists', 'file']
+        fields = ['id', 'title', 'uploader', 'image', 'artists', 'file', 'likes', 'streams']
 
 
 class AuthenticatedSongSerializer(SongSerializer):
@@ -91,22 +99,14 @@ class AuthenticatedSongSerializer(SongSerializer):
 
 class SongDetailsSerializer(SongSerializer):
     genres = GenreSerializer(many=True)
-    likes = serializers.SerializerMethodField()
-    streams = serializers.SerializerMethodField()
     comments = serializers.SerializerMethodField()
-
-    def get_likes(self, song):
-        return song.like_set.filter(active=True).count()
-
-    def get_streams(self, song):
-        return song.streams.count()
 
     def get_comments(self, song):
         return song.comment_set.count()
 
     class Meta:
         model = SongSerializer.Meta.model
-        fields = SongSerializer.Meta.fields + ['created_date', 'genres', 'likes', 'streams', 'comments', 'lyrics', 'description']
+        fields = SongSerializer.Meta.fields + ['created_date', 'genres', 'comments', 'lyrics', 'description']
 
 
 class AuthenticatedSongDetailsSerializer(SongDetailsSerializer, AuthenticatedSongSerializer):

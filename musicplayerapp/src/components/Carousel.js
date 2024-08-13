@@ -61,27 +61,15 @@ const Carousel = ({ label, items, type = 'song' }) => {
     };
 
     const navigate = useNavigate();
-    const {
-        playSong, pauseSong, isPlaying, currentSong
-    } = useAudio();
+    const { isPlaying, currentSong, togglePlayPauseNewSong } = useAudio();
 
     const goToDetails = (songId) => {
         navigate(`/songs/${songId}/`);
     }
 
     const togglePlayPause = (song) => {
-        if (currentSong && song.id === currentSong.id) {
-            if (isPlaying) {
-                pauseSong();
-
-            }
-            else {
-                playSong(song);
-            }
-        } else {
-            playSong(song);
-        }
-    };
+        togglePlayPauseNewSong(song);
+    }
 
     return (
         <div className="carousel-container">
