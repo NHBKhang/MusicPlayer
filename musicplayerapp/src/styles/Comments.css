@@ -2,9 +2,6 @@
     max-height: 400px;
     overflow-y: auto;
     padding: 10px;
-    border: 1px solid rgba(211, 211, 211, 0.1);
-    border-radius: 8px;
-    background-color: rgba(50, 50, 50, 0.2);
 }
 
 .comment-input {

@@ -4,7 +4,7 @@ import moment from 'moment';
 import { useUser } from '../configs/UserContext';
 import { authAPI, endpoints } from '../configs/API';
 
-const Comments = ({ comments, count, user, uploader, songId }) => {
+const Comments = ({ comments, setComments, count, user, uploader, songId }) => {
     const [content, setContent] = useState('');
     const { getAccessToken } = useUser();
 
@@ -13,13 +13,26 @@ const Comments = ({ comments, count, user, uploader, songId }) => {
     };
 
     const addComment = async () => {
-        if (!content || content === '') {
+        if (!content.trim()) {
             alert("Bình luận không được rỗng!");
             return;
         }
         try {
             let res = await authAPI(await getAccessToken())
-                .post(endpoints.comments(songId));
+                .post(endpoints['add-comment'](songId), {
+                    'content': content,
+                    'user': user.id,
+                    'song': songId
+                }, {
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                });
+            setComments((current) => [
+                ...current,
+                res.data,
+            ]);
+            setContent('');
         } catch (error) {
             console.error(error);
             alert(error);

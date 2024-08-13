@@ -105,3 +105,65 @@
     background-color: red !important;
     color: white;
 }
+
+pre {
+    margin: 0;
+    width: 100%;
+}
+
+.song-description {
+    height: 400px;
+    display: flex;
+    max-height: 400px;
+    overflow-y: auto;
+    text-align: justify;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 255, 0.4) gray;
+    padding: 10px;
+    margin: 10px;
+    font: 1.2rem sans-serif;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+}
+
+.description-link {
+    color: rgb(0, 162, 255) !important;
+}
+
+.description-link:hover {
+    text-decoration: underline !important;
+    color: rgb(0, 208, 255) !important;
+}
+
+.song-lyrics {
+    height: 400px;
+    display: flex;
+    max-height: 400px;
+    overflow-y: auto;
+    text-align: justify;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 255, 0.4) gray;
+    padding: 10px;
+    margin: 10px;
+}
+
+.song-lyrics::-webkit-scrollbar {
+    width: 6px;
+}
+
+.song-lyrics::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 255, 0.4);
+    border-radius: 10px;
+}
+
+.song-lyrics::-webkit-scrollbar-track {
+    background-color: gray;
+}
+
+.center {
+    justify-content: center !important;
+    align-items: center !important;
+}

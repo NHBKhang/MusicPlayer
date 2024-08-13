@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { Comments, Footer, Header, LoginRequiredModal, Sidebar } from "../components";
+import { Comments, Footer, Header, LoginRequiredModal, Sidebar, TabView } from "../components";
 import '../styles/SongDetailsPage.css';
 import { useEffect, useState } from "react";
 import { authAPI, endpoints } from "../configs/API";
@@ -66,6 +66,53 @@ const SongDetailsPage = () => {
         e.preventDefault();
     }
 
+    const renderDescription = (description) => {
+        if (!description) {
+            return "Không có mô tả cho bài hát này";
+        }
+
+        const urlPattern = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/ig;
+        const processedDescription = description.replace(urlPattern, (url) => (
+            `<a href="${url}" target="_blank" rel="noopener noreferrer" class="description-link">${url}</a>`
+        ));
+
+        return (
+            <span dangerouslySetInnerHTML={{ __html: processedDescription }} />
+        );
+    };
+
+    const tabs = [
+        {
+            label: "Bình luận",
+            content: <Comments
+                comments={comments}
+                setComments={setComments}
+                count={song?.comments}
+                user={user}
+                uploader={song?.uploader}
+                songId={song?.id} />
+        }, {
+            label: "Mô tả",
+            content: <div
+                className={`song-description ${song?.description ? '' : 'center'}`}>
+                    <pre>
+                        {renderDescription(song?.description)}
+                    </pre>
+            </div>
+        }, {
+            label: "Lời bài hát",
+            content: <div
+                className={`song-lyrics ${song?.lyrics ? '' : 'center'}`}>
+                <span>
+                    <pre>
+                        {song?.lyrics ? song?.lyrics :
+                            "Không có lời bát cho bài hát này"}
+                    </pre>
+                </span>
+            </div>
+        }
+    ]
+
     return (
         <div className='d-flex' style={{ flexDirection: 'row' }}>
             <PageTitle title={`${song?.artists} - ${song?.title}`} />
@@ -130,27 +177,14 @@ const SongDetailsPage = () => {
                                     </div>
                                 </div>
                             </div>
-                            {/* <div className="song-lyrics">
-                                <h2>Lyrics</h2>
-                                <p>{song?.lyrics}</p>
-                            </div> */}
-                            {/* <div className="song-controls">
-                                <button>Play</button>
-                                <button>Pause</button>
-                                <button>Next</button>
-                            </div> */}
                             <br />
                         </div>
                     </div>
                 </div>
                 <div className="content-container row">
-                    <div className="col-md-8">
-                        <Comments
-                            comments={comments}
-                            count={song?.comments}
-                            user={user}
-                            uploader={song?.uploader}
-                            songId={song?.id} />
+                    <div className="col-md-8 p-0">
+                        <TabView tabs={tabs} />
+
                     </div>
                     <div className="col-md-4">
 

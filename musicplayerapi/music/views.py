@@ -171,6 +171,7 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
     queryset = Song.objects.filter(active=True).order_by('-id').all()
     serializer_class = serializers.SongSerializer
     pagination_class = paginators.SongPaginator
+    permission_classes = [permissions.AllowAny(), ]
 
     def get_serializer_class(self):
         if self.action in ['retrieve', 'update', 'partial_update']:
@@ -183,6 +184,12 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
                 return serializers.AuthenticatedSongSerializer
             else:
                 return self.serializer_class
+
+    def get_permissions(self):
+        if self.action in ['like', 'add-comment', ]:
+            return [permissions.IsAuthenticated(), ]
+
+        return self.permission_classes
 
     def get_queryset(self):
         queryset = self.queryset
