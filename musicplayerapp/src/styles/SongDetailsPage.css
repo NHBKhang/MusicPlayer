@@ -196,3 +196,13 @@ pre {
 .related-song .play-button i {
     font-size: 18px;
 }
+
+.related-song h5 {
+    height: 25px;
+    overflow-y: hidden;
+}
+
+.related-song p {
+    height: 25px;
+    overflow-y: hidden;
+}

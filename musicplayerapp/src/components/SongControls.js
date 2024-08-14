@@ -12,7 +12,7 @@ import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import { useUser } from '../configs/UserContext';
 import { authAPI, endpoints } from '../configs/API';
 import { useNavigate } from 'react-router-dom';
-import PageTitle from '../configs/PageTitle';
+import PageTitle from './PageTitle';
 
 const SongControls = () => {
     const {

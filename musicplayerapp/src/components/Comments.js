@@ -39,6 +39,12 @@ const Comments = ({ comments, setComments, count, user, uploader, songId }) => {
         }
     };
 
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            addComment();
+        }
+    };
+
     return (
         <div className="comments-container">
             <div className='mb-3 mt-1' style={{ fontSize: "1.1rem" }}>
@@ -57,6 +63,7 @@ const Comments = ({ comments, setComments, count, user, uploader, songId }) => {
                     type="text"
                     value={content}
                     onChange={inputChange}
+                    onKeyDown={handleKeyDown}
                     placeholder="Add a comment..."
                     className="comment-input" />
                 <button onClick={addComment} className="add-comment-button">

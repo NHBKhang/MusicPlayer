@@ -3,7 +3,7 @@ import '../styles/SignupPage.css';
 import API, { endpoints } from "../configs/API";
 import { useNavigate } from "react-router-dom";
 import { GoogleButton, FacebookButton } from '../components';
-import { usePageTitle } from "../configs/PageTitle";
+import { usePageTitle } from "../components/PageTitle";
 
 const SignupPage = () => {
     usePageTitle("Sign up");

@@ -117,7 +117,7 @@ class Playlist(BaseModel, ImageBaseModel):
 
 class PlaylistDetails(models.Model):
     playlist = models.OneToOneField(Playlist, on_delete=models.CASCADE, related_name='details')
-    song = models.ForeignKey(Song, on_delete=models.CASCADE)
+    song = models.ForeignKey(Song, on_delete=models.CASCADE, related_name='playlists')
     order = models.PositiveIntegerField()
 
     class Meta:

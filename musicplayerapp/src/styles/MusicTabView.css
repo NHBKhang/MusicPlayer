@@ -1,0 +1,55 @@
+.music-tabview {
+    background-color: inherit;
+}
+
+.music-tab-headers {
+    display: flex;
+    border-bottom: 1px solid #4b4372;
+    padding: 10px 0;
+}
+
+.music-tab-button {
+    flex: 1;
+    padding: 10px;
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: bold;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.music-tab-button.music-active {
+    color: #fff;
+}
+
+.music-tab-button.music-active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 25%;
+    width: 50%;
+    height: 2px;
+    background-color: #9e55d6;
+}
+
+.music-tab-button:hover {
+    color: #b8b8b8;
+}
+
+.music-tab-content {
+    padding: 20px;
+}
+
+.music-tab-pane {
+    display: none;
+}
+
+.music-tab-pane.music-active {
+    display: block;
+}
+
+

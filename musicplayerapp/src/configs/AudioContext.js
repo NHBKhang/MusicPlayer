@@ -13,7 +13,6 @@ export const AudioProvider = ({ children }) => {
     const [currentTime, setCurrentTime] = useState(0);
     const [loop, setLoop] = useState('none');
     const [volume, setVolume] = useState(1);
-    const [streamPosted, setStreamPosted] = useState(false);
     const audio = getAudioInstance();
     const { getAccessToken } = useUser();
 
@@ -21,7 +20,6 @@ export const AudioProvider = ({ children }) => {
         const timerId = setTimeout(async () => {
             try {
                 await authAPI(getAccessToken()).post(endpoints.stream(songId));
-                setStreamPosted(true);
             } catch (error) {
                 console.error('Error posting stream:', error);
             }
@@ -37,6 +35,7 @@ export const AudioProvider = ({ children }) => {
                 return;
             }
             setCurrentTime(0);
+
             let res = await authAPI(await getAccessToken()).get(endpoints['next-song'](currentSong.id));
             playSong(res.data);
         } catch (error) {
@@ -52,6 +51,7 @@ export const AudioProvider = ({ children }) => {
                 return;
             }
             setCurrentTime(0);
+
             let res = await authAPI(await getAccessToken()).get(endpoints['previous-song'](currentSong.id));
             playSong(res.data);
         } catch (error) {
@@ -60,16 +60,29 @@ export const AudioProvider = ({ children }) => {
         }
     }, [currentSong, getAccessToken]);
 
+    const togglePlayPauseNewSong = useCallback((song) => {
+        if (currentSong && song.id === currentSong.id) {
+            if (isPlaying) {
+                pauseSong();
+            }
+            else {
+                playSong(song);
+            }
+        } else {
+            playSong(song);
+        }
+    }, [currentSong, isPlaying]);
+
     useEffect(() => {
         let postStreamTimer = null;
 
         const handlePlaySong = async (event) => {
             const { song } = event.detail;
-            setCurrentSong(song);
             setVisible(true);
-            setStreamPosted(false);
+            setCurrentSong(song);
             audio.src = song.file;
             audio.volume = volume;
+
             if (currentSong && currentSong.id !== song.id) {
                 setCurrentTime(0);
                 audio.currentTime = 0;
@@ -99,7 +112,6 @@ export const AudioProvider = ({ children }) => {
                     audio.currentTime = 0;
                     await audio.play();
                     setIsPlaying(true);
-                    setStreamPosted(false);
                     postStreamTimer = postStreamAfterDelay(currentSong.id);
                 } catch (error) {
                     alert('Playback failed:', error);
@@ -135,7 +147,7 @@ export const AudioProvider = ({ children }) => {
             window.removeEventListener('pauseSong', handlePauseSong);
             clearTimeout(postStreamTimer);
         };
-    }, [audio, currentTime, loop, volume, currentSong, streamPosted,
+    }, [audio, currentTime, loop, volume, currentSong, 
         playNextSong, postStreamAfterDelay, setCurrentTime]);
 
     useEffect(() => {
@@ -165,20 +177,6 @@ export const AudioProvider = ({ children }) => {
             pauseSong();
         } else {
             playSong(currentSong);
-        }
-    };
-
-    const togglePlayPauseNewSong = (song) => {
-        if (currentSong && song.id === currentSong.id) {
-            if (isPlaying) {
-                pauseSong();
-
-            }
-            else {
-                playSong(song);
-            }
-        } else {
-            playSong(song);
         }
     };
 
@@ -213,7 +211,7 @@ export const AudioProvider = ({ children }) => {
             loop, toggleLoop,
             volume, setVolume,
             currentTime, setCurrentTime,
-            playSong, pauseSong, 
+            playSong, pauseSong,
             togglePlayPause, togglePlayPauseNewSong,
             playNextSong, playPreviousSong,
         }}>

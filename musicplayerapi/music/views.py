@@ -8,7 +8,7 @@ from music import serializers, paginators, perms, utils
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from django.contrib.auth import update_session_auth_hash
-from django.db.models import Count, Max
+from django.db.models import Count, Max, Q
 from google.oauth2 import id_token
 from google.auth.transport import requests as gg_requests
 from oauth2_provider.settings import oauth2_settings
@@ -138,7 +138,8 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
         if q:
             queries = queries.filter(Q(first_name__icontains=q) |
                                      Q(last_name__icontains=q) |
-                                     Q(username__icontains=q))
+                                     Q(username__icontains=q) |
+                                     Q(info_display_name__icontains=q))
 
         return queries
 
@@ -200,6 +201,10 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
         elif cate == '2':
             queryset = queryset.filter(active=True).annotate(latest_streamed_at=Max('streams__streamed_at')) \
                 .order_by('-latest_streamed_at')
+
+        q = self.request.query_params.get('q')
+        if q:
+            queryset = queryset.filter(title__icontains=q)
 
         return queryset
 
@@ -303,7 +308,21 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
             ).exclude(id=song.id).values_list('id', flat=True)[:3]
             related_song_ids.update(artist_related_songs)
 
+        if len(related_song_ids) < 3:
+            additional_songs_needed = 3 - len(related_song_ids)
+            additional_songs = Song.objects.exclude(
+                id__in=related_song_ids.union({song.id})
+            ).values_list('id', flat=True)[:additional_songs_needed]
+            related_song_ids.update(additional_songs)
+
         final_related_songs = Song.objects.filter(id__in=related_song_ids).distinct().order_by('-created_date')[:3]
 
         serializer = serializers.SongSerializer(final_related_songs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class PlaylistViewSet(viewsets.ModelViewSet):
+    queryset = Playlist.objects.filter(active=True).all()
+    serializer_class = serializers.PlaylistSerializer
+    pagination_class = paginators.PlaylistPaginator
+    permission_classes = [permissions.AllowAny]

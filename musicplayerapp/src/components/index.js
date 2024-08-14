@@ -8,3 +8,5 @@ export { default as FacebookButton } from './FacebookButton';
 export { default as LoginRequiredModal } from './LoginRequiredModal';
 export { default as Comments } from './Comments';
 export { default as TabView } from './TabView';
+export { default as PageTitle } from './PageTitle';
+export { default as MusicTabView } from './MusicTabView';

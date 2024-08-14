@@ -115,10 +115,25 @@ class AuthenticatedSongDetailsSerializer(SongDetailsSerializer, AuthenticatedSon
         fields = SongDetailsSerializer.Meta.fields + AuthenticatedSongSerializer.Meta.fields
 
 
+class PlaylistDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PlaylistDetails
+        fields = ['id', 'song']
+
+
 class PlaylistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Playlist
-        fields = ['id', 'title', 'description', 'creator', ]
+        fields = ['id', 'image', 'creator', ]
+
+
+class PlaylistSongsSerializer(PlaylistSerializer):
+    details = PlaylistDetailsSerializer(many=True)
+
+    class Meta:
+        model = PlaylistSerializer.Meta.model
+        fields = PlaylistSerializer.Meta.fields + ['details', 'genres', 'description', 'playlist_type',
+                                                   'published_date', 'is_public']
 
 
 class CommentSerializer(serializers.ModelSerializer):

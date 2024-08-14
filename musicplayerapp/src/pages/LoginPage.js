@@ -3,7 +3,7 @@ import '../styles/LoginPage.css';
 import { useUser } from '../configs/UserContext';
 import { useNavigate } from 'react-router-dom';
 import { GoogleButton, FacebookButton } from '../components';
-import { usePageTitle } from '../configs/PageTitle';
+import { usePageTitle } from '../components/PageTitle';
 
 const LoginPage = () => {
     usePageTitle("Log in");

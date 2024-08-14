@@ -4,7 +4,7 @@ import '../styles/Footer.css';
 const Footer = () => {
     return (
         <footer>
-            <div className="mt-5 p-3 bg-dark text-white row footer">
+            <div className="p-3 ps-4 bg-dark text-white row footer">
                 <div style={{justifyContent: 'space-evenly'}} className="container d-flex flex-wrap">
                     <div className="content about me-2">
                         <h4>Theo dõi chúng tôi</h4>

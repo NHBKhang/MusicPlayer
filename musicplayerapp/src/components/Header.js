@@ -13,7 +13,16 @@ const Header = () => {
     };
 
     const handleSearch = () => {
-        console.log(query);
+        if (query.trim() === '') {
+            return;
+        }
+        navigate(`/search/?q=${encodeURIComponent(query.trim())}`);
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
     };
 
     const onLogout = (e) => {
@@ -37,6 +46,7 @@ const Header = () => {
                                 type="text"
                                 value={query}
                                 onChange={handleChange}
+                                onKeyDown={handleKeyDown}
                                 placeholder="Search..." />
                             <button onClick={handleSearch} className="search">
                                 <i className="fas fa-search"></i>

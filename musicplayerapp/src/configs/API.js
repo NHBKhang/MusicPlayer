@@ -1,6 +1,6 @@
 import {
     HomePage,
-    LoginPage, SetPasswordPage, SignupPage,
+    LoginPage, SearchPage, SetPasswordPage, SignupPage,
     SongDetailsPage
 } from "../pages";
 import axios from "axios";
@@ -24,9 +24,13 @@ export const routes = {
         url: '/songs/:id/',
         component: SongDetailsPage
     },
-    SetPassword: {
+    setPassword: {
         url: '/set-password/',
         component: SetPasswordPage
+    },
+    search: {
+        url: '/search/',
+        component: SearchPage
     }
 }
 

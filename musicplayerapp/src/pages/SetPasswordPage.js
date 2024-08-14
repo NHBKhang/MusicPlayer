@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { authAPI, endpoints } from '../configs/API';
 import { useLocation, useNavigate } from 'react-router-dom';
 import '../styles/SetPasswordPage.css';
-import { usePageTitle } from '../configs/PageTitle';
+import { usePageTitle } from '../components/PageTitle';
 import { useUser } from '../configs/UserContext';
 
 const SetPasswordPage = () => {

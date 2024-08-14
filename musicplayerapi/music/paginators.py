@@ -7,3 +7,7 @@ class CommentPaginator(pagination.PageNumberPagination):
 
 class SongPaginator(pagination.PageNumberPagination):
     page_size = 10
+
+
+class PlaylistPaginator(pagination.PageNumberPagination):
+    page_size = 10
