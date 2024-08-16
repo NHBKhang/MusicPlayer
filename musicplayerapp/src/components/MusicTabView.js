@@ -1,32 +1,40 @@
-import React, { useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import '../styles/MusicTabView.css';
 
-const MusicTabView = ({ tabs }) => {
-    const [activeTab, setActiveTab] = useState(tabs[0].label);
+const MusicTabView = ({ tabs, query, activeTab, onTabChange }) => {
+    const contentRef = useRef(null);
 
     const handleTabClick = (label) => {
-        setActiveTab(label);
+        onTabChange(label);
     };
+
+    useEffect(() => {
+        if (contentRef.current) {
+            contentRef.current.scrollTop = contentRef.current.scrollHeight;
+        }
+    }, [activeTab]);
 
     return (
         <div className="music-tabview">
-            <div className="music-tab-headers">
-                {tabs.map((tab) => (
-                    <button
-                        key={tab.label}
-                        className={`music-tab-button ${activeTab === tab.label ? 'music-active' : ''}`}
-                        onClick={() => handleTabClick(tab.label)}>
-                        {tab.label}
-                    </button>
-                ))}
+            <div className="music-tabview-fixed">
+                <p className='m-2 mb-3 p-1 fs-4'>Kết quả tìm cho "{query}"</p>
+                <div className="music-tab-headers">
+                    {tabs.map((tab) => (
+                        <button
+                            key={tab.label}
+                            className={`music-tab-button ${activeTab === tab.label ? 'music-active' : ''}`}
+                            onClick={() => handleTabClick(tab.label)}>
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
             </div>
-            <div className="music-tab-content">
+            <div className="music-tab-content" ref={contentRef}>
                 {tabs.map((tab) => (
                     <div
                         key={tab.label}
-                        className={`music-tab-pane ${activeTab === tab.label ? 'music-active' : ''}`}
-                    >
-                        {activeTab === tab.label && tab.content}
+                        className={`music-tab-pane ${activeTab === tab.label ? 'music-active' : 'music-inactive'}`}>
+                        {tab.content}
                     </div>
                 ))}
             </div>

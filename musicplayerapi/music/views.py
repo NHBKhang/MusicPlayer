@@ -128,6 +128,7 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
     queryset = User.objects.filter(is_active=True)
     serializer_class = serializers.UserSerializer
     parser_classes = [parsers.MultiPartParser, ]
+    pagination_class = paginators.UserPaginator
 
     def get_queryset(self):
         queries = self.queryset
@@ -139,7 +140,7 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
             queries = queries.filter(Q(first_name__icontains=q) |
                                      Q(last_name__icontains=q) |
                                      Q(username__icontains=q) |
-                                     Q(info_display_name__icontains=q))
+                                     Q(info__display_name__icontains=q)).distinct()
 
         return queries
 

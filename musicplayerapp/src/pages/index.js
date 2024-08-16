@@ -10,8 +10,8 @@ const Page = ({ children, title }) => {
                 <Sidebar />
             </div>
             <div className='content w-100'>
-                {children}
-                <div className='mt-5'><Footer /></div>
+                <div className='mb-5'>{children}</div>
+                <Footer />
             </div>
         </div>
     )

@@ -1,6 +1,6 @@
 .App {
   text-align: center;
-  background-color: #282c34;
+  background: #282c34 !important;
 }
 
 @media (prefers-reduced-motion: no-preference) {

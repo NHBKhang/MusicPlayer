@@ -1,18 +1,13 @@
-.music-tabview {
-    background-color: inherit;
-}
-
 .music-tab-headers {
     display: flex;
     border-bottom: 1px solid #4b4372;
-    padding: 10px 0;
 }
 
 .music-tab-button {
     flex: 1;
     padding: 10px;
     color: #ffffff;
-    font-size: 1rem;
+    font-size: 14px;
     font-weight: bold;
     background: none;
     border: none;
@@ -41,7 +36,8 @@
 }
 
 .music-tab-content {
-    padding: 20px;
+    padding: 1rem;
+    margin-top: 120px;
 }
 
 .music-tab-pane {
@@ -52,4 +48,19 @@
     display: block;
 }
 
+.music-tab-pane.music-inactive {
+    display: none;
+}
 
+.music-tabview-fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 400;
+    margin-top: 60px;
+    margin-left: 50px;
+    background-color: #282c34;
+    padding: 10px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}

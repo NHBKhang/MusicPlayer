@@ -11,3 +11,7 @@ class SongPaginator(pagination.PageNumberPagination):
 
 class PlaylistPaginator(pagination.PageNumberPagination):
     page_size = 10
+
+
+class UserPaginator(pagination.PageNumberPagination):
+    page_size = 5

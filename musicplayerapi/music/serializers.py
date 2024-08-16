@@ -80,7 +80,7 @@ class SongSerializer(ImageSerializer):
 
     class Meta:
         model = Song
-        fields = ['id', 'title', 'uploader', 'image', 'artists', 'file', 'likes', 'streams']
+        fields = ['id', 'title', 'uploader', 'image', 'artists', 'file', 'likes', 'streams', 'created_date']
 
 
 class AuthenticatedSongSerializer(SongSerializer):
@@ -106,7 +106,7 @@ class SongDetailsSerializer(SongSerializer):
 
     class Meta:
         model = SongSerializer.Meta.model
-        fields = SongSerializer.Meta.fields + ['created_date', 'genres', 'comments', 'lyrics', 'description']
+        fields = SongSerializer.Meta.fields + ['genres', 'comments', 'lyrics', 'description']
 
 
 class AuthenticatedSongDetailsSerializer(SongDetailsSerializer, AuthenticatedSongSerializer):
