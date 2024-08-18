@@ -1,17 +1,19 @@
 import { Carousel } from '../components';
 import '../styles/HomePage.css';
 import { useEffect, useState } from 'react';
-import API, { endpoints } from '../configs/API';
+import { authAPI, endpoints } from '../configs/API';
 import Page from '.';
+import { useUser } from '../configs/UserContext';
 
 const HomePage = () => {
     const [topMusic, setTopMusic] = useState([]);
     const [recentlyMusic, setRecentlyMusic] = useState([]);
+    const { getAccessToken } = useUser();
 
     useEffect(() => {
         const loadTopMusic = async () => {
             try {
-                let res = await API.get(`${endpoints.songs}?cate=1`);
+                let res = await authAPI(await getAccessToken()).get(`${endpoints.songs}?cate=1`);
                 setTopMusic(res.data.results);
             } catch (error) {
                 console.error(error);
@@ -21,7 +23,7 @@ const HomePage = () => {
 
         const loadRecentlyMusic = async () => {
             try {
-                let res = await API.get(`${endpoints.songs}?cate=2`);
+                let res = await authAPI(await getAccessToken()).get(`${endpoints.songs}?cate=2`);
                 setRecentlyMusic(res.data.results);
             } catch (error) {
                 console.error(error);
@@ -31,7 +33,7 @@ const HomePage = () => {
 
         loadTopMusic();
         loadRecentlyMusic();
-    }, []);
+    }, [getAccessToken]);
 
     return (
         <Page title={"Home"}>

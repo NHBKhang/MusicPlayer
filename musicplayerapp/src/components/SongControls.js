@@ -97,6 +97,21 @@ const SongControls = () => {
         }
     };
 
+    const follow = async () => {
+        try {
+            let res = await authAPI(await getAccessToken())
+                .post(endpoints.follow(currentSong.uploader.id));
+            setCurrentSong(prevSong => ({
+                ...prevSong,
+                followed: res.data.followed
+
+            }));
+        } catch (error) {
+            console.error(error);
+            alert("Lỗi");
+        }
+    };
+
     const goToDetails = () => {
         navigate(`/songs/${currentSong.id}/`);
     };
@@ -181,9 +196,11 @@ const SongControls = () => {
                     </button>
                     {currentSong?.uploader.id !== user.id && <button
                         type="button"
-                        // onClick={follow}
+                        onClick={follow}
                         className={`me-4${currentSong?.followed ? ' followed' : ''}`}>
-                        <i class="fa-solid fa-user-plus"></i>
+                        {currentSong?.followed ?
+                            <i class="fa-solid fa-user-check"></i> :
+                            <i class="fa-solid fa-user-plus"></i>}
                     </button>}
                 </div>}
             </div>

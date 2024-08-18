@@ -30,6 +30,11 @@ const Header = () => {
         logout();
     }
 
+    const onProfileClick = (e) => {
+        e.preventDefault();
+        navigate(`/profile/${user.id}/`)
+    }
+
     return (
         <div>
             <nav className="navbar navbar-expand-sm navbar-dark bg-dark">
@@ -66,7 +71,11 @@ const Header = () => {
                                         className="rounded-circle" />
                                 </button>
                                 <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-                                    <li><a className="dropdown-item" href="#/profile">Hồ sơ</a></li>
+                                    <li>
+                                        <a  onClick={onProfileClick}
+                                            className="dropdown-item"
+                                            href="/profile/">Hồ sơ</a>
+                                    </li>
                                     <li><a className="dropdown-item" href="#/settings">Cài đặt</a></li>
                                     <li><hr className="dropdown-divider" /></li>
                                     <li><a className="dropdown-item" onClick={onLogout} href="/logout/">Đăng xuất</a></li>

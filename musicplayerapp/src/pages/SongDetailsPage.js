@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { Comments, LoginRequiredModal, TabView } from "../components";
+import { Comments, LoginRequiredModal, TabView, VerifiedBadge } from "../components";
 import '../styles/SongDetailsPage.css';
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { authAPI, endpoints } from "../configs/API";
 import moment from "moment";
 import { useAudio } from "../configs/AudioContext";
@@ -19,17 +19,17 @@ const SongDetailsPage = () => {
     const [comments, setComments] = useState([]);
     const [relatedSongs, setRelatedSong] = useState([]);
     const navigate = useNavigate();
+    
+    const loadSong = useCallback(async () => {
+        try {
+            let res = await authAPI(await getAccessToken()).get(endpoints.song(id));
+            setSong(res.data);
+        } catch (error) {
+            alert("Không thể tải được bài hát");
+        }
+    }, [id, getAccessToken]);
 
     useEffect(() => {
-        const loadSong = async () => {
-            try {
-                let res = await authAPI(await getAccessToken()).get(endpoints.song(id));
-                setSong(res.data);
-            } catch (error) {
-                alert("Không thể tải được bài hát");
-            }
-        };
-
         const loadComments = async () => {
             try {
                 let res = await authAPI(await getAccessToken()).get(endpoints.comments(id));
@@ -48,10 +48,13 @@ const SongDetailsPage = () => {
             }
         }
 
-        loadSong();
         loadComments();
         loadRelatedSongs();
-    }, [id, setCurrentSong, getAccessToken]);
+    }, [id, getAccessToken, loadSong]);
+
+    useEffect(() => {
+        loadSong();
+    }, [currentSong, song, loadSong]);
 
     const like = async () => {
         if (user) {
@@ -81,6 +84,8 @@ const SongDetailsPage = () => {
 
     const goToDetails = (songId) => { navigate(`/songs/${songId}/`); };
 
+    const goToArtist = (artistId) => { navigate(`/profile/${artistId}/`); };
+
     const renderDescription = (description) => {
         if (!description) {
             return "Không có mô tả cho bài hát này";
@@ -102,10 +107,8 @@ const SongDetailsPage = () => {
             content: <Comments
                 comments={comments}
                 setComments={setComments}
-                count={song?.comments}
                 user={user}
-                uploader={song?.uploader}
-                songId={song?.id} />
+                state={{ isModalOpen, setIsModalOpen, song, setSong }} />
         }, {
             label: "Mô tả",
             content: <div
@@ -149,13 +152,16 @@ const SongDetailsPage = () => {
                             </div>
                         </div>
                         <div className="d-flex justify-content-between other-info">
-                            <div className="">
+                            <div onClick={() => goToArtist(song?.uploader?.id)} className="cursor-pointer">
                                 <img
                                     className="rounded-circle"
                                     src={song?.uploader?.avatar}
                                     alt={song?.uploader?.name}
                                     width={40} />
-                                <span><strong>{song?.uploader?.name}</strong></span>
+                                <span>
+                                    <strong>{song?.uploader?.name}</strong>
+                                    {song?.uploader?.info?.verified && <VerifiedBadge />}
+                                </span>
                             </div>
                             <span>{moment(song?.created_date).fromNow()}</span>
                         </div>

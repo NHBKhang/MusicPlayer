@@ -126,9 +126,15 @@ def set_password(request):
 
 class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveAPIView):
     queryset = User.objects.filter(is_active=True)
-    serializer_class = serializers.UserSerializer
+    serializer_class = serializers.PublicUserSerializer
     parser_classes = [parsers.MultiPartParser, ]
     pagination_class = paginators.UserPaginator
+
+    def get_serializer_class(self):
+        if self.request.user.is_authenticated:
+            return serializers.AuthenticatedUserSerializer
+
+        return serializers.UserSerializer
 
     def get_queryset(self):
         queries = self.queryset
@@ -163,6 +169,20 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
         return Response(serializers.UserSerializer(user).data)
 
+    @action(methods=['post'], url_path='follow', detail=True)
+    def follow(self, request, pk=None):
+        if not request.user.is_authenticated:
+            raise AuthenticationFailed("User must be authenticated to like a song")
+
+        user = self.get_object()
+        fo, created = Follow.objects.get_or_create(follower=request.user, followed=user)
+
+        fo.active = not fo.active
+        if not created:
+            fo.save()
+
+        return Response(serializers.AuthenticatedUserSerializer(user, context={'request': request}).data)
+
 
 class GenreViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
     queryset = Genre.objects.filter(active=True).all()
@@ -194,18 +214,27 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
         return self.permission_classes
 
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = self.queryset.filter(active=True)
 
         cate = self.request.query_params.get('cate')
         if cate == '1':
-            queryset = queryset.filter(active=True).annotate(num_streams=Count('streams')).order_by('-num_streams')
+            queryset = queryset.annotate(num_streams=Count('streams')).order_by('-num_streams')
         elif cate == '2':
-            queryset = queryset.filter(active=True).annotate(latest_streamed_at=Max('streams__streamed_at')) \
+            queryset = queryset.annotate(latest_streamed_at=Max('streams__streamed_at')) \
                 .order_by('-latest_streamed_at')
 
         q = self.request.query_params.get('q')
         if q:
-            queryset = queryset.filter(title__icontains=q)
+            queryset = queryset.filter(Q(title__icontains=q) |
+                                       Q(artists__icontains=q))
+
+        uploader = self.request.query_params.get('uploader')
+        pop = self.request.query_params.get('pop')
+        if uploader:
+            queryset = queryset.filter(uploader_id=uploader)
+
+            if pop:
+                queryset = queryset.annotate(num_streams=Count('streams')).order_by('-num_streams')
 
         return queryset
 

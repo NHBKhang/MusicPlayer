@@ -14,8 +14,18 @@ class ImageSerializer(serializers.ModelSerializer):
         return rep
 
 
+class UserInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserInfo
+        fields = ['bio', 'verified']
+
+
 class PublicUserSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
+    info = UserInfoSerializer()
+    followers = serializers.SerializerMethodField()
+    following = serializers.SerializerMethodField()
+    songs = serializers.SerializerMethodField()
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)
@@ -35,9 +45,19 @@ class PublicUserSerializer(serializers.ModelSerializer):
 
         return user.username
 
+    def get_followers(self, user):
+        return user.followers.filter(active=True).count()
+
+    def get_following(self, user):
+        return user.following.filter(active=True).count()
+
+    def get_songs(self, user):
+        return user.songs.filter(active=True).count()
+
     class Meta:
         model = User
-        fields = ['id', 'name', 'avatar', 'username']
+        fields = ['id', 'name', 'avatar', 'username', 'first_name', 'last_name', 'info', 'followers', 'following',
+                  'songs', 'last_login']
 
 
 class UserSerializer(PublicUserSerializer):
@@ -53,12 +73,26 @@ class UserSerializer(PublicUserSerializer):
     class Meta:
         model = PublicUserSerializer.Meta.model
         fields = (PublicUserSerializer.Meta.fields +
-                  ['first_name', 'last_name', 'email', 'password', 'last_login'])
+                  ['email', 'password'])
         extra_kwargs = {
             'password': {
                 'write_only': True
             }
         }
+
+
+class AuthenticatedUserSerializer(PublicUserSerializer):
+    followed = serializers.SerializerMethodField()
+
+    def get_followed(self, user):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return user.followers.filter(follower=request.user, active=True).exists()
+        return False
+
+    class Meta:
+        model = PublicUserSerializer.Meta.model
+        fields = PublicUserSerializer.Meta.fields + ['followed']
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -85,6 +119,7 @@ class SongSerializer(ImageSerializer):
 
 class AuthenticatedSongSerializer(SongSerializer):
     liked = serializers.SerializerMethodField()
+    followed = serializers.SerializerMethodField()
 
     def get_liked(self, song):
         request = self.context.get('request')
@@ -92,9 +127,16 @@ class AuthenticatedSongSerializer(SongSerializer):
             return song.like_set.filter(user=request.user, active=True).exists()
         return False
 
+    def get_followed(self, song):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return song.uploader.followers.filter(follower=request.user, active=True).exists()
+        return False
+
+
     class Meta:
         model = SongSerializer.Meta.model
-        fields = SongSerializer.Meta.fields + ['liked', ]
+        fields = SongSerializer.Meta.fields + ['liked', 'followed']
 
 
 class SongDetailsSerializer(SongSerializer):

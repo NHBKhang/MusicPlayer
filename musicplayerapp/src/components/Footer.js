@@ -3,7 +3,7 @@ import '../styles/Footer.css';
 
 const Footer = () => {
     return (
-        <footer>
+        <footer className="footer">
             <div className="p-3 ps-4 bg-dark text-white row footer">
                 <div style={{justifyContent: 'space-evenly'}} className="container d-flex flex-wrap">
                     <div className="content about me-2">

@@ -41,7 +41,7 @@ class UserInfo(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name='info')
     display_name = models.CharField(max_length=30, null=True, blank=True)
     bio = models.TextField(blank=True, null=True)
-    artist_verified = models.BooleanField(default=False)
+    verified = models.BooleanField(default=False)
 
     def __str__(self):
         if self.display_name:
@@ -174,10 +174,9 @@ class Transaction(models.Model):
         return self.bank_code + str(self.transaction_id)
 
 
-class Follow(models.Model):
+class Follow(BaseModel):
     follower = models.ForeignKey(User, related_name='following', on_delete=models.CASCADE)
     followed = models.ForeignKey(User, related_name='followers', on_delete=models.CASCADE)
-    followed_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('follower', 'followed')

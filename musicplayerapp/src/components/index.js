@@ -10,3 +10,4 @@ export { default as Comments } from './Comments';
 export { default as TabView } from './TabView';
 export { default as PageTitle } from './PageTitle';
 export { default as MusicTabView } from './MusicTabView';
+export { default as VerifiedBadge } from './VerifiedBadge';

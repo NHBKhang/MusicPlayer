@@ -3,10 +3,16 @@ import '../styles/Comments.css';
 import moment from 'moment';
 import { useUser } from '../configs/UserContext';
 import { authAPI, endpoints } from '../configs/API';
+import VerifiedBadge from './VerifiedBadge';
+import { useNavigate } from 'react-router-dom';
+import { useAudio } from '../configs/AudioContext';
 
-const Comments = ({ comments, setComments, count, user, uploader, songId }) => {
+const Comments = ({ comments, setComments, user, state }) => {
     const [content, setContent] = useState('');
     const { getAccessToken } = useUser();
+    const { setIsModalOpen, setSong, song } = state;
+    const { isPlaying, currentSong, setCurrentSong } = useAudio();
+    const navigate = useNavigate();
 
     const inputChange = (event) => {
         setContent(event.target.value);
@@ -19,10 +25,10 @@ const Comments = ({ comments, setComments, count, user, uploader, songId }) => {
         }
         try {
             let res = await authAPI(await getAccessToken())
-                .post(endpoints['add-comment'](songId), {
+                .post(endpoints['add-comment'](song.id), {
                     'content': content,
                     'user': user.id,
-                    'song': songId
+                    'song': song.id
                 }, {
                     headers: {
                         "Content-Type": "application/json"
@@ -39,18 +45,44 @@ const Comments = ({ comments, setComments, count, user, uploader, songId }) => {
         }
     };
 
+    const follow = async () => {
+        if (user) {
+            try {
+                let res = await authAPI(await getAccessToken())
+                    .post(endpoints.follow(song?.uploader?.id));
+                setSong(prev => ({
+                    ...prev,
+                    followed: res.data.followed
+                }));
+
+                if (isPlaying && currentSong.id === song.id)
+                    setCurrentSong(prev => ({
+                        ...prev,
+                        followed: res.data.followed
+                    }));
+            } catch (error) {
+                console.error(error);
+                alert("Lỗi");
+            }
+        } else {
+            setIsModalOpen(true);
+        }
+    };
+
     const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
             addComment();
         }
     };
 
+    const goToArtist = (artistId) => { navigate(`/profile/${artistId}`); };
+
     return (
         <div className="comments-container">
             <div className='mb-3 mt-1' style={{ fontSize: "1.1rem" }}>
                 <span>
                     <i class="fa-solid fa-comment me-2"></i>
-                    {count} bình luận
+                    {song?.comments} bình luận
                 </span>
             </div>
             <div className='w-100 mb-4 pb-2'>
@@ -71,31 +103,39 @@ const Comments = ({ comments, setComments, count, user, uploader, songId }) => {
                 </button>
             </div>
             <div className='row w-100'>
-                <div className='col-md-3 d-md-flex d-none justify-content-center 
-                align-items-center flex-wrap'>
-                    <img
-                        src={uploader?.avatar}
-                        alt={uploader?.name}
+                <div
+                    className='col-md-3 d-md-inline-flex d-none flex-wrap'
+                    style={{ alignItems: "flex-start", justifyContent: "center", maxHeight: 250 }}>
+                    <img onClick={() => goToArtist(song?.uploader?.id)}
+                        src={song?.uploader?.avatar}
+                        alt={song?.uploader?.name}
                         className='rounded-circle m-auto mt-1 uploader-cover' />
-                    <h6 className='w-100 mt-2 fs-ms-6 fs-5'>
-                        {uploader?.name}
+                    <h6 className='w-100 mt-2 fs-ms-6 fs-5' onClick={() => goToArtist(song?.uploader?.id)}>
+                        {song?.uploader?.name}
+                        {song?.uploader?.info?.verified && <VerifiedBadge />}
                     </h6>
                     <div className='mb-2 d-flex justify-content-evenly w-100'>
                         <div className='d-flex align-items-center'>
                             <i class="fa-solid fa-users text-white"></i>
-                            <p className='mb-0 ms-1'>12</p>
+                            <p className='mb-0 ms-1'>{song?.uploader?.followers}</p>
                         </div>
                         <div className='align-items-center d-none d-lg-flex'>
                             <i class="fa-solid fa-music text-white"></i>
-                            <p className='mb-0 ms-1'>12</p>
+                            <p className='mb-0 ms-1'>{song?.uploader?.songs}</p>
                         </div>
                     </div>
-                    <button className={`mb-2 follow-button `}>
-                        <i class="fa-solid fa-user-plus"></i>
-                        <p className='d-none d-lg-inline text-black'> Theo dõi</p>
-                        {/* <i class="fa-solid fa-user-check"></i>
-                        <p className='d-none d-lg-inline text-black'> Đã theo dõi</p> */}
-                    </button>
+                    {user?.id !== song?.uploader?.id &&
+                        <button
+                            className={`mb-2 follow-button ${song?.followed ? 'followed' : ''}`}
+                            onClick={follow}>
+                            {song?.followed ? (<>
+                                <i class="fa-solid fa-user-check"></i>
+                                <p className='d-none d-lg-inline text-black'> Đã theo dõi</p>
+                            </>) : (<>
+                                <i class="fa-solid fa-user-plus"></i>
+                                <p className='d-none d-lg-inline text-black'> Theo dõi</p>
+                            </>)}
+                        </button>}
                 </div>
                 <div className='col-md-9 col-sm-12'>
                     {comments.length > 0 ? comments.map((comment, index) => (

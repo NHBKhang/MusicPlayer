@@ -1,6 +1,6 @@
 import {
     HomePage,
-    LoginPage, SearchPage, SetPasswordPage, SignupPage,
+    LoginPage, ProfilePage, SearchPage, SetPasswordPage, SignupPage,
     SongDetailsPage
 } from "../pages";
 import axios from "axios";
@@ -31,12 +31,17 @@ export const routes = {
     search: {
         url: '/search/',
         component: SearchPage
+    },
+    profile: {
+        url: '/profile/:id/',
+        component: ProfilePage
     }
 }
 
 export const endpoints = {
     'users': '/users/',
-    'user': (userId) => `/users/${userId}`,
+    'user': (userId) => `/users/${userId}/`,
+    'follow': (useId) => `/users/${useId}/follow/`,
     'login': '/o/token/',
     'login-google': '/auth/google/',
     'login-facebook': '/auth/facebook/',

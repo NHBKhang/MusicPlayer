@@ -67,6 +67,10 @@ const Carousel = ({ label, items, type = 'song' }) => {
         navigate(`/songs/${songId}/`);
     }
 
+    const goToArtist = (artistId) => {
+        navigate(`/profile/${artistId}/`);
+    }
+
     const togglePlayPause = (song) => {
         togglePlayPauseNewSong(song);
     }
@@ -91,7 +95,7 @@ const Carousel = ({ label, items, type = 'song' }) => {
                                 {`${song.artists} - ${song?.title}`}
                             </h6>
                         </div>
-                        <p>{song.uploader.name}</p>
+                        <p onClick={() => goToArtist(song.uploader.id)}>{song.uploader.name}</p>
                         <div className='btn-group'>
                             <button
                                 className="play-button"
