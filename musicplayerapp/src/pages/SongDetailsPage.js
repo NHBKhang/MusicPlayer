@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { Comments, LoginRequiredModal, TabView, VerifiedBadge } from "../components";
 import '../styles/SongDetailsPage.css';
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { authAPI, endpoints } from "../configs/API";
 import moment from "moment";
 import { useAudio } from "../configs/AudioContext";
@@ -19,15 +19,6 @@ const SongDetailsPage = () => {
     const [comments, setComments] = useState([]);
     const [relatedSongs, setRelatedSong] = useState([]);
     const navigate = useNavigate();
-    
-    const loadSong = useCallback(async () => {
-        try {
-            let res = await authAPI(await getAccessToken()).get(endpoints.song(id));
-            setSong(res.data);
-        } catch (error) {
-            alert("Không thể tải được bài hát");
-        }
-    }, [id, getAccessToken]);
 
     useEffect(() => {
         const loadComments = async () => {
@@ -50,11 +41,20 @@ const SongDetailsPage = () => {
 
         loadComments();
         loadRelatedSongs();
-    }, [id, getAccessToken, loadSong]);
+    }, [id, getAccessToken]);
 
     useEffect(() => {
+        const loadSong = async () => {
+            try {
+                let res = await authAPI(await getAccessToken()).get(endpoints.song(id));
+                setSong(res.data);
+            } catch (error) {
+                alert("Không thể tải được bài hát");
+            }
+        };
+
         loadSong();
-    }, [currentSong, song, loadSong]);
+    }, [currentSong, id, getAccessToken, setSong]);
 
     const like = async () => {
         if (user) {

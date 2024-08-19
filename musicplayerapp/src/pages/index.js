@@ -25,3 +25,4 @@ export { default as SongDetailsPage } from './SongDetailsPage';
 export { default as SetPasswordPage } from './SetPasswordPage';
 export { default as SearchPage } from './SearchPage';
 export { default as ProfilePage } from './ProfilePage'; 
+export { default as LibraryPage } from './LibraryPage';

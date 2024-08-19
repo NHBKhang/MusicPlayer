@@ -8,7 +8,7 @@ const Sidebar = ({ contentArea }) => {
         icon: <i class="fa-solid fa-house"></i>,
         label: 'Trang chủ'
     }, {
-        href: '#',
+        href: '/library/',
         icon: <i class="fa-solid fa-list"></i>,
         label: 'Thư viện'
     }];

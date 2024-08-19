@@ -36,9 +36,9 @@ const ProfilePage = () => {
     useEffect(() => {
         setProfile(prev => ({
             ...prev,
-            followed: currentSong.followed
+            followed: currentSong?.followed
         }));
-    }, [currentSong.followed]);
+    }, [currentSong?.followed]);
 
     const follow = async () => {
         if (user) {
@@ -122,7 +122,7 @@ const UserProfileTabs = ({ profile, getAccessToken, state }) => {
         songs: (userId, page) =>
             `${endpoints.songs}?uploader=${userId}&page=${page}`,
         popular: (userId, page) =>
-            `${endpoints.songs}?uploader=${userId}&page=${page}&pop=true`,
+            `${endpoints.songs}?uploader=${userId}&page=${page}&cate=1`,
         albums: (userId, page) =>
             `${endpoints.songs}?uploader=${userId}&page=${page}`,
         playlists: (userId, page) =>
@@ -191,11 +191,7 @@ const UserProfileTabs = ({ profile, getAccessToken, state }) => {
                     const url = urls[tabKeys[activeTab]](profile.id, page[field]);
                     const res = await authAPI(await getAccessToken()).get(url);
 
-                    if (res.data.next === null) {
-                        updatePage(field, 0);
-                    } else {
-                        updatePage(field, page[field] + 1);
-                    }
+                    if (res.data.next === null) updatePage(field, 0);
 
                     updateData(field, res.data.results, append);
                 } catch (error) {

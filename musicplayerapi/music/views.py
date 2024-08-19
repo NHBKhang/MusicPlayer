@@ -216,6 +216,14 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
     def get_queryset(self):
         queryset = self.queryset.filter(active=True)
 
+        q = self.request.query_params.get('q')
+        if q:
+            queryset = queryset.filter(Q(title__icontains=q) |
+                                       Q(artists__icontains=q))
+
+        if self.request.query_params.get('likes') and self.request.user.is_authenticated:
+            return queryset.filter(like__user=self.request.user).order_by('-like__created_date')
+
         cate = self.request.query_params.get('cate')
         if cate == '1':
             queryset = queryset.annotate(num_streams=Count('streams')).order_by('-num_streams')
@@ -223,18 +231,9 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
             queryset = queryset.annotate(latest_streamed_at=Max('streams__streamed_at')) \
                 .order_by('-latest_streamed_at')
 
-        q = self.request.query_params.get('q')
-        if q:
-            queryset = queryset.filter(Q(title__icontains=q) |
-                                       Q(artists__icontains=q))
-
         uploader = self.request.query_params.get('uploader')
-        pop = self.request.query_params.get('pop')
         if uploader:
             queryset = queryset.filter(uploader_id=uploader)
-
-            if pop:
-                queryset = queryset.annotate(num_streams=Count('streams')).order_by('-num_streams')
 
         return queryset
 

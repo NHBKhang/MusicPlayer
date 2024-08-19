@@ -1,0 +1,113 @@
+.library-container .tabview {
+    width: 100%;
+}
+
+.library-container .tabs {
+    display: flex;
+    border-bottom: 2px solid #ddd;
+    margin-bottom: 20px;
+}
+
+.library-container .tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    color: #555;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+.library-container .tab:hover {
+    color: #ff5500;
+}
+
+.library-container .tab.active {
+    color: #ff5500;
+    border-bottom: 2px solid #ff5500;
+}
+
+.library-container .tab-content {
+    padding: 20px;
+    background-color: inherit;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-height: 300px;
+    color: azure;
+}
+
+.song-card-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.song-card {
+    margin: 20px 15px;
+    width: 10rem;
+    position: relative;
+}
+
+.song-card-image {
+    width: 10rem;
+    height: 10rem;
+    cursor: pointer;
+}
+
+.song-card-artists, .song-card-title {
+    text-align: start !important;
+    overflow: hidden !important;
+    width: 100%;
+    cursor: pointer;
+}
+
+.song-card-artists:hover, .song-card-title:hover {
+    color: rgb(220, 220, 220);
+}
+
+.song-card-title {
+    padding: 7px 0;
+    height: 27px;
+    margin: 0
+}
+
+.song-card-artists {
+    padding: 0;
+    margin: 0;
+    height: 22px;
+    display: block !important;
+}
+
+.song-card .play-button {
+    opacity: 0;
+    color: rgba(245, 245, 245, 0.9);
+    background-color: rgba(255, 85, 0, 0.9) !important;
+    border-radius: 50% !important;
+    border: none;
+    width: 4rem;
+    height: 4rem;
+    margin-right: 20px !important;
+    position: absolute;
+    left: 3rem;
+    top: 3rem;
+}
+
+.song-card .play-button:hover {
+    opacity: 1;
+    transition-delay: 0s;
+}
+
+.song-card .play-button i {
+    font-size: 35px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.song-card-query {
+    background-color: rgba(255, 255, 255);
+    border-radius: 10px;
+    width: 15rem;
+    height: 2.5rem;
+    padding: 0 10px;
+    color: rgb(0, 0, 0);
+}

@@ -1,5 +1,6 @@
 import {
     HomePage,
+    LibraryPage,
     LoginPage, ProfilePage, SearchPage, SetPasswordPage, SignupPage,
     SongDetailsPage
 } from "../pages";
@@ -35,6 +36,10 @@ export const routes = {
     profile: {
         url: '/profile/:id/',
         component: ProfilePage
+    },
+    library: {
+        url: '/library/',
+        component: LibraryPage
     }
 }
 
