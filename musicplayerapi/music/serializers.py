@@ -133,7 +133,6 @@ class AuthenticatedSongSerializer(SongSerializer):
             return song.uploader.followers.filter(follower=request.user, active=True).exists()
         return False
 
-
     class Meta:
         model = SongSerializer.Meta.model
         fields = SongSerializer.Meta.fields + ['liked', 'followed']

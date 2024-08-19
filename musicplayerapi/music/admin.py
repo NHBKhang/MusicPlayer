@@ -2,7 +2,11 @@ from django.contrib import admin
 from django.template.response import TemplateResponse
 from django.urls import path
 from django.utils.html import mark_safe
+from django.utils import timezone
+from django.db.models import Count
+from django.utils.timezone import now
 from music.models import *
+from music import utils
 from oauth2_provider.models import Application, IDToken, AccessToken, RefreshToken, Grant
 import cloudinary
 
@@ -13,12 +17,35 @@ class MyAdminSite(admin.AdminSite):
 
     def get_urls(self):
         return [
-            path('music_stats/', self.stats_view),
+            path('music_stats/', self.stats_view, name="music-stats"),
+            path('stream_stats/', self.stream_stats_view, name="stream-stats"),
+
         ] + super().get_urls()
 
     def stats_view(self, request):
+        stats = utils.stats()
         return TemplateResponse(request, 'admin/stats.html', {
-            'stats': ''
+            'stats': stats,
+            'title': 'Statistics Overview'
+        })
+
+    def stream_stats_view(self, request):
+        month = request.GET.get('month')
+        date = request.GET.get('date')
+
+        stats = utils.streams_stats(month=month, date=date)
+
+        today = timezone.now().date()
+        max_date = today.strftime('%Y-%m-%d')
+        max_month = today.strftime('%Y-%m')
+
+        return TemplateResponse(request, 'admin/stream-stats.html', {
+            'stats': stats,
+            'title': 'Streams Statistics Overview',
+            'current_month': month if month else '',
+            'current_date': date if date else '',
+            'max_date': max_date,
+            'max_month': max_month,
         })
 
 
@@ -66,7 +93,6 @@ class PlaylistAdmin(admin.ModelAdmin):
             if type(playlist.image) is cloudinary.CloudinaryResource:
                 return mark_safe(f"<img width='300' src='{playlist.image.url}' />")
             return mark_safe(f"<img width='300' src='/static/{playlist.image}' />")
-
 
 
 admin_site.register(User, UserAdmin)

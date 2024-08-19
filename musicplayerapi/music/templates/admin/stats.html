@@ -1,0 +1,61 @@
+{% extends 'admin/base_site.html' %}
+{% block content %}
+    <h1>THỐNG KÊ THÔNG TIN THỂ LOẠI BÀI HÁT</h1>
+
+    <ul>
+        {% for s in stats %}
+            <li><strong>{{ s.name }}</strong>: {{ s.counter }}</li>
+        {% endfor %}
+    </ul>
+
+    <div style="width: 50%;">
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let labels = [];
+        let data = [];
+        let backgroundColors = [];
+        {% for s in stats %}
+            labels.push('{{ s.name }}');
+            data.push({{ s.counter }});
+
+            backgroundColors.push('rgba(' + Math.floor(Math.random() * 255) + ','
+                                         + Math.floor(Math.random() * 255) + ','
+                                         + Math.floor(Math.random() * 255) + ', 0.7)');
+        {% endfor %}
+
+        window.onload = function () {
+            const ctx = document.getElementById('myChart');
+
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '# Số lượng',
+                        data: data,
+                        borderWidth: 1,
+                        backgroundColor: backgroundColors
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(tooltipItem) {
+                                    return tooltipItem.label + ': ' + tooltipItem.raw;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+{% endblock %}
