@@ -89,12 +89,12 @@
     width: 100%;
     text-align: left;
     position: relative;
+    gap: 15px;
 }
 
 .track-cover {
     width: 100px;
     height: 100px;
-    margin-right: 15px;
     border-radius: 4px;
     object-fit: cover;
 }
@@ -192,4 +192,104 @@
     max-width: 150px;
     text-align: center;
     padding: 3px;
+}
+
+.playlist-item {
+    display: flex;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    width: 100%;
+    text-align: left;
+    gap: 10px;
+}
+
+.playlist-item .date {
+    font-size: 14px;
+    margin: 0;
+    margin-bottom: 5px !important;
+    color: aqua;
+}
+
+.playlist-item .play-button {
+    color: rgba(245, 245, 245, 0.9);
+    background-color: rgba(255, 85, 0, 0.9) !important;
+    border-radius: 50% !important;
+    border: none;
+    width: 50px;
+    min-width: 50px;
+    height: 50px !important;
+}
+
+.playlist-item .play-button i {
+    font-size: 25px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.playlist-item .privacy {
+    top: 45px;
+    border: 1px solid whitesmoke;
+    padding: 2px 7px;
+    background-color: rgba(255, 85, 0);
+}
+
+.playlist-item .track-list-container {
+    width: calc(100% - 30px);
+    border: 1px solid rgba(245, 245, 245, 0.25);
+    margin: 20px 15px 5px;
+}
+
+.playlist-item .track-list {
+    max-height: 250px;
+    width: 100%;
+    overflow-y: hidden;
+    transition: max-height 0.3s ease-in-out;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.playlist-item .track-item {
+    display: flex;
+    align-items: center;
+    padding: 3px 10px 3px 3px;
+    border-bottom: 1px solid rgba(245, 245, 245, 0.25);
+}
+
+.playlist-item .track-item:last-child {
+    border-bottom: none;
+}
+
+.playlist-item .track-item.active span{
+    color: rgb(255, 108, 35);
+}
+
+.playlist-item .track-image {
+    width: 35px;
+    height: 35px;
+    object-fit: cover;
+    margin-right: 0;
+    border-radius: 4px;
+}
+
+.playlist-item .track-info {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.playlist-item .view-more-button {
+    width: 100%;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 10px;
+    text-align: center;
+    vertical-align: middle;
+    border-top: 1px solid rgba(245, 245, 245, 0.25);
+}
+
+.playlist-item .view-more-button:hover {
+    text-decoration: underline;
 }

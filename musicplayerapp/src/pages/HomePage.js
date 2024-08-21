@@ -8,7 +8,7 @@ import { useUser } from '../configs/UserContext';
 const HomePage = () => {
     const [topMusic, setTopMusic] = useState([]);
     const [recentlyMusic, setRecentlyMusic] = useState([]);
-    const { getAccessToken } = useUser();
+    const { getAccessToken, user } = useUser();
 
     useEffect(() => {
         const loadTopMusic = async () => {
@@ -37,9 +37,11 @@ const HomePage = () => {
 
     return (
         <Page title={"Home"}>
-            <Carousel label='Bài hát hàng đầu' items={topMusic} />
-            <Carousel label='Nghe gần đây' items={recentlyMusic} />
-            {/* <Carousel label='Có thể bạn sẽ thích' items={topMusic} /> */}
+            <div className='content-container'>
+                <Carousel label='Bài hát hàng đầu' items={topMusic} />
+                {user && <Carousel label='Nghe gần đây' items={recentlyMusic} />}
+                {/* <Carousel label='Có thể bạn sẽ thích' items={topMusic} /> */}
+            </div>
         </Page>
     )
 }

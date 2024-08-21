@@ -46,12 +46,13 @@ hr {
 }
 
 .content {
-  margin-top: 75px;
+  margin-top: 60px;
+  /* min-height: 500px; */
 }
 
 .content-container {
-  margin-left: 5.5rem !important;
-  margin-right: 1.5rem !important;
+  margin-left: 5rem !important;
+  margin-right: 1rem !important;
 }
 
 .spinner {

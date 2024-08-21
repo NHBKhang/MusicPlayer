@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Page from '.';
 import { LoginRequiredModal, MusicTabView, VerifiedBadge } from '../components';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -13,163 +13,160 @@ const SearchPage = () => {
     const [searchParams] = useSearchParams();
     const [query, setQuery] = useState(searchParams.get('q') || '');
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const tabKeys = useMemo(() => ['all', 'songs', 'artists', 'albums', 'playlists'], []);
+    const [activeTab, setActiveTab] = useState(0);
+
+    const urls = useMemo(() => ({
+        all: (query, page) => `${endpoints.songs}?q=${query}&page=${page}`,
+        songs: (query, page) => `${endpoints.songs}?q=${query}&page=${page}`,
+        artists: (query, page) => `${endpoints.users}?q=${query}&page=${page}`,
+        albums: (query, page) => `${endpoints.playlists}?q=${query}&page=${page}&type=0`,
+        playlists: (query, page) => `${endpoints.playlists}?q=${query}&page=${page}&type=4`
+    }), []);
+
     const [data, setData] = useState({
+        all: [],
         songs: [],
-        artists: []
+        artists: [],
+        albums: [],
+        playlists: []
     });
+
     const [page, setPage] = useState({
+        all: 1,
         songs: 1,
-        artists: 1
+        artists: 1,
+        albums: 1,
+        playlists: 1
     });
+
     const [loading, setLoading] = useState({
+        all: false,
         songs: false,
-        artists: false
-    });
-    const [activeTab, setActiveTab] = useState('Bài hát');
-    const observerRefs = useRef({
-        songs: null,
-        artists: null
-    });
-    const loadMoreRefs = useRef({
-        songs: null,
-        artists: null
+        artists: false,
+        albums: false,
+        playlists: false
     });
 
-    const updatePage = (field, value) => {
-        setPage(prev => ({ ...prev, [field]: value }));
-    };
+    const observerRefs = useRef({});
+    const loadMoreRefs = useRef({});
 
-    const updateData = (field, newData, append = false) => {
-        setData(prev => ({
-            ...prev,
-            [field]: append ? [...prev[field], ...newData] : newData,
-        }));
-    };
+    const updatePage = (field, value) => setPage(prev => ({ ...prev, [field]: value }));
+    const updateData = (field, newData, append = false) => setData(prev => ({
+        ...prev,
+        [field]: append ? [...prev[field], ...newData] : newData,
+    }));
+    const updateLoading = (field, value) => setLoading(prev => ({ ...prev, [field]: value }));
 
-    const updateLoading = (field, value) => {
-        setLoading(prev => ({ ...prev, [field]: value }));
-    };
+    const loadItems = useCallback(async (field, append = false) => {
+        if (page[field] > 0 && query) {
+            updateLoading(field, true);
+            try {
+                const url = urls[tabKeys[activeTab]](query, page[field]);
+                const res = await authAPI(await getAccessToken()).get(url);
 
-    const loadItems = useCallback(
-        async (field, endpoint, append = false) => {
-            if (page[field] > 0) {
-                updateLoading(field, true);
-                try {
-                    const url = `${endpoint}?q=${query}&page=${page[field]}`;
-                    const res = await authAPI(await getAccessToken()).get(url);
+                if (res.data.next === null) updatePage(field, 0);
 
-                    if (res.data.next === null) updatePage(field, 0);
-
-                    updateData(field, res.data.results, append);
-                } catch (error) {
-                    console.error(error);
-                    alert(error);
-                } finally {
-                    updateLoading(field, false);
-                }
+                updateData(field, res.data.results, append);
+            } catch (error) {
+                console.error('Failed to load items:', error);
+            } finally {
+                updateLoading(field, false);
             }
-        },
-        [page, query, getAccessToken]
-    );
-
-    const loadMore = useCallback((field, endpoint) => {
-        if (page[field] > 0 && !loading[field]) {
-            updatePage(field, page[field] + 1);
-            loadItems(field, endpoint, true);
         }
-    }, [page, loading, loadItems]);
+    }, [page, query, activeTab, tabKeys, urls, getAccessToken]);
+
+    const loadMore = useCallback((field) => {
+        if (page[field] > 0 && !loading[field] && data[field].length > 0) {
+            updatePage(field, page[field] + 1);
+            loadItems(field, true);
+        }
+    }, [page, loading, data, loadItems]);
 
     useEffect(() => {
-        if (activeTab === 'Bài hát') {
-            loadItems('songs', endpoints.songs);
-        } else if (activeTab === 'Nghệ sĩ') {
-            loadItems('artists', endpoints.users);
-        }
-    }, [activeTab, query, loadItems]);
+        const tabKey = tabKeys[activeTab];
+        loadItems(tabKey);
+    }, [activeTab, loadItems, tabKeys]);
 
     useEffect(() => {
         const newQuery = searchParams.get('q') || '';
         setQuery(newQuery);
-        setPage({ songs: 1, artists: 1 });
-        setData({ songs: [], artists: [] });
+        setData({
+            all: [],
+            songs: [],
+            artists: [],
+            albums: [],
+            playlists: []
+        });
+        setPage({
+            all: 1,
+            songs: 1,
+            artists: 1,
+            albums: 1,
+            playlists: 1
+        });
+        setLoading({
+            all: false,
+            songs: false,
+            artists: false,
+            albums: false,
+            playlists: false
+        });
     }, [searchParams]);
 
     useEffect(() => {
-        const currentSongsObserver = observerRefs.current.songs;
+        const currentField = tabKeys[activeTab];
+        const currentObserver = observerRefs.current[currentField];
 
-        if (currentSongsObserver) {
-            currentSongsObserver.disconnect();
+        if (currentObserver) {
+            currentObserver.disconnect();
         }
 
         const callback = (entries) => {
-            if (entries[0].isIntersecting && page.songs > 0) {
-                loadMore('songs', endpoints.songs);
+            if (entries[0].isIntersecting && page[currentField] > 0) {
+                loadMore(currentField);
             }
         };
 
-        const newSongsObserver = new IntersectionObserver(callback);
-        observerRefs.current.songs = newSongsObserver;
+        const newObserver = new IntersectionObserver(callback);
+        observerRefs.current[currentField] = newObserver;
 
-        if (loadMoreRefs.current.songs) {
-            newSongsObserver.observe(loadMoreRefs.current.songs);
+        if (loadMoreRefs.current[currentField]) {
+            newObserver.observe(loadMoreRefs.current[currentField]);
         }
 
         return () => {
-            if (currentSongsObserver) {
-                currentSongsObserver.disconnect();
+            if (currentObserver) {
+                currentObserver.disconnect();
             }
         };
-    }, [loadMore, page.songs]);
+    }, [activeTab, loadMore, page, tabKeys]);
 
-    useEffect(() => {
-        const currentArtistsObserver = observerRefs.current.artists;
-
-        if (currentArtistsObserver) {
-            currentArtistsObserver.disconnect();
-        }
-
-        const callback = (entries) => {
-            if (entries[0].isIntersecting && page.artists > 0) {
-                loadMore('artists', endpoints.users);
-            }
-        };
-
-        const newArtistsObserver = new IntersectionObserver(callback);
-        observerRefs.current.artists = newArtistsObserver;
-
-        if (loadMoreRefs.current.artists) {
-            newArtistsObserver.observe(loadMoreRefs.current.artists);
-        }
-
-        return () => {
-            if (currentArtistsObserver) {
-                currentArtistsObserver.disconnect();
-            }
-        };
-    }, [loadMore, page.artists]);
-
-    const handleTabChange = (label) => {
-        setActiveTab(label);
+    const handleTabChange = (index) => {
+        setActiveTab(index);
     };
 
     const tabs = [
-        // {
-        //     label: 'Tất cả',
-        //     content: (
-        //         <div>
-        //             {songs.map((song) => (
-        //                 <div key={song.id}>
-        //                     <h6>{song.name}</h6>
-        //                 </div>
-        //             ))}
-        //         </div>
-        //     ),
-        // },
+        {
+            label: 'Tất cả',
+            content: (
+                <div>
+                    {data.all?.map(song => (
+                        <SongItem key={song.id} song={song} />
+                    ))}
+                    {page.songs > 0 && (
+                        <div ref={el => loadMoreRefs.current.songs = el} className="load-more-container">
+                            {loading.songs && <p>Loading...</p>}
+                        </div>
+                    )}
+                </div>
+            ),
+        },
         {
             label: 'Bài hát',
             content: (
                 <div>
-                    {data.songs.map((song) => (
+                    {data.songs?.map(song => (
                         <SongItem key={song.id} song={song} />
                     ))}
                     {page.songs > 0 && (
@@ -184,7 +181,7 @@ const SearchPage = () => {
             label: 'Nghệ sĩ',
             content: (
                 <div>
-                    {data.artists.map((artist) => (
+                    {data.artists?.map(artist => (
                         <ArtistItem key={artist.id} artist={artist} state={{ isModalOpen, setIsModalOpen }} />
                     ))}
                     {page.artists > 0 && (
@@ -199,20 +196,23 @@ const SearchPage = () => {
             label: 'Albums',
             content: (
                 <ul>
-                    {/* {albums.map((album) => (
-                        <li key={album.id}>{album.name}</li>
-                    ))} */}
+                    {/* Render albums here */}
                 </ul>
             ),
         },
         {
             label: 'Danh sách phát',
             content: (
-                <ul>
-                    {/* {albums.map((album) => (
-                        <li key={album.id}>{album.name}</li>
-                    ))} */}
-                </ul>
+                <div>
+                    {data.playlists?.map(playlist => (
+                        <PlaylistItem key={playlist.id} playlist={playlist} />
+                    ))}
+                    {page.playlists > 0 && (
+                        <div ref={el => loadMoreRefs.current.playlists = el} className="load-more-container">
+                            {loading.playlists && <p>Loading...</p>}
+                        </div>
+                    )}
+                </div>
             ),
         },
     ];
@@ -222,7 +222,9 @@ const SearchPage = () => {
             <div className="content-container" style={{ height: '85%' }}>
                 <div style={{ width: '100%', position: 'relative' }}>
                     <MusicTabView
-                        tabs={tabs} query={query} activeTab={activeTab}
+                        tabs={tabs}
+                        query={query}
+                        activeTab={activeTab}
                         onTabChange={handleTabChange}
                         state={{ isModalOpen, setIsModalOpen }} />
                 </div>
@@ -334,7 +336,7 @@ const ArtistItem = ({ artist, state }) => {
     };
 
     return (
-        <div key={item.id} className='d-flex item'>
+        <div key={item.id} className='d-flex item cursor-pointer'>
             <img onClick={goToArtist}
                 src={item.avatar} alt={item.name}
                 width={120} height={120} className='artist-item-image rounded-circle' />
@@ -366,6 +368,91 @@ const ArtistItem = ({ artist, state }) => {
             </div>
         </div>
     )
-}
+};
+
+const PlaylistItem = ({ playlist }) => {
+    const { isPlaying, currentSong, playlistId, togglePlayPauseNewSong, playSong } = useAudio();
+    const navigate = useNavigate();
+    const [item,] = useState(playlist);
+    const [visibleCount, setVisibleCount] = useState(5);
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    const handleViewMore = () => {
+        if (isExpanded) {
+            setVisibleCount(5);
+        } else {
+            setVisibleCount(item?.details?.length || 0);
+        }
+        setIsExpanded(!isExpanded);
+    };
+
+    const goToDetails = () => navigate(`/playlists/${item.id}/`);
+
+    const goToArtist = () => navigate(`/profile/${item.creator.id}/`);
+
+    const play = () => {
+        if (currentSong && `${playlistId}` === `${item?.id}`) {
+            togglePlayPauseNewSong(currentSong, item?.id);
+        } else {
+            if (item?.details?.length > 0) {
+                playSong(item.details[0]?.song, item?.id);
+            }
+        }
+    };
+
+    return (
+        <div className="playlist-item item cursor-pointer">
+            <img
+                src={item?.image ?? (item?.details && item.details[0]?.song?.image)}
+                alt={item?.title}
+                className="track-cover"
+                onClick={goToDetails} />
+            <div className="w-100">
+                <div className="d-flex" style={{ gap: 12 }}>
+                    <button
+                        className="play-button"
+                        title="Phát bài hát"
+                        onClick={play}>
+                        {isPlaying && `${playlistId}` === `${item?.id}` ?
+                            <i className="fa-solid fa-pause"></i> :
+                            <i className="fa-solid fa-play"></i>}
+                    </button>
+                    <div className="playlist-info w-100">
+                        <div className='d-flex justify-content-between'>
+                            <p className="p-0 m-0" onClick={goToArtist}>{item?.creator?.name}</p>
+                            <p className="date">{moment(item?.created_date).fromNow()}</p>
+                        </div>
+                        <div className='d-flex justify-content-between'>
+                            <h5 onClick={goToDetails} className="cursor-pointer">{item?.title}</h5>
+                            <span className="privacy">
+                                {item?.is_public ?? <><i className="fa-solid fa-lock"></i> Private</>}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div className="track-list-container">
+                    <ul className="track-list">
+                        {item?.details?.slice(0, visibleCount).map((d, index) => (
+                            <li key={index}
+                                className={`track-item cursor-pointer${currentSong?.id === d.song?.id ? ' active' : ''}`}
+                                onClick={() => playSong(d.song, item?.id)}>
+                                <img src={d.song?.image} alt={d.song?.title} className="track-image" />
+                                <div className="track-info">
+                                    <span>{index + 1}. {`${d.song?.artists} - ${d.song?.title}`}</span>
+                                    <span><i className="fa-solid fa-play me-2"></i>{d.song?.streams}</span>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                    {item?.details?.length > 5 && (
+                        <button onClick={handleViewMore} className="view-more-button">
+                            {isExpanded ? `View Less` : `View ${item.details.length - 5} more tracks`}
+                        </button>
+                    )}
+                </div>
+            </div>
+        </div>
+    )
+};
 
 export default SearchPage;

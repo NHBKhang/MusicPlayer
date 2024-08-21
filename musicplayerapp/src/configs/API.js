@@ -1,7 +1,7 @@
 import {
     HomePage,
     LibraryPage,
-    LoginPage, ProfilePage, SearchPage, SetPasswordPage, SignupPage,
+    LoginPage, PlaylistDetailsPage, ProfilePage, SearchPage, SetPasswordPage, SignupPage,
     SongDetailsPage
 } from "../pages";
 import axios from "axios";
@@ -24,6 +24,10 @@ export const routes = {
     song: {
         url: '/songs/:id/',
         component: SongDetailsPage
+    },
+    playlist: {
+        url: '/playlists/:id/',
+        component: PlaylistDetailsPage
     },
     setPassword: {
         url: '/set-password/',
@@ -58,6 +62,8 @@ export const endpoints = {
     'previous-song': (songId) => `/songs/${songId}/previous/`,
     'next-song': (songId) => `/songs/${songId}/next/`,
     'related-songs': (songId) => `/songs/${songId}/related/`,
+    'playlists': '/playlists/',
+    'playlist': (playlistId) => `/playlists/${playlistId}/`,
     'like': (songId) => `/songs/${songId}/like/`,
     'stream': (songId) => `/songs/${songId}/stream/`,
     'comments': (songId) => `/songs/${songId}/comments/`,

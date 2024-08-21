@@ -1,10 +1,10 @@
 .item {
-    padding: 1rem;
+    padding: 1rem !important;
 }
 
 @media (max-width: 600px) {
     .item {
-        padding: 1rem 0;
+        padding: 1rem 0 !important;
     }
 }
 
@@ -46,4 +46,13 @@
 
 .song-item-title:hover {
     color: beige;
+}
+
+.music-tab-pane .playlist-item {
+    border-bottom: none;
+}
+
+.music-tab-pane .playlist-item .track-cover {
+    width: 120px !important;
+    height: 120px !important;
 }

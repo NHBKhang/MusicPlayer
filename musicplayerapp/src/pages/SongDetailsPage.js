@@ -7,6 +7,7 @@ import moment from "moment";
 import { useAudio } from "../configs/AudioContext";
 import { useUser } from "../configs/UserContext";
 import Page from ".";
+import { renderDescription } from "../configs/Utils";
 
 const SongDetailsPage = () => {
     const {
@@ -85,21 +86,6 @@ const SongDetailsPage = () => {
     const goToDetails = (songId) => { navigate(`/songs/${songId}/`); };
 
     const goToArtist = (artistId) => { navigate(`/profile/${artistId}/`); };
-
-    const renderDescription = (description) => {
-        if (!description) {
-            return "Không có mô tả cho bài hát này";
-        }
-
-        const urlPattern = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/ig;
-        const processedDescription = description.replace(urlPattern, (url) => (
-            `<a href="${url}" target="_blank" rel="noopener noreferrer" class="description-link">${url}</a>`
-        ));
-
-        return (
-            <span dangerouslySetInnerHTML={{ __html: processedDescription }} />
-        );
-    };
 
     const tabs = [
         {

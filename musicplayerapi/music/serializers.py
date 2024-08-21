@@ -157,23 +157,35 @@ class AuthenticatedSongDetailsSerializer(SongDetailsSerializer, AuthenticatedSon
 
 
 class PlaylistDetailsSerializer(serializers.ModelSerializer):
+    song = serializers.SerializerMethodField()
+
+    def get_song(self, detail):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return AuthenticatedSongSerializer(detail.song, context={'request': request}).data
+
+        return SongSerializer(detail.song).data
+
     class Meta:
         model = PlaylistDetails
         fields = ['id', 'song']
 
 
-class PlaylistSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Playlist
-        fields = ['id', 'image', 'creator', ]
-
-
-class PlaylistSongsSerializer(PlaylistSerializer):
+class PlaylistSerializer(ImageSerializer):
+    creator = PublicUserSerializer(read_only=True)
     details = PlaylistDetailsSerializer(many=True)
 
     class Meta:
+        model = Playlist
+        fields = ['id', 'title', 'image', 'creator', 'details']
+
+
+class PlaylistSongsSerializer(PlaylistSerializer):
+    genres = GenreSerializer(many=True)
+
+    class Meta:
         model = PlaylistSerializer.Meta.model
-        fields = PlaylistSerializer.Meta.fields + ['details', 'genres', 'description', 'playlist_type',
+        fields = PlaylistSerializer.Meta.fields + ['genres', 'description', 'playlist_type', 'created_date',
                                                    'published_date', 'is_public']
 
 

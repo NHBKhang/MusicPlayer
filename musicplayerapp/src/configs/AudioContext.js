@@ -13,6 +13,7 @@ export const AudioProvider = ({ children }) => {
     const [currentTime, setCurrentTime] = useState(0);
     const [loop, setLoop] = useState('none');
     const [volume, setVolume] = useState(1);
+    const [playlistId, setPlaylistId] = useState('');
     const audio = getAudioInstance();
     const { getAccessToken } = useUser();
 
@@ -36,13 +37,15 @@ export const AudioProvider = ({ children }) => {
             }
             setCurrentTime(0);
 
-            let res = await authAPI(await getAccessToken()).get(endpoints['next-song'](currentSong.id));
-            playSong(res.data);
+            let url = `${endpoints['next-song'](currentSong.id)}?playlist=${playlistId}&loop=${loop}`;
+            let res = await authAPI(await getAccessToken()).get(url);
+            playSong(res.data.song);
+            setPlaylistId(res.data.playlist_id);
         } catch (error) {
             console.error('Playback failed:', error);
             alert('Playback failed: ' + (error.response?.data?.detail || 'An unknown error occurred'));
         }
-    }, [currentSong, getAccessToken]);
+    }, [currentSong, getAccessToken, playlistId, loop]);
 
     const playPreviousSong = useCallback(async () => {
         try {
@@ -52,24 +55,26 @@ export const AudioProvider = ({ children }) => {
             }
             setCurrentTime(0);
 
-            let res = await authAPI(await getAccessToken()).get(endpoints['previous-song'](currentSong.id));
-            playSong(res.data);
+            let url = `${endpoints['previous-song'](currentSong.id)}?playlist=${playlistId}&loop=${loop}`;
+            let res = await authAPI(await getAccessToken()).get(url);
+            playSong(res.data.song);
+            setPlaylistId(res.data.playlist_id);
         } catch (error) {
             console.error('Playback failed:', error);
             alert('Playback failed: ' + (error.response?.data?.detail || 'An unknown error occurred'));
         }
-    }, [currentSong, getAccessToken]);
+    }, [currentSong, getAccessToken, playlistId, loop]);
 
-    const togglePlayPauseNewSong = useCallback((song) => {
+    const togglePlayPauseNewSong = useCallback((song, playlistId = '') => {
         if (currentSong && song.id === currentSong.id) {
             if (isPlaying) {
                 pauseSong();
             }
             else {
-                playSong(song);
+                playSong(song, playlistId);
             }
         } else {
-            playSong(song);
+            playSong(song, playlistId);
         }
     }, [currentSong, isPlaying]);
 
@@ -77,9 +82,10 @@ export const AudioProvider = ({ children }) => {
         let postStreamTimer = null;
 
         const handlePlaySong = async (event) => {
-            const { song } = event.detail;
+            const { song, playlistId } = event.detail;
             setVisible(true);
             setCurrentSong(song);
+            setPlaylistId(playlistId);
             audio.src = song.file;
             audio.volume = volume;
 
@@ -147,7 +153,7 @@ export const AudioProvider = ({ children }) => {
             window.removeEventListener('pauseSong', handlePauseSong);
             clearTimeout(postStreamTimer);
         };
-    }, [audio, currentTime, loop, volume, currentSong, 
+    }, [audio, currentTime, loop, volume, currentSong,
         playNextSong, postStreamAfterDelay, setCurrentTime]);
 
     useEffect(() => {
@@ -162,8 +168,8 @@ export const AudioProvider = ({ children }) => {
             setVisible(true);
     }, [isPlaying]);
 
-    const playSong = (song) => {
-        const event = new CustomEvent('playSong', { detail: { song } });
+    const playSong = (song, playlistId = '') => {
+        const event = new CustomEvent('playSong', { detail: { song, playlistId } });
         window.dispatchEvent(event);
     };
 
@@ -208,6 +214,7 @@ export const AudioProvider = ({ children }) => {
             visible,
             currentSong, setCurrentSong,
             duration,
+            playlistId,
             loop, toggleLoop,
             volume, setVolume,
             currentTime, setCurrentTime,

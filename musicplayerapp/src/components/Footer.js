@@ -6,7 +6,7 @@ const Footer = () => {
         <footer className="footer">
             <div className="p-3 ps-4 bg-dark text-white row footer">
                 <div style={{justifyContent: 'space-evenly'}} className="container d-flex flex-wrap">
-                    <div className="content about me-2">
+                    <div className="about me-2 ms-4">
                         <h4>Theo dõi chúng tôi</h4>
                         <ul style={{listStyleType: 'disc'}} className="social-icon">
                             <li><a href="https://www.facebook.com/"><i className="fa-brands fa-facebook"></i>Facebook</a></li>
@@ -15,7 +15,7 @@ const Footer = () => {
                             <li><a href="https://www.youtube.com/"><i className="fa-brands fa-youtube"></i>Youtube</a></li>
                         </ul>
                     </div>
-                    <div className="content links me-2">
+                    <div className="links me-2">
                         <h4>Đường Dẫn</h4>
                         <ul className="link">
                             <li><a href="/">Trang Chủ</a></li>
@@ -25,7 +25,7 @@ const Footer = () => {
                             <li><a href="/">Điều Kiện Chính Sách</a></li>
                         </ul>
                     </div>
-                    <div className="content help me-2">
+                    <div className="help me-2">
                         <h4>Trợ giúp</h4>
                         <ul className="link">
                             <li><a href="/">Trung tâm trợ giúp</a></li>
@@ -36,7 +36,7 @@ const Footer = () => {
                             <li><a href="/">Liên hệ</a></li>
                         </ul>
                     </div>
-                    <div className="content contactus">
+                    <div className="contactus">
                         <h4>Liên hệ</h4>
                         <ul style={{listStyleType: 'square'}}>
                             <li>CÔNG TY ABC</li>

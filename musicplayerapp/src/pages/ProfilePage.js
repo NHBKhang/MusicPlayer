@@ -124,9 +124,9 @@ const UserProfileTabs = ({ profile, getAccessToken, state }) => {
         popular: (userId, page) =>
             `${endpoints.songs}?uploader=${userId}&page=${page}&cate=1`,
         albums: (userId, page) =>
-            `${endpoints.songs}?uploader=${userId}&page=${page}`,
+            `${endpoints.playlists}?creator=${userId}&page=${page}&type=0`,
         playlists: (userId, page) =>
-            `${endpoints.songs}?uploader=${userId}&page=${page}`
+            `${endpoints.playlists}?creator=${userId}&page=${page}&type=4`
     }), []);
     const [data, setData] = useState({
         all: [],
@@ -274,7 +274,9 @@ const UserProfileTabs = ({ profile, getAccessToken, state }) => {
             <TabView tabs={tabs} activeTab={activeTab} onTabClick={handleTabClick} />
             <div className="tracks-container">
                 {data[tabKeys[activeTab]].map(item => (
-                    <TrackItem key={item.id} song={item} state={state} />
+                    activeTab !== 3 && activeTab !== 4 ?
+                        <TrackItem key={item.id} song={item} state={state} /> :
+                        <PlaylistItem key={item.id} playlist={item} />
                 ))}
                 {page[tabKeys[activeTab]] > 0 && (
                     <div ref={el => loadMoreRefs.current[tabKeys[activeTab]] = el} className="load-more-container">
@@ -326,7 +328,7 @@ const TrackItem = memo(({ song, state }) => {
 
     return (
         <div className="track-item">
-            <button
+            <button style={{ left: '20px !important' }}
                 className="play-button"
                 title="Phát bài hát"
                 onClick={() => togglePlayPauseNewSong(item)}>
@@ -339,7 +341,7 @@ const TrackItem = memo(({ song, state }) => {
             <div className="track-info w-100">
                 <h5 onClick={goToDetails} className="cursor-pointer">{item.title}</h5>
                 <p>{item.artists}</p>
-                <div className="d-flex justify-content-between align-items-center w-100">
+                <div className="d-flex justify-content-between align-items-center w-100 mt-2">
                     <button
                         type="button"
                         onClick={like}
@@ -359,5 +361,90 @@ const TrackItem = memo(({ song, state }) => {
         </div>
     )
 });
+
+const PlaylistItem = ({ playlist }) => {
+    const { isPlaying, currentSong, playlistId, togglePlayPauseNewSong, playSong } = useAudio();
+    const navigate = useNavigate();
+    const [item,] = useState(playlist);
+    const [visibleCount, setVisibleCount] = useState(5);
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    const handleViewMore = () => {
+        if (isExpanded) {
+            setVisibleCount(5);
+        } else {
+            setVisibleCount(item?.details?.length || 0);
+        }
+        setIsExpanded(!isExpanded);
+    };
+
+    const goToDetails = () => navigate(`/playlists/${item.id}/`);
+
+    const goToArtist = () => navigate(`/profile/${item.creator.id}/`);
+
+    const play = () => {
+        if (currentSong && `${playlistId}` === `${item?.id}`) {
+            togglePlayPauseNewSong(currentSong, item?.id);
+        } else {
+            if (item?.details?.length > 0) {
+                playSong(item.details[0]?.song, item?.id);
+            }
+        }
+    };
+
+    return (
+        <div className="playlist-item item cursor-pointer">
+            <img
+                src={item?.image ?? (item?.details && item.details[0]?.song?.image)}
+                alt={item?.title}
+                className="track-cover"
+                onClick={goToDetails} />
+            <div className="w-100">
+                <div className="d-flex" style={{ gap: 12 }}>
+                    <button
+                        className="play-button"
+                        title="Phát bài hát"
+                        onClick={play}>
+                        {isPlaying && `${playlistId}` === `${item?.id}` ?
+                            <i className="fa-solid fa-pause"></i> :
+                            <i className="fa-solid fa-play"></i>}
+                    </button>
+                    <div className="playlist-info w-100">
+                        <div className='d-flex justify-content-between'>
+                            <p className="p-0 m-0" onClick={goToArtist}>{item?.creator?.name}</p>
+                            <p className="date">{moment(item?.created_date).fromNow()}</p>
+                        </div>
+                        <div className='d-flex justify-content-between'>
+                            <h5 onClick={goToDetails} className="cursor-pointer">{item?.title}</h5>
+                            <span className="privacy">
+                                {item?.is_public ?? <><i className="fa-solid fa-lock"></i> Private</>}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div className="track-list-container">
+                    <ul className="track-list">
+                        {item?.details?.slice(0, visibleCount).map((d, index) => (
+                            <li key={index}
+                                className={`track-item cursor-pointer${currentSong?.id === d.song?.id ? ' active' : ''}`}
+                                onClick={() => playSong(d.song, item?.id)}>
+                                <img src={d.song?.image} alt={d.song?.title} className="track-image" />
+                                <div className="track-info">
+                                    <span>{index + 1}. {`${d.song?.artists} - ${d.song?.title}`}</span>
+                                    <span><i className="fa-solid fa-play me-2"></i>{d.song?.streams}</span>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                    {item?.details?.length > 5 && (
+                        <button onClick={handleViewMore} className="view-more-button">
+                            {isExpanded ? `View Less` : `View ${item.details.length - 5} more tracks`}
+                        </button>
+                    )}
+                </div>
+            </div>
+        </div>
+    )
+};
 
 export default ProfilePage;

@@ -215,21 +215,23 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
     def get_queryset(self):
         queryset = self.queryset.filter(active=True)
+        user = self.request.user
 
         q = self.request.query_params.get('q')
         if q:
             queryset = queryset.filter(Q(title__icontains=q) |
                                        Q(artists__icontains=q))
 
-        if self.request.query_params.get('likes') and self.request.user.is_authenticated:
+        if self.request.query_params.get('likes') and user.is_authenticated:
             return queryset.filter(like__user=self.request.user).order_by('-like__created_date')
 
         cate = self.request.query_params.get('cate')
         if cate == '1':
             queryset = queryset.annotate(num_streams=Count('streams')).order_by('-num_streams')
-        elif cate == '2':
-            queryset = queryset.annotate(latest_streamed_at=Max('streams__streamed_at')) \
-                .order_by('-latest_streamed_at')
+        elif cate == '2' and user.is_authenticated:
+            queryset = (queryset
+                        .annotate(latest_streamed_at=Max('streams__streamed_at'))
+                        .order_by('-latest_streamed_at'))
 
         uploader = self.request.query_params.get('uploader')
         if uploader:
@@ -284,15 +286,34 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
     def next(self, request, pk=None):
         try:
             current_song = self.get_object()
-            next_song = Song.objects.filter(active=True, id__gt=current_song.id).first()
-            if next_song:
-                serializer = self.get_serializer(next_song)
-                return Response(serializer.data, status=status.HTTP_200_OK)
+            playlist_id = self.request.query_params.get('playlist')
 
-            first_song = Song.objects.filter(active=True).first()
-            if first_song:
-                serializer = self.get_serializer(first_song)
-                return Response(serializer.data, status=status.HTTP_200_OK)
+            if playlist_id:
+                current_detail = PlaylistDetails.objects.get(playlist_id=playlist_id, song_id=current_song.id)
+                next_detail = (PlaylistDetails.objects.filter(playlist_id=playlist_id,order__gt=current_detail.order)
+                               .order_by('order').first())
+
+                if next_detail:
+                    next_song = next_detail.song
+                else:
+                    if self.request.query_params.get('loop') == 'playlist':
+                        next_song = (PlaylistDetails.objects.filter(playlist_id=playlist_id)
+                                     .order_by('order').first().song)
+                    else:
+                        playlist_id = ''
+                        next_song = Song.objects.filter(active=True, id__gt=current_song.id).first()
+                        if not next_song:
+                            next_song = Song.objects.filter(active=True).first()
+            else:
+                next_song = Song.objects.filter(active=True, id__gt=current_song.id).first()
+                if not next_song:
+                    next_song = Song.objects.filter(active=True).first()
+
+            if next_song:
+                return Response({
+                    "song": self.get_serializer(next_song).data,
+                    "playlist_id": playlist_id
+                }, status=status.HTTP_200_OK)
 
             return Response({"detail": "No songs available."}, status=status.HTTP_404_NOT_FOUND)
         except Song.DoesNotExist:
@@ -302,15 +323,35 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
     def previous(self, request, pk=None):
         try:
             current_song = self.get_object()
-            next_song = Song.objects.filter(active=True, id__lt=current_song.id).last()
-            if next_song:
-                serializer = self.get_serializer(next_song)
-                return Response(serializer.data, status=status.HTTP_200_OK)
+            playlist_id = self.request.query_params.get('playlist')
 
-            last_song = Song.objects.filter(active=True).last()
-            if last_song:
-                serializer = self.get_serializer(last_song)
-                return Response(serializer.data, status=status.HTTP_200_OK)
+            if playlist_id:
+                current_detail = PlaylistDetails.objects.get(playlist_id=playlist_id, song_id=current_song.id)
+                previous_detail = (PlaylistDetails.objects
+                                   .filter(playlist_id=playlist_id, order__lt=current_detail.order)
+                                   .order_by('order').last())
+
+                if previous_detail:
+                    previous_song = previous_detail.song
+                else:
+                    if self.request.query_params.get('loop') == 'playlist':
+                        previous_song = (PlaylistDetails.objects.filter(playlist_id=playlist_id)
+                                         .order_by('order').last().song)
+                    else:
+                        playlist_id = ''
+                        previous_song = Song.objects.filter(active=True, id__lt=current_song.id).last()
+                        if not previous_song:
+                            previous_song = Song.objects.filter(active=True).last()
+            else:
+                previous_song = Song.objects.filter(active=True, id__lt=current_song.id).last()
+                if not previous_song:
+                    previous_song = Song.objects.filter(active=True).last()
+
+            if previous_song:
+                return Response({
+                    "song": self.get_serializer(previous_song).data,
+                    "playlist_id": playlist_id
+                }, status=status.HTTP_200_OK)
 
             return Response({"detail": "No next song available."}, status=status.HTTP_404_NOT_FOUND)
         except Song.DoesNotExist:
@@ -346,12 +387,42 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
         final_related_songs = Song.objects.filter(id__in=related_song_ids).distinct().order_by('-created_date')[:3]
 
-        serializer = serializers.SongSerializer(final_related_songs, many=True)
+        if self.request.user.is_authenticated:
+            serializer = serializers.AuthenticatedSongSerializer(final_related_songs, many=True,
+                                                                 context={'request': self.request})
+        else:
+            serializer = serializers.SongSerializer(final_related_songs, many=True)
+
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class PlaylistViewSet(viewsets.ModelViewSet):
+class PlaylistViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
     queryset = Playlist.objects.filter(active=True).all()
     serializer_class = serializers.PlaylistSerializer
     pagination_class = paginators.PlaylistPaginator
     permission_classes = [permissions.AllowAny]
+
+    def get_serializer_class(self):
+        if self.action in ['retrieve', 'update', 'partial_update']:
+            return serializers.PlaylistSongsSerializer
+
+        return self.serializer_class
+
+    def get_queryset(self):
+        queryset = self.queryset
+
+        q = self.request.query_params.get('q')
+        if q:
+            queryset = queryset.filter(Q(title__icontains=q) | Q())
+
+        type = self.request.query_params.get('type')
+        if type:
+            queryset = queryset.filter(playlist_type=int(type))
+        elif type and int(type) == 0:
+            queryset = queryset.exclude(playlist_type=4)
+
+        creator = self.request.query_params.get('creator')
+        if creator:
+            queryset = queryset.filter(creator=int(creator))
+
+        return queryset

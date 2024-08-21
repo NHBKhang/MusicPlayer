@@ -9,7 +9,7 @@ import imghdr
 
 
 class ImageBaseModel(models.Model):
-    image = CloudinaryField(null=True, resource_type='image')
+    image = CloudinaryField(null=True, resource_type='image', blank=True)
 
     class Meta:
         abstract = True
@@ -116,7 +116,7 @@ class Playlist(BaseModel, ImageBaseModel):
 
 
 class PlaylistDetails(models.Model):
-    playlist = models.OneToOneField(Playlist, on_delete=models.CASCADE, related_name='details')
+    playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE, related_name='details')
     song = models.ForeignKey(Song, on_delete=models.CASCADE, related_name='playlists')
     order = models.PositiveIntegerField()
 
@@ -127,7 +127,7 @@ class PlaylistDetails(models.Model):
         verbose_name_plural = "playlists details"
 
     def __str__(self):
-        return f"{self.song.title} thuộc {self.playlist.name} ở vị trí {self.order}"
+        return f"{self.song.title} thuộc {self.playlist.title} ở vị trí {self.order}"
 
 
 class Interaction(BaseModel):
