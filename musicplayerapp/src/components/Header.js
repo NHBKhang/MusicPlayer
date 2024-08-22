@@ -28,6 +28,7 @@ const Header = () => {
     const onLogout = (e) => {
         e.preventDefault();
         logout();
+        navigate('/')
     }
 
     const onProfileClick = (e) => {

@@ -16,6 +16,6 @@
 .playlist-songs-container {
     max-height: 600px;
     padding: 5px 0;
-    overflow-y: scroll;
+    overflow-y: auto;
     scrollbar-width: thin;
 }

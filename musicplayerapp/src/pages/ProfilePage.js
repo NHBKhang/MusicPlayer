@@ -124,7 +124,7 @@ const UserProfileTabs = ({ profile, getAccessToken, state }) => {
         popular: (userId, page) =>
             `${endpoints.songs}?uploader=${userId}&page=${page}&cate=1`,
         albums: (userId, page) =>
-            `${endpoints.playlists}?creator=${userId}&page=${page}&type=0`,
+            `${endpoints.playlists}?creator=${userId}&page=${page}`,
         playlists: (userId, page) =>
             `${endpoints.playlists}?creator=${userId}&page=${page}&type=4`
     }), []);
@@ -194,6 +194,7 @@ const UserProfileTabs = ({ profile, getAccessToken, state }) => {
                     if (res.data.next === null) updatePage(field, 0);
 
                     updateData(field, res.data.results, append);
+                    console.info(res.data.results)
                 } catch (error) {
                     console.error(error);
                 } finally {
@@ -362,7 +363,7 @@ const TrackItem = memo(({ song, state }) => {
     )
 });
 
-const PlaylistItem = ({ playlist }) => {
+const PlaylistItem = memo(({ playlist }) => {
     const { isPlaying, currentSong, playlistId, togglePlayPauseNewSong, playSong } = useAudio();
     const navigate = useNavigate();
     const [item,] = useState(playlist);
@@ -416,9 +417,9 @@ const PlaylistItem = ({ playlist }) => {
                         </div>
                         <div className='d-flex justify-content-between'>
                             <h5 onClick={goToDetails} className="cursor-pointer">{item?.title}</h5>
-                            <span className="privacy">
-                                {item?.is_public ?? <><i className="fa-solid fa-lock"></i> Private</>}
-                            </span>
+                            {!item?.is_public && <span className="privacy">
+                                <i className="fa-solid fa-lock"></i> Private
+                            </span>}
                         </div>
                     </div>
                 </div>
@@ -445,6 +446,6 @@ const PlaylistItem = ({ playlist }) => {
             </div>
         </div>
     )
-};
+});
 
 export default ProfilePage;

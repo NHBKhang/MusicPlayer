@@ -223,7 +223,7 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
                                        Q(artists__icontains=q))
 
         if self.request.query_params.get('likes') and user.is_authenticated:
-            return queryset.filter(like__user=self.request.user).order_by('-like__created_date')
+            queryset = queryset.filter(like__user=user).order_by('-like__created_date')
 
         cate = self.request.query_params.get('cate')
         if cate == '1':
@@ -237,7 +237,7 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
         if uploader:
             queryset = queryset.filter(uploader_id=uploader)
 
-        return queryset
+        return queryset.distinct()
 
     @action(methods=['post'], url_path='like', detail=True)
     def like(self, request, pk):
@@ -397,7 +397,7 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
 
 class PlaylistViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
-    queryset = Playlist.objects.filter(active=True).all()
+    queryset = Playlist.objects.filter(active=True, is_public=True).all()
     serializer_class = serializers.PlaylistSerializer
     pagination_class = paginators.PlaylistPaginator
     permission_classes = [permissions.AllowAny]
@@ -413,16 +413,20 @@ class PlaylistViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Ret
 
         q = self.request.query_params.get('q')
         if q:
-            queryset = queryset.filter(Q(title__icontains=q) | Q())
-
-        type = self.request.query_params.get('type')
-        if type:
-            queryset = queryset.filter(playlist_type=int(type))
-        elif type and int(type) == 0:
-            queryset = queryset.exclude(playlist_type=4)
+            queryset = queryset.filter(Q(title__icontains=q) | Q(creator__songs__title__icontains=q))
 
         creator = self.request.query_params.get('creator')
         if creator:
             queryset = queryset.filter(creator=int(creator))
 
-        return queryset
+            if self.request.user.is_authenticated:
+                private_queryset = Playlist.objects.filter(is_public=False, creator=self.request.user)
+                queryset = queryset | private_queryset
+
+        type = self.request.query_params.get('type')
+        if type:
+            queryset = queryset.filter(playlist_type=int(type))
+        else:
+            queryset = queryset.exclude(playlist_type=Playlist.PLAYLIST)
+
+        return queryset.distinct()

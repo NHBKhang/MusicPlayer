@@ -175,9 +175,18 @@ class PlaylistSerializer(ImageSerializer):
     creator = PublicUserSerializer(read_only=True)
     details = PlaylistDetailsSerializer(many=True)
 
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        if type(instance.image) is cloudinary.CloudinaryResource:
+            rep['image'] = instance.image.url
+        elif instance.details.count() == 0:
+            rep['image'] = 'https://cdn.getmidnight.com/b5a0b552ae89a91aa34705031852bd16/2022/08/1_1---2022-08-24T165236.013-1.png'
+
+        return rep
+
     class Meta:
         model = Playlist
-        fields = ['id', 'title', 'image', 'creator', 'details']
+        fields = ['id', 'title', 'image', 'creator', 'details', 'is_public']
 
 
 class PlaylistSongsSerializer(PlaylistSerializer):
@@ -186,7 +195,7 @@ class PlaylistSongsSerializer(PlaylistSerializer):
     class Meta:
         model = PlaylistSerializer.Meta.model
         fields = PlaylistSerializer.Meta.fields + ['genres', 'description', 'playlist_type', 'created_date',
-                                                   'published_date', 'is_public']
+                                                   'published_date']
 
 
 class CommentSerializer(serializers.ModelSerializer):

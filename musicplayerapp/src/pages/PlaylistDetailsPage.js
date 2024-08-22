@@ -22,7 +22,6 @@ const PlaylistDetailsPage = () => {
             try {
                 let res = await authAPI(await getAccessToken()).get(endpoints.playlist(id));
                 setPlaylist(res.data);
-                console.info(res.data)
             } catch (error) {
                 console.error(error);
             }
@@ -41,7 +40,7 @@ const PlaylistDetailsPage = () => {
         if (currentSong && `${playlistId}` === `${playlist?.id}`) {
             togglePlayPause();
         } else {
-            if (playlist.details.length > 0) {
+            if (playlist?.details?.length > 0) {
                 playSong(playlist.details[0].song, playlist.id);
             }
         }
@@ -50,12 +49,20 @@ const PlaylistDetailsPage = () => {
         {
             label: "Bài hát",
             content: <div className="playlist-songs-container">
-                {playlist?.details?.map((item) =>
-                    <SongItem
-                        song={item.song}
-                        playlistId={playlist?.id}
-                        state={{ isModalOpen, setIsModalOpen }}
-                        navigate={navigate} />)}
+                {playlist?.details?.length > 0 ? (
+                    playlist.details.map((item) => (
+                        <SongItem
+                            key={item.song.id}
+                            song={item.song}
+                            playlistId={playlist.id}
+                            state={{ isModalOpen, setIsModalOpen }}
+                            navigate={navigate} />
+                    ))
+                ) : (
+                    <div style={{ minHeight: 65 }} className="d-flex align-items-center justify-content-center">
+                        <span>No songs available in this playlist.</span>
+                    </div>
+                )}
             </div>
         }, {
             label: "Mô tả",
@@ -76,14 +83,14 @@ const PlaylistDetailsPage = () => {
                     <div className="song-cover col-xxl-3 col-xl-4 col-lg-4 col-md-6 col-sm-12">
                         <img
                             src={`${playlistId}` !== `${playlist?.id}` ?
-                                (playlist?.image ?? (playlist?.details && playlist?.details[0].song.image)) :
+                                (playlist?.image ?? (playlist?.details?.length > 0 && playlist?.details[0].song.image)) :
                                 (currentSong?.image)}
                             alt={playlist?.title} />
                     </div>
                     <div className="song-info col-xxl-9 col-xl-8 col-lg-8 col-md-6">
                         <h1 className="mt-2 mb-2">{playlist?.title}</h1>
                         <div className="d-flex justify-content-end mb-3">
-                            <div>
+                            <div className="mt-4">
                                 {playlist?.genres?.map(g =>
                                     <a key={g.id}
                                         href="/" className="ms-3 genre"

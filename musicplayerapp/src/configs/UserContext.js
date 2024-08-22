@@ -113,6 +113,7 @@ export const UserProvider = ({ children }) => {
         googleLogout();
         setUser(null);
         localStorage.removeItem('token');
+        
     };
 
 

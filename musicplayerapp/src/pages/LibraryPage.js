@@ -27,7 +27,7 @@ const TabView = () => {
             case 1:
                 return <Likes />;
             case 2:
-                return <div>Playlists Content</div>;
+                return <Playlists />;
             case 3:
                 return <div>Albums Content</div>;
             case 4:
@@ -57,16 +57,21 @@ const TabView = () => {
 };
 
 const Likes = () => {
-    const [songs, setSongs] = useState([]);
+    const [songs, setSongs] = useState([]);;
     const [query, setQuery] = useState('');
-    const [page, setPage] = useState(1); 
+    const [page, setPage] = useState(1);
     const { getAccessToken } = useUser();
+
+    useEffect(() => {
+        setSongs([]);
+        setPage(1);
+    }, [query]);
 
     useEffect(() => {
         const loadSongs = async () => {
             if (page > 0) {
                 try {
-                    let url = `${endpoints.songs}?likes=true&q=${query}&page=${page}`;
+                    let url = `${endpoints.songs}?likes=true&q=${query.trim()}&page=${page}`;
                     let res = await authAPI(await getAccessToken()).get(url);
                     setSongs(res.data.results);
                 } catch (error) {
@@ -84,13 +89,54 @@ const Likes = () => {
                 <p className='fs-5 p-0'>Nghe lại các bài hát bạn đã thích:</p>
                 <input className="song-card-query"
                     placeholder='Tìm kiếm...'
-                    value={query} 
+                    value={query}
                     onChange={(e) => setQuery(e.target.value)} />
             </div>
-            {songs.map((song) => <SongCard song={song} />)}
+            {songs.map((song) => <SongCard key={song.id} song={song} />)}
         </div>
     )
-}
+};
+
+const Playlists = () => {
+    const [playlists, setPlaylists] = useState([]);;
+    const [query, setQuery] = useState('');
+    const [page, setPage] = useState(1);
+    const { getAccessToken, user } = useUser();
+
+    useEffect(() => {
+        setPlaylists([]);
+        setPage(1);
+    }, [query]);
+
+    useEffect(() => {
+        const loadSongs = async () => {
+            if (page > 0 && user?.id) {
+                try {
+                    let url = `${endpoints.playlists}?creator=${user.id}&q=${query.trim()}&page=${page}&type=4`;
+                    let res = await authAPI(await getAccessToken()).get(url);
+                    setPlaylists(res.data.results);
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+        };
+
+        loadSongs();
+    }, [getAccessToken, query, page, user?.id]);
+
+    return (
+        <div className='song-card-container'>
+            <div className='w-100 d-flex justify-content-between flex-wrap'>
+                <p className='fs-5 p-0'>Nghe lại các bài hát trong playlist của bạn:</p>
+                <input className="song-card-query"
+                    placeholder='Tìm kiếm...'
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)} />
+            </div>
+            {playlists.map((playlist) => <PlaylistCard key={playlist.id} playlist={playlist} />)}
+        </div>
+    )
+};
 
 const SongCard = ({ song }) => {
     const [item,] = useState(song);
@@ -117,6 +163,39 @@ const SongCard = ({ song }) => {
             <span className='song-card-artists' onClick={goToArtist}>{item.artists}</span>
         </div>
     )
-}
+};
+
+const PlaylistCard = ({ playlist }) => {
+    const [item,] = useState(playlist);
+    const navigate = useNavigate();
+    const { togglePlayPauseNewSong, isPlaying, playlistId } = useAudio();
+
+    const goToDetails = () => { navigate(`/playlists/${item.id}/`); };
+
+    const goToArtist = () => { navigate(`/profile/${item.uploader.id}/`); };
+
+    const play = () => {
+        if (item.details?.length > 0) {
+            togglePlayPauseNewSong(item.details[0].song, playlist.id)
+        }
+    };
+
+    return (
+        <div className='song-card'>
+            <button className="play-button"
+                title="Phát bài hát"
+                onClick={play}>
+                {isPlaying && playlistId === item.id ?
+                    <i class="fa-solid fa-pause"></i> :
+                    <i class="fa-solid fa-play"></i>}
+            </button>
+            <img onClick={goToDetails}
+                src={item?.image ?? (item?.details && item.details[0]?.song?.image)} alt={item.title}
+                className='song-card-image' />
+            <h6 className='song-card-title' onClick={goToDetails}>{item.title}</h6>
+            <span className='song-card-artists' onClick={goToArtist}>{item.creator.name}</span>
+        </div>
+    )
+};
 
 export default LibraryPage;

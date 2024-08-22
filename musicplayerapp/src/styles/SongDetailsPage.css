@@ -1,13 +1,12 @@
 .song-container {
     border: 1px solid rgba(211, 211, 211, 0.5);
     margin: 20px 0;
-
 }
 
 .song-detail {
     display: flex;
     justify-content: center;
-    align-items: flex-end;
+    align-items: flex-start;
     padding: 10px;
     width: 100%;
 }

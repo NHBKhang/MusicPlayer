@@ -20,7 +20,7 @@ const SearchPage = () => {
         all: (query, page) => `${endpoints.songs}?q=${query}&page=${page}`,
         songs: (query, page) => `${endpoints.songs}?q=${query}&page=${page}`,
         artists: (query, page) => `${endpoints.users}?q=${query}&page=${page}`,
-        albums: (query, page) => `${endpoints.playlists}?q=${query}&page=${page}&type=0`,
+        albums: (query, page) => `${endpoints.playlists}?q=${query}&page=${page}`,
         playlists: (query, page) => `${endpoints.playlists}?q=${query}&page=${page}&type=4`
     }), []);
 
@@ -195,9 +195,16 @@ const SearchPage = () => {
         {
             label: 'Albums',
             content: (
-                <ul>
-                    {/* Render albums here */}
-                </ul>
+                <div>
+                    {data.albums?.map(album => (
+                        <PlaylistItem key={album.id} playlist={album} />
+                    ))}
+                    {page.albums > 0 && (
+                        <div ref={el => loadMoreRefs.current.albums = el} className="load-more-container">
+                            {loading.albums && <p>Loading...</p>}
+                        </div>
+                    )}
+                </div>
             ),
         },
         {
@@ -424,9 +431,9 @@ const PlaylistItem = ({ playlist }) => {
                         </div>
                         <div className='d-flex justify-content-between'>
                             <h5 onClick={goToDetails} className="cursor-pointer">{item?.title}</h5>
-                            <span className="privacy">
-                                {item?.is_public ?? <><i className="fa-solid fa-lock"></i> Private</>}
-                            </span>
+                            {!item?.is_public && <span className="privacy">
+                                <i className="fa-solid fa-lock"></i> Private
+                            </span>}
                         </div>
                     </div>
                 </div>

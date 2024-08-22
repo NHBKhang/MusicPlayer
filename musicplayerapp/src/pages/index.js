@@ -10,7 +10,7 @@ const Page = ({ children, title }) => {
                 <Sidebar />
             </div>
             <div className='content w-100'>
-                <div className='mb-5'>{children}</div>
+                <div className='mb-5 music-content'>{children}</div>
                 <Footer />
             </div>
         </div>
