@@ -1,5 +1,6 @@
 from cloudinary.models import CloudinaryField
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.db import models
@@ -35,6 +36,11 @@ class User(AbstractUser):
             file_type = imghdr.what(self.avatar.file)
             if file_type not in ['jpeg', 'png', 'gif']:
                 raise ValidationError("File uploaded must be an image (JPEG, PNG, or GIF).")
+
+    # def save(self, *args, **kwargs):
+    #     if self.password:
+    #         self.password = make_password(self.password)
+    #     super().save(*args, **kwargs)
 
 
 class UserInfo(models.Model):

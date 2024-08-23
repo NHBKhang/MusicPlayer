@@ -30,8 +30,7 @@ export const UserProvider = ({ children }) => {
 
             loginWithToken(res.data);
         } catch (error) {
-            alert("Đăng nhập thất bại!")
-            console.error("Login failed:", error);
+            throw error;
         }
     };
 
@@ -48,7 +47,6 @@ export const UserProvider = ({ children }) => {
             setUser(res.data);
             localStorage.setItem('user', JSON.stringify(res.data));
         } catch (error) {
-            console.error("Failed to fetch user with provided access token", error);
             const refreshedAccessToken = await refreshAccessToken();
             if (refreshedAccessToken) {
                 const res = await authAPI(refreshedAccessToken).get(endpoints['current-user']);
@@ -57,6 +55,7 @@ export const UserProvider = ({ children }) => {
             } else {
                 logout();
             }
+            throw error;
         }
     };
 
@@ -80,8 +79,8 @@ export const UserProvider = ({ children }) => {
                 localStorage.setItem('token', JSON.stringify(newToken));
                 return newToken.access_token;
             } catch (error) {
-                console.error("Failed to refresh token", error);
                 logout();
+                throw error;
             }
         } else {
             logout();
@@ -95,7 +94,7 @@ export const UserProvider = ({ children }) => {
         if (token) {
             const now = Date.now() / 1000;
             const expiresAt = token.issued_at + token.expires_in;
-    
+
             if (expiresAt > now) {
                 console.log("Using existing access token");
                 return token.access_token;
@@ -113,7 +112,7 @@ export const UserProvider = ({ children }) => {
         googleLogout();
         setUser(null);
         localStorage.removeItem('token');
-        
+
     };
 
 

@@ -42,16 +42,20 @@
     flex-wrap: wrap;
 }
 
-.song-card {
+.song-card, .artist-card {
     margin: 20px 15px;
     width: 10rem;
     position: relative;
 }
 
-.song-card-image {
+.song-card-image, .artist-card-image {
     width: 10rem;
     height: 10rem;
     cursor: pointer;
+}
+
+.artist-card-image {
+    border-radius: 50%;
 }
 
 .song-card-artists, .song-card-title {
@@ -65,13 +69,13 @@
     color: rgb(220, 220, 220);
 }
 
-.song-card-title {
+.song-card-title, .artist-card-name {
     padding: 7px 0;
     height: 27px;
-    margin: 0
+    margin: 0;
 }
 
-.song-card-artists {
+.song-card-artists, .artist-card-following {
     padding: 0;
     margin: 0;
     height: 22px;

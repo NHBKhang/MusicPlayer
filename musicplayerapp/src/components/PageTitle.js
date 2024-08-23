@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-export const usePageTitle = ({ title = null, defaultTitle = true }) => {
+export const usePageTitle = (title, defaultTitle = true) => {
     useEffect(() => {
         if (!defaultTitle) {
             if (title) {

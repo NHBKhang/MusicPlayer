@@ -20,10 +20,11 @@ const LoginPage = () => {
         setLoading(true);
 
         try {
-            login(username, password);
+            await login(username, password);
             navigate('/');
         } catch (error) {
-            setError(error);
+            setError(error.response?.data?.error_description);
+            console.info(error);
         } finally {
             setLoading(false);
         }

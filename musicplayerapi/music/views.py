@@ -146,9 +146,13 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
             queries = queries.filter(Q(first_name__icontains=q) |
                                      Q(last_name__icontains=q) |
                                      Q(username__icontains=q) |
-                                     Q(info__display_name__icontains=q)).distinct()
+                                     Q(info__display_name__icontains=q))
 
-        return queries
+        follower = self.request.query_params.get('follower')
+        if follower:
+            queries = queries.filter(followers__follower__in=follower)
+
+        return queries.distinct()
 
     def get_permissions(self):
         if self.action in ['get_current_user', 'patch_current_user', 'list']:
@@ -419,14 +423,15 @@ class PlaylistViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Ret
         if creator:
             queryset = queryset.filter(creator=int(creator))
 
-            if self.request.user.is_authenticated:
-                private_queryset = Playlist.objects.filter(is_public=False, creator=self.request.user)
-                queryset = queryset | private_queryset
+        if self.request.user.is_authenticated:
+            private_queryset = Playlist.objects.filter(is_public=False, creator=self.request.user)
+            queryset = queryset | private_queryset
 
         type = self.request.query_params.get('type')
         if type:
             queryset = queryset.filter(playlist_type=int(type))
         else:
-            queryset = queryset.exclude(playlist_type=Playlist.PLAYLIST)
+            if self.action not in ['retrieve', 'update', 'partial_update']:
+                queryset = queryset.exclude(playlist_type=Playlist.PLAYLIST)
 
         return queryset.distinct()

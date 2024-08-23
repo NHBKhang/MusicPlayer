@@ -12,7 +12,7 @@ import '../styles/PlaylistDetailsPage.css';
 const PlaylistDetailsPage = () => {
     const { id } = useParams();
     const { getAccessToken } = useUser();
-    const { isPlaying, currentSong, togglePlayPause, playSong, playlistId } = useAudio();
+    const { isPlaying, currentSong, togglePlayPauseNewSong, playlistId } = useAudio();
     const navigate = useNavigate();
     const [playlist, setPlaylist] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -37,14 +37,15 @@ const PlaylistDetailsPage = () => {
     const goToArtist = (artistId) => { navigate(`/profile/${artistId}/`); };
 
     const play = () => {
-        if (currentSong && `${playlistId}` === `${playlist?.id}`) {
-            togglePlayPause();
-        } else {
-            if (playlist?.details?.length > 0) {
-                playSong(playlist.details[0].song, playlist.id);
+        if (currentSong && `${playlistId}` === `${playlist.id}`)
+            togglePlayPauseNewSong(currentSong, playlist.id);
+        else {
+            if (playlist.details?.length > 0) {
+                togglePlayPauseNewSong(playlist.details[0].song, playlist.id);
             }
         }
-    }
+    };
+
     const tabs = [
         {
             label: "Bài hát",
