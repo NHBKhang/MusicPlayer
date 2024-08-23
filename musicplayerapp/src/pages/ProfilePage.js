@@ -175,7 +175,7 @@ const UserProfileTabs = ({ profile, getAccessToken, state }) => {
     const updateData = (field, newData, append = false) => {
         setData(prev => ({
             ...prev,
-            [field]: append ? [...prev[field], ...newData] : newData,
+            [field]: append ? [...newData, ...prev[field]] : newData,
         }));
     };
 
@@ -194,7 +194,6 @@ const UserProfileTabs = ({ profile, getAccessToken, state }) => {
                     if (res.data.next === null) updatePage(field, 0);
 
                     updateData(field, res.data.results, append);
-                    console.info(res.data.results)
                 } catch (error) {
                     console.error(error);
                 } finally {

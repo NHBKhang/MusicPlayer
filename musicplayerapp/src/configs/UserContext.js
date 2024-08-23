@@ -96,10 +96,8 @@ export const UserProvider = ({ children }) => {
             const expiresAt = token.issued_at + token.expires_in;
 
             if (expiresAt > now) {
-                console.log("Using existing access token");
                 return token.access_token;
             } else {
-                console.log("Access token expired, refreshing...");
                 const refreshedAccessToken = await refreshAccessToken();
                 return refreshedAccessToken || null;
             }

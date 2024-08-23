@@ -20,14 +20,12 @@ const Sidebar = ({ contentArea }) => {
         <div className="sidebar bg-dark">
             <ul className='sidebar-content'>
                 {contents.map(c =>
-                    <li className={c.href === location.pathname && 'selected'}>
-                        <a onClick={(e) => {
-                            e.preventDefault();
-                            navigate(c.href);
-                        }} href='/'>
+                    <li className={`cursor-pointer ${c.href === location.pathname && 'selected'}`}
+                        onClick={() => navigate(c.href)} >
+                        <span>
                             {c.icon}
                             <p>{c.label}</p>
-                        </a>
+                        </span>
                     </li>)}
             </ul>
         </div>

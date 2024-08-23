@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import '../styles/LibraryPage.css';
 import Page from '.';
 import { useUser } from '../configs/UserContext';
 import { authAPI, endpoints } from '../configs/API';
 import { useNavigate } from 'react-router-dom';
 import { useAudio } from '../configs/AudioContext';
+import { debounce } from 'lodash';
 
 const LibraryPage = () => {
 
@@ -60,7 +61,31 @@ const Likes = () => {
     const [songs, setSongs] = useState([]);;
     const [query, setQuery] = useState('');
     const [page, setPage] = useState(1);
+    const [loading, setLoading] = useState(false);
+    const loadMoreRef = useRef(null);
+    const observerRef = useRef(null);
     const { getAccessToken } = useUser();
+
+    const updateSongs = (newData, append = false) => {
+        console.info(newData);
+        setSongs(prev => append ? [...newData, ...prev] : newData);
+    };
+
+    const loadSongs = useCallback(async (append = false) => {
+        if (page > 0) {
+            setLoading(true);
+            try {
+                let url = `${endpoints.songs}?likes=true&q=${query.trim()}&page=${page}`;
+                let res = await authAPI(await getAccessToken()).get(url);
+                if (!res.data.next) setPage(0);
+                updateSongs(res.data.results, append);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoading(false);
+            }
+        }
+    }, [getAccessToken, query, page]);
 
     useEffect(() => {
         setSongs([]);
@@ -68,20 +93,37 @@ const Likes = () => {
     }, [query]);
 
     useEffect(() => {
-        const loadSongs = async () => {
-            if (page > 0) {
-                try {
-                    let url = `${endpoints.songs}?likes=true&q=${query.trim()}&page=${page}`;
-                    let res = await authAPI(await getAccessToken()).get(url);
-                    setSongs(res.data.results);
-                } catch (error) {
-                    console.error(error);
-                }
+        loadSongs();
+    }, [loadSongs]);
+
+    const loadMore = useCallback(() => {
+        if (page > 0 && !loading && songs.length > 0) {
+            setPage(p => p + 1);
+            loadSongs(true);
+        }
+    }, [loading, page, songs, loadSongs]);
+
+    const debouncedLoadMore = useRef(debounce(loadMore, 2000)).current;
+
+    useEffect(() => {
+        const callback = (entries) => {
+            if (entries[0].isIntersecting && page > 0 && !loading) {
+                debouncedLoadMore();
             }
         };
 
-        loadSongs();
-    }, [getAccessToken, query, page]);
+        observerRef.current = new IntersectionObserver(callback);
+
+        if (loadMoreRef.current) {
+            observerRef.current.observe(loadMoreRef.current);
+        }
+
+        return () => {
+            if (observerRef.current) {
+                observerRef.current.disconnect();
+            }
+        };
+    }, [loadMore, page, loading, debouncedLoadMore]);
 
     return (
         <div className='song-card-container'>
@@ -93,6 +135,11 @@ const Likes = () => {
                     onChange={(e) => setQuery(e.target.value)} />
             </div>
             {songs.map((song) => <SongCard key={song.id} song={song} />)}
+            {page > 0 && (
+                <div ref={el => loadMoreRef.current = el} className="load-more-container">
+                    {loading && <p>Loading...</p>}
+                </div>
+            )}
         </div>
     )
 };
@@ -101,7 +148,30 @@ const Playlists = () => {
     const [playlists, setPlaylists] = useState([]);;
     const [query, setQuery] = useState('');
     const [page, setPage] = useState(1);
+    const [loading, setLoading] = useState(false);
+    const loadMoreRef = useRef(null);
+    const observerRef = useRef(null);
     const { getAccessToken, user } = useUser();
+
+    const updatePlaylists = (newData, append = false) => {
+        setPlaylists(prev => append ? [...prev, ...newData] : newData);
+    };
+
+    const loadPlaylists = useCallback(async (append = false) => {
+        if (page > 0 && user?.id) {
+            setLoading(true);
+            try {
+                let url = `${endpoints.playlists}?creator=${user.id}&q=${query.trim()}&page=${page}&type=4`;
+                let res = await authAPI(await getAccessToken()).get(url);
+                if (res.data.next === null) setPage(0);
+                updatePlaylists(res.data.results, append);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoading(false);
+            }
+        }
+    }, [getAccessToken, query, page, user?.id]);
 
     useEffect(() => {
         setPlaylists([]);
@@ -109,20 +179,39 @@ const Playlists = () => {
     }, [query]);
 
     useEffect(() => {
-        const loadSongs = async () => {
-            if (page > 0 && user?.id) {
-                try {
-                    let url = `${endpoints.playlists}?creator=${user.id}&q=${query.trim()}&page=${page}&type=4`;
-                    let res = await authAPI(await getAccessToken()).get(url);
-                    setPlaylists(res.data.results);
-                } catch (error) {
-                    console.error(error);
-                }
+        loadPlaylists();
+    }, [loadPlaylists]);
+
+    const loadMore = useCallback(() => {
+        if (!loading && playlists.length > 0) {
+            setPage(p => p + 1);
+            loadPlaylists(true);
+        }
+    }, [loading, playlists, loadPlaylists]);
+
+    useEffect(() => {
+        if (observerRef.current) {
+            observerRef.current.disconnect();
+        }
+
+        const callback = (entries) => {
+            if (entries[0].isIntersecting && page > 0) {
+                loadMore();
             }
         };
 
-        loadSongs();
-    }, [getAccessToken, query, page, user?.id]);
+        observerRef.current = new IntersectionObserver(callback);
+
+        if (loadMoreRef.current) {
+            observerRef.current.observe(loadMoreRef.current);
+        }
+
+        return () => {
+            if (observerRef.current) {
+                observerRef.current.disconnect();
+            }
+        };
+    }, [loadMore, page]);
 
     return (
         <div className='song-card-container'>
@@ -134,6 +223,11 @@ const Playlists = () => {
                     onChange={(e) => setQuery(e.target.value)} />
             </div>
             {playlists.map((playlist) => <PlaylistCard key={playlist.id} playlist={playlist} />)}
+            {page > 0 && (
+                <div ref={el => loadMoreRef.current = el} className="load-more-container">
+                    {loading && <p>Loading...</p>}
+                </div>
+            )}
         </div>
     )
 };
@@ -142,7 +236,30 @@ const Albums = () => {
     const [albums, setAlbums] = useState([]);;
     const [query, setQuery] = useState('');
     const [page, setPage] = useState(1);
+    const [loading, setLoading] = useState(false);
+    const loadMoreRef = useRef(null);
+    const observerRef = useRef(null);
     const { getAccessToken, user } = useUser();
+
+    const updateAlbums = (newData, append = false) => {
+        setAlbums(prev => append ? [...prev, ...newData] : newData);
+    };
+
+    const loadAlbums = useCallback(async (append = false) => {
+        if (page > 0 && user?.id) {
+            setLoading(true);
+            try {
+                let url = `${endpoints.playlists}?creator=${user.id}&q=${query.trim()}&page=${page}`;
+                let res = await authAPI(await getAccessToken()).get(url);
+                if (res.data.next === null) setPage(0);
+                updateAlbums(res.data.results, append);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoading(false);
+            }
+        }
+    }, [getAccessToken, query, page, user?.id]);
 
     useEffect(() => {
         setAlbums([]);
@@ -150,20 +267,39 @@ const Albums = () => {
     }, [query]);
 
     useEffect(() => {
-        const loadSongs = async () => {
-            if (page > 0 && user?.id) {
-                try {
-                    let url = `${endpoints.playlists}?creator=${user.id}&q=${query.trim()}&page=${page}`;
-                    let res = await authAPI(await getAccessToken()).get(url);
-                    setAlbums(res.data.results);
-                } catch (error) {
-                    console.error(error);
-                }
+        loadAlbums();
+    }, [loadAlbums]);
+
+    const loadMore = useCallback(() => {
+        if (!loading && albums.length > 0) {
+            setPage(p => p + 1);
+            loadAlbums(true);
+        }
+    }, [loading, albums, loadAlbums]);
+
+    useEffect(() => {
+        if (observerRef.current) {
+            observerRef.current.disconnect();
+        }
+
+        const callback = (entries) => {
+            if (entries[0].isIntersecting && page > 0) {
+                loadMore();
             }
         };
 
-        loadSongs();
-    }, [getAccessToken, query, page, user?.id]);
+        observerRef.current = new IntersectionObserver(callback);
+
+        if (loadMoreRef.current) {
+            observerRef.current.observe(loadMoreRef.current);
+        }
+
+        return () => {
+            if (observerRef.current) {
+                observerRef.current.disconnect();
+            }
+        };
+    }, [loadMore, page]);
 
     return (
         <div className='song-card-container'>
@@ -175,6 +311,11 @@ const Albums = () => {
                     onChange={(e) => setQuery(e.target.value)} />
             </div>
             {albums.map((playlist) => <PlaylistCard key={playlist.id} playlist={playlist} />)}
+            {page > 0 && (
+                <div ref={el => loadMoreRef.current = el} className="load-more-container">
+                    {loading && <p>Loading...</p>}
+                </div>
+            )}
         </div>
     )
 };
@@ -183,7 +324,30 @@ const Following = () => {
     const [following, setFollowing] = useState([]);;
     const [query, setQuery] = useState('');
     const [page, setPage] = useState(1);
+    const [loading, setLoading] = useState(false);
+    const loadMoreRef = useRef(null);
+    const observerRef = useRef(null);
     const { getAccessToken, user } = useUser();
+
+    const updateFollowing = (newData, append = false) => {
+        setFollowing(prev => append ? [...prev, ...newData] : newData);
+    };
+
+    const loadFollowing = useCallback(async (append = false) => {
+        if (page > 0 && user?.id) {
+            setLoading(true);
+            try {
+                let url = `${endpoints.users}?follower=${user.id}&q=${query.trim()}&page=${page}`;
+                let res = await authAPI(await getAccessToken()).get(url);
+                if (res.data.next === null) setPage(0);
+                updateFollowing(res.data.results, append);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoading(false);
+            }
+        }
+    }, [getAccessToken, query, page, user?.id]);
 
     useEffect(() => {
         setFollowing([]);
@@ -191,20 +355,39 @@ const Following = () => {
     }, [query]);
 
     useEffect(() => {
-        const loadSongs = async () => {
-            if (page > 0 && user?.id) {
-                try {
-                    let url = `${endpoints.users}?follower=${user.id}&q=${query.trim()}&page=${page}`;
-                    let res = await authAPI(await getAccessToken()).get(url);
-                    setFollowing(res.data.results);
-                } catch (error) {
-                    console.error(error);
-                }
+        loadFollowing();
+    }, [loadFollowing]);
+
+    const loadMore = useCallback(() => {
+        if (!loading && following.length > 0) {
+            setPage(p => p + 1);
+            loadFollowing(true);
+        }
+    }, [loading, following, loadFollowing]);
+
+    useEffect(() => {
+        if (observerRef.current) {
+            observerRef.current.disconnect();
+        }
+
+        const callback = (entries) => {
+            if (entries[0].isIntersecting && page > 0) {
+                loadMore();
             }
         };
 
-        loadSongs();
-    }, [getAccessToken, query, page, user?.id]);
+        observerRef.current = new IntersectionObserver(callback);
+
+        if (loadMoreRef.current) {
+            observerRef.current.observe(loadMoreRef.current);
+        }
+
+        return () => {
+            if (observerRef.current) {
+                observerRef.current.disconnect();
+            }
+        };
+    }, [loadMore, page]);
 
     return (
         <div className='song-card-container'>
@@ -216,6 +399,11 @@ const Following = () => {
                     onChange={(e) => setQuery(e.target.value)} />
             </div>
             {following.map((artist) => <ArtistCard key={artist.id} artist={artist} />)}
+            {page > 0 && (
+                <div ref={el => loadMoreRef.current = el} className="load-more-container">
+                    {loading && <p>Loading...</p>}
+                </div>
+            )}
         </div>
     )
 };
