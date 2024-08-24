@@ -17,7 +17,7 @@ const SearchPage = () => {
     const [activeTab, setActiveTab] = useState(0);
 
     const urls = useMemo(() => ({
-        all: (query, page) => `${endpoints.songs}?q=${query}&page=${page}`,
+        all: (query, page) => `${endpoints['mixed-search']}?q=${query}&page=${page}&type=0`,
         songs: (query, page) => `${endpoints.songs}?q=${query}&page=${page}`,
         artists: (query, page) => `${endpoints.users}?q=${query}&page=${page}`,
         albums: (query, page) => `${endpoints.playlists}?q=${query}&page=${page}`,
@@ -66,7 +66,7 @@ const SearchPage = () => {
                 const res = await authAPI(await getAccessToken()).get(url);
 
                 if (res.data.next === null) updatePage(field, 0);
-
+                console.info(res.data.results)
                 updateData(field, res.data.results, append);
             } catch (error) {
                 console.error('Failed to load items:', error);
@@ -151,12 +151,16 @@ const SearchPage = () => {
             label: 'Tất cả',
             content: (
                 <div>
-                    {data.all?.map(song => (
-                        <SongItem key={song.id} song={song} />
-                    ))}
-                    {page.songs > 0 && (
-                        <div ref={el => loadMoreRefs.current.songs = el} className="load-more-container">
-                            {loading.songs && <p>Loading...</p>}
+                    {data.all?.map(item => item.type === 'song' ? (
+                        <SongItem key={item.id} song={item} state={{ isModalOpen, setIsModalOpen }} />
+                    ) : (item.type === 'artist' ? (
+                        <ArtistItem key={item.id} artist={item} state={{ isModalOpen, setIsModalOpen }} />
+                    ) : (
+                        <PlaylistItem key={item.id} playlist={item} />
+                    )))}
+                    {page.all > 0 && (
+                        <div ref={el => loadMoreRefs.current.all = el} className="load-more-container">
+                            {loading.all && <p>Loading...</p>}
                         </div>
                     )}
                 </div>
@@ -167,7 +171,7 @@ const SearchPage = () => {
             content: (
                 <div>
                     {data.songs?.map(song => (
-                        <SongItem key={song.id} song={song} />
+                        <SongItem key={song.id} song={song} state={{ isModalOpen, setIsModalOpen }} />
                     ))}
                     {page.songs > 0 && (
                         <div ref={el => loadMoreRefs.current.songs = el} className="load-more-container">
@@ -243,11 +247,10 @@ const SearchPage = () => {
     );
 };
 
-const SongItem = ({ song }) => {
-    const { togglePlayPauseNewSong, isPlaying, currentSong,
-        setCurrentSong
-    } = useAudio();
-    const { getAccessToken } = useUser();
+const SongItem = ({ song, state }) => {
+    const { togglePlayPauseNewSong, isPlaying, currentSong, setCurrentSong } = useAudio();
+    const { setIsModalOpen } = state;
+    const { getAccessToken, user } = useUser();
     const [item, setItem] = useState(song);
     const navigate = useNavigate();
 
@@ -256,15 +259,19 @@ const SongItem = ({ song }) => {
     };
 
     const like = async () => {
-        try {
-            let token = await getAccessToken();
-            let res = await authAPI(token).post(endpoints.like(item.id));
-            setItem(res.data);
+        if (user) {
+            try {
+                let token = await getAccessToken();
+                let res = await authAPI(token).post(endpoints.like(item.id));
+                setItem(res.data);
 
-            if (isPlaying && currentSong.id === item.id)
-                setCurrentSong(res.data);
-        } catch (error) {
-            alert(error);
+                if (isPlaying && currentSong.id === item.id)
+                    setCurrentSong(res.data);
+            } catch (error) {
+                alert(error);
+            }
+        } else {
+            setIsModalOpen(true);
         }
     };
 

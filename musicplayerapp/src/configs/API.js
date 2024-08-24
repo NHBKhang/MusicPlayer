@@ -68,6 +68,7 @@ export const endpoints = {
     'stream': (songId) => `/songs/${songId}/stream/`,
     'comments': (songId) => `/songs/${songId}/comments/`,
     'add-comment': (songId) => `/songs/${songId}/comment/`,
+    'mixed-search': '/search/',
 }
 
 export const authAPI = (accessToken) =>

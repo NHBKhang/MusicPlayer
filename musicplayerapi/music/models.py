@@ -174,7 +174,7 @@ class Transaction(models.Model):
     transaction_id = models.BigIntegerField(null=False, blank=False)
     transaction_date = models.DateTimeField(auto_now_add=True)
     bank_code = models.CharField(max_length=20, null=False, blank=False)
-    description = models.TextField(null=False)
+    description = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return self.bank_code + str(self.transaction_id)

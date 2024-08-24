@@ -13,4 +13,5 @@ urlpatterns = [
     path('auth/google/', views.google_login, name='google-login'),
     path('auth/facebook/', views.facebook_login, name='google-login'),
     path('auth/set-password/', views.set_password, name='set-password'),
+    path('search/', views.MixedSearchView.as_view(), name='mixed-search'),
 ]
