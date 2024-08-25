@@ -12,16 +12,18 @@ const SearchPage = () => {
     const { getAccessToken } = useUser();
     const [searchParams] = useSearchParams();
     const [query, setQuery] = useState(searchParams.get('q') || '');
+    const [genreQuery, setGenreQuery] = useState(searchParams.get('genre'));
     const [isModalOpen, setIsModalOpen] = useState(false);
     const tabKeys = useMemo(() => ['all', 'songs', 'artists', 'albums', 'playlists'], []);
     const [activeTab, setActiveTab] = useState(0);
+    const genreParam = !!searchParams.get('genre');
 
     const urls = useMemo(() => ({
         all: (query, page) => `${endpoints['mixed-search']}?q=${query}&page=${page}&type=0`,
-        songs: (query, page) => `${endpoints.songs}?q=${query}&page=${page}`,
+        songs: (query, page, genre) => `${endpoints.songs}?q=${query}&page=${page}&genre=${genre}`,
         artists: (query, page) => `${endpoints.users}?q=${query}&page=${page}`,
-        albums: (query, page) => `${endpoints.playlists}?q=${query}&page=${page}`,
-        playlists: (query, page) => `${endpoints.playlists}?q=${query}&page=${page}&type=4`
+        albums: (query, page, genre) => `${endpoints.playlists}?q=${query}&page=${page}&genre=${genre}`,
+        playlists: (query, page, genre) => `${endpoints.playlists}?q=${query}&page=${page}&type=4&genre=${genre}`
     }), []);
 
     const [data, setData] = useState({
@@ -59,10 +61,10 @@ const SearchPage = () => {
     const updateLoading = (field, value) => setLoading(prev => ({ ...prev, [field]: value }));
 
     const loadItems = useCallback(async (field, append = false) => {
-        if (page[field] > 0 && query) {
+        if (page[field] > 0) {
             updateLoading(field, true);
             try {
-                const url = urls[tabKeys[activeTab]](query, page[field]);
+                const url = urls[tabKeys[activeTab]](query, page[field], genreQuery);
                 const res = await authAPI(await getAccessToken()).get(url);
 
                 if (res.data.next === null) updatePage(field, 0);
@@ -74,7 +76,7 @@ const SearchPage = () => {
                 updateLoading(field, false);
             }
         }
-    }, [page, query, activeTab, tabKeys, urls, getAccessToken]);
+    }, [page, query, genreQuery, activeTab, tabKeys, urls, getAccessToken]);
 
     const loadMore = useCallback((field) => {
         if (page[field] > 0 && !loading[field] && data[field].length > 0) {
@@ -112,7 +114,13 @@ const SearchPage = () => {
             albums: false,
             playlists: false
         });
-    }, [searchParams]);
+    }, [searchParams, genreQuery]);
+
+    useEffect(() => {
+        if (genreParam) {
+            setActiveTab(1);
+        }
+    }, [genreParam]);
 
     useEffect(() => {
         const currentField = tabKeys[activeTab];
@@ -234,10 +242,9 @@ const SearchPage = () => {
                 <div style={{ width: '100%', position: 'relative' }}>
                     <MusicTabView
                         tabs={tabs}
-                        query={query}
+                        queryset={{ query, genreQuery, setGenreQuery, genreParam }}
                         activeTab={activeTab}
-                        onTabChange={handleTabChange}
-                        state={{ isModalOpen, setIsModalOpen }} />
+                        onTabChange={handleTabChange} />
                 </div>
             </div>
             <LoginRequiredModal

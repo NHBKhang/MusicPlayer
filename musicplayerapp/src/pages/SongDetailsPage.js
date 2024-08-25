@@ -81,6 +81,7 @@ const SongDetailsPage = () => {
 
     const searchByGenre = async (e, genreId) => {
         e.preventDefault();
+        navigate(`/search/?genre=${genreId}`);
     };
 
     const goToDetails = (songId) => { navigate(`/songs/${songId}/`); };

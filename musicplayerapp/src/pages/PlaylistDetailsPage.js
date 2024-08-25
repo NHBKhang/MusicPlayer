@@ -31,7 +31,8 @@ const PlaylistDetailsPage = () => {
     }, [id, getAccessToken]);
 
     const searchByGenre = (e, genreId) => {
-
+        e.preventDefault();
+        navigate(`/search/?genre=${genreId}`);
     }
 
     const goToArtist = (artistId) => { navigate(`/profile/${artistId}/`); };

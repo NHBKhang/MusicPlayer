@@ -118,7 +118,7 @@ const UserProfileTabs = ({ profile, getAccessToken, state }) => {
     const [activeTab, setActiveTab] = useState(0);
     const urls = useMemo(() => ({
         all: (userId, page) =>
-            `${endpoints.songs}?uploader=${userId}&page=${page}`,
+            `${endpoints["mixed-search"]}?user=${userId}&page=${page}`,
         songs: (userId, page) =>
             `${endpoints.songs}?uploader=${userId}&page=${page}`,
         popular: (userId, page) =>
@@ -274,9 +274,13 @@ const UserProfileTabs = ({ profile, getAccessToken, state }) => {
             <TabView tabs={tabs} activeTab={activeTab} onTabClick={handleTabClick} />
             <div className="tracks-container">
                 {data[tabKeys[activeTab]].map(item => (
-                    activeTab !== 3 && activeTab !== 4 ?
+                    activeTab === 0 ? (item.type === 'song' ? (
+                        <TrackItem key={item.id} song={item} state={state} />
+                    ) : (
+                        <PlaylistItem key={item.id} playlist={item} state={state} />
+                    )) : (activeTab !== 3 && activeTab !== 4 ?
                         <TrackItem key={item.id} song={item} state={state} /> :
-                        <PlaylistItem key={item.id} playlist={item} />
+                        <PlaylistItem key={item.id} playlist={item} />)
                 ))}
                 {page[tabKeys[activeTab]] > 0 && (
                     <div ref={el => loadMoreRefs.current[tabKeys[activeTab]] = el} className="load-more-container">
@@ -393,7 +397,7 @@ const PlaylistItem = memo(({ playlist }) => {
     };
 
     return (
-        <div className="playlist-item item cursor-pointer">
+        <div className="playlist-item cursor-pointer">
             <img
                 src={item?.image ?? (item?.details && item.details[0]?.song?.image)}
                 alt={item?.title}

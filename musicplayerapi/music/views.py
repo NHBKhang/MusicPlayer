@@ -227,6 +227,10 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
             queryset = queryset.filter(Q(title__icontains=q) |
                                        Q(artists__icontains=q))
 
+        genre = self.request.query_params.get('genre')
+        if genre and genre != '0':
+            queryset = queryset.filter(genres__exact=int(genre))
+
         if self.request.query_params.get('likes') and user.is_authenticated:
             queryset = queryset.filter(like__user=user).order_by('-like__created_date')
 
@@ -440,28 +444,38 @@ class PlaylistViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Ret
 
 class MixedSearchView(APIView):
     def get(self, request, *args, **kwargs):
+        user_id = self.request.query_params.get('user')
+        user_id = int(user_id) if user_id else None
+
         song_viewset = SongViewSet()
-        artist_viewset = UserViewSet()
         playlist_viewset = PlaylistViewSet()
 
-        song_viewset.request = artist_viewset.request = playlist_viewset.request = self.request
-        song_viewset.action = artist_viewset.action = playlist_viewset.action = 'get'
+        song_viewset.request = playlist_viewset.request = self.request
+        song_viewset.action = playlist_viewset.action = 'get'
 
-        songs = song_viewset.get_queryset()
+        songs = song_viewset.get_queryset().filter(uploader_id=user_id) \
+            if user_id else song_viewset.get_queryset()
         song_serializer = song_viewset.get_serializer_class()(
             songs, many=True, context={'request': self.request})
 
-        artists = artist_viewset.get_queryset()
-        artist_serializer = artist_viewset.get_serializer_class()(
-            artists, many=True, context={'request': self.request})
-
-        playlists = playlist_viewset.get_queryset()
+        playlists = playlist_viewset.get_queryset().filter(creator_id=user_id) \
+            if user_id else playlist_viewset.get_queryset()
         playlist_serializer = playlist_viewset.get_serializer_class()(
             playlists, many=True, context={'request': self.request})
 
         combined_results = [{'type': 'song', **item} for item in song_serializer.data] + \
-                           [{'type': 'artist', **item} for item in artist_serializer.data] + \
                            [{'type': 'playlist', **item} for item in playlist_serializer.data]
+
+        if not user_id:
+            artist_viewset = UserViewSet()
+            artist_viewset.request = self.request
+            artist_viewset.action = 'get'
+
+            artists = artist_viewset.get_queryset()
+            artist_serializer = artist_viewset.get_serializer_class()(
+                artists, many=True, context={'request': self.request})
+
+            combined_results += [{'type': 'artist', **item} for item in artist_serializer.data]
 
         paginator = paginators.CombinedResultsPaginator()
         paginated_results = paginator.paginate_queryset(combined_results, request)

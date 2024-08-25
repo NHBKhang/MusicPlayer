@@ -2,7 +2,8 @@ import {
     HomePage,
     LibraryPage,
     LoginPage, PlaylistDetailsPage, ProfilePage, SearchPage, SetPasswordPage, SignupPage,
-    SongDetailsPage
+    SongDetailsPage,
+    UploadPage
 } from "../pages";
 import axios from "axios";
 
@@ -44,6 +45,10 @@ export const routes = {
     library: {
         url: '/library/',
         component: LibraryPage
+    },
+    upload: {
+        url: '/upload/',
+        component: UploadPage
     }
 }
 
