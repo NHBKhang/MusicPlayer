@@ -1,39 +1,95 @@
-import React, { useCallback, useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import Page from '.';
+import API, { authAPI, endpoints } from '../configs/API';
+import { normalizeFileName } from '../configs/Utils';
+import { useUser } from '../configs/UserContext';
 
 const UploadPage = () => {
-    const [files, setFiles] = useState([]);
+    const { getAccessToken, user } = useUser();
+    const [songs, setSongs] = useState([]);
     const [uploadStatus, setUploadStatus] = useState('');
+    const [genres, setGenres] = useState([]);
 
-    const onDrop = useCallback((acceptedFiles) => {
-        setFiles(acceptedFiles);
+    useEffect(() => {
+        const loadGenres = async () => {
+            try {
+                let res = await API.get(endpoints.genres);
+                setGenres(res.data);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        loadGenres();
     }, []);
 
-    const handleUpload = async () => {
+    const handleDrop = useCallback((acceptedFiles) => {
+        const newSongs = acceptedFiles.map(file => ({
+            file,
+            title: normalizeFileName(file.name),
+            artists: '',
+            genres: '',
+            lyrics: '',
+            description: ''
+        }));
+        setSongs((prevSongs) => [...prevSongs, ...newSongs]);
+    }, []);
+
+    const handleUpload = async (song) => {
+        if (!user || !user.id) {
+            setUploadStatus('Người dùng không hợp lệ.');
+            return;
+        }
+
         const formData = new FormData();
-        files.forEach((file) => {
-            formData.append('files[]', file);
-        });
-
+        formData.append('file', song.file);
+        formData.append('title', song.title);
+        formData.append('artists', song.artists);
+        formData.append('genres', song.genres);
+        formData.append('lyrics', song.lyrics);
+        formData.append('description', song.description);
+        formData.append('uploader', Number(user.id));
+       
         try {
-            const response = await fetch('/upload', {
-                method: 'POST',
-                body: formData,
-            });
+            const res = await authAPI(await getAccessToken())
+                .post(endpoints.songs, formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data"
+                    },
+                    timeout: 0
+                });
 
-            if (response.ok) {
+            if (res.status === 200) {
                 setUploadStatus('Upload thành công!');
-                setFiles([]);
+                setSongs((prevSongs) => prevSongs.filter(s => s !== song));
             } else {
                 setUploadStatus('Upload thất bại.');
             }
         } catch (error) {
+            console.error(error);
             setUploadStatus('Có lỗi xảy ra khi upload.');
         }
     };
 
-    const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept: 'audio/*' });
+    const handleCancel = (index) => {
+        setSongs((prevSongs) => prevSongs.filter((_, i) => i !== index));
+    };
+
+    const updateSong = (index, field, value) => {
+        setSongs((prevSongs) => {
+            const updatedSongs = [...prevSongs];
+            updatedSongs[index][field] = value;
+            return updatedSongs;
+        });
+    };
+
+    const handleInputChange = (index, e) => {
+        const { name, value } = e.target;
+        updateSong(index, name, value);
+    };
+
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop: handleDrop, accept: 'audio/*' });
 
     return (
         <Page title={"Tải nhạc lên"}>
@@ -43,12 +99,14 @@ const UploadPage = () => {
                     {...getRootProps()}
                     style={{
                         display: 'flex',
+                        flexDirection: 'column',
                         border: '2px dashed #cccccc',
-                        minHeight: '400px',
+                        minHeight: '100px',
                         justifyContent: 'center',
                         alignItems: 'center',
                         cursor: 'pointer',
-                        backgroundColor: isDragActive ? '#f0f0f0' : 'rgba(0, 0, 0, 0.4)',
+                        backgroundColor: isDragActive ? 'rgba(150, 150, 150, 0.4)' : 'rgba(0, 0, 0, 0.4)',
+                        padding: '20px',
                     }}>
                     <input {...getInputProps()} />
                     {isDragActive ? (
@@ -57,20 +115,71 @@ const UploadPage = () => {
                         <p>Kéo và thả file nhạc vào đây, hoặc click để chọn file</p>
                     )}
                 </div>
-                <div style={{ marginTop: '20px' }}>
-                    {files.length > 0 && (
-                        <>
-                            <h4>Files sẽ upload:</h4>
-                            <ul>
-                                {files.map((file, index) => (
-                                    <li key={index}>{file.name}</li>
-                                ))}
-                            </ul>
-                            <button onClick={handleUpload}>Upload</button>
-                        </>
-                    )}
-                </div>
-                {uploadStatus && <p>{uploadStatus}</p>}
+
+                {songs.length > 0 && (
+                    <div style={{ marginTop: '20px', display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+                        {songs.map((song, index) => (
+                            <div key={index} style={{
+                                border: '1px solid #ddd',
+                                borderRadius: '8px',
+                                padding: '10px',
+                                width: '300px',
+                                backgroundColor: 'rgba(50, 50, 50, 0.4)',
+                                boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)'
+                            }}>
+                                <h5>Bài hát {index + 1}</h5>
+                                <div style={{ textAlign: 'start', marginBottom: '10px' }}>
+                                    <label>Tiêu đề:</label>
+                                    <input
+                                        type="text"
+                                        name="title"
+                                        value={song.title}
+                                        onChange={(e) => handleInputChange(index, e)}
+                                        style={{ width: '100%', padding: '5px', margin: '5px 0' }} />
+                                </div>
+                                <div style={{ textAlign: 'start', marginBottom: '10px' }}>
+                                    <label>Nghệ sĩ:</label>
+                                    <input
+                                        type="text"
+                                        name="artists"
+                                        value={song.artists}
+                                        onChange={(e) => handleInputChange(index, e)}
+                                        style={{ width: '100%', padding: '5px', margin: '5px 0' }} />
+                                </div>
+                                <div style={{ textAlign: 'start', marginBottom: '10px' }}>
+                                    <label>Thể loại:</label>
+                                    <select
+                                        name="genres"
+                                        value={song.genres}
+                                        onChange={(e) => handleInputChange(index, e)}
+                                        style={{ width: '100%', padding: '5px', margin: '5px 0' }}>
+                                        <option value="">Chọn thể loại</option>
+                                        {genres?.map((g) => (<option key={g.id} value={g.id}>{g.name}</option>))}
+                                    </select>
+                                </div>
+                                <div style={{ textAlign: 'start', marginBottom: '10px' }}>
+                                    <label>Lời bài hát:</label>
+                                    <textarea
+                                        name="lyrics"
+                                        value={song.lyrics}
+                                        onChange={(e) => handleInputChange(index, e)}
+                                        style={{ width: '100%', padding: '5px', margin: '5px 0' }} />
+                                </div>
+                                <div style={{ textAlign: 'start', marginBottom: '10px' }}>
+                                    <label>Mô tả:</label>
+                                    <textarea
+                                        name="description"
+                                        value={song.description}
+                                        onChange={(e) => handleInputChange(index, e)}
+                                        style={{ width: '100%', padding: '5px', margin: '5px 0' }} />
+                                </div>
+                                <button onClick={() => handleUpload(song)} style={{ marginTop: '10px', marginRight: '10px' }}>Upload</button>
+                                <button onClick={() => handleCancel(index)} style={{ marginTop: '10px', backgroundColor: 'red', color: 'white' }}>Cancel</button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+                {uploadStatus && <p style={{ marginTop: '20px' }}>{uploadStatus}</p>}
             </div>
         </Page>
     );

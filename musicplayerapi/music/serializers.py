@@ -3,17 +3,6 @@ from music.models import *
 import cloudinary
 
 
-class ImageSerializer(serializers.ModelSerializer):
-    def to_representation(self, instance):
-        rep = super().to_representation(instance)
-        if type(instance.image) is cloudinary.CloudinaryResource:
-            rep['image'] = instance.image.url
-        else:
-            rep['image'] = instance.image
-
-        return rep
-
-
 class UserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserInfo
@@ -101,8 +90,8 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 
-class SongSerializer(ImageSerializer):
-    uploader = PublicUserSerializer(read_only=True)
+class SongSerializer(serializers.ModelSerializer):
+    uploader = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
     likes = serializers.SerializerMethodField()
     streams = serializers.SerializerMethodField()
 
@@ -111,6 +100,17 @@ class SongSerializer(ImageSerializer):
 
     def get_streams(self, song):
         return song.streams.count()
+
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        if type(instance.image) is cloudinary.CloudinaryResource:
+            rep['image'] = instance.image.url
+        elif instance.uploader.avatar:
+            rep['image'] = instance.uploader.avatar.url
+        else:
+            rep['image'] = 'https://static.vecteezy.com/system/resources/previews/021/693/323/non_2x/a-logo-for-a-music-company-that-is-made-by-song-brand-vector.jpg'
+
+        return rep
 
     class Meta:
         model = Song
@@ -171,7 +171,7 @@ class PlaylistDetailsSerializer(serializers.ModelSerializer):
         fields = ['id', 'song']
 
 
-class PlaylistSerializer(ImageSerializer):
+class PlaylistSerializer(serializers.ModelSerializer):
     creator = PublicUserSerializer(read_only=True)
     details = PlaylistDetailsSerializer(many=True)
 
@@ -180,7 +180,8 @@ class PlaylistSerializer(ImageSerializer):
         if type(instance.image) is cloudinary.CloudinaryResource:
             rep['image'] = instance.image.url
         elif instance.details.count() == 0:
-            rep['image'] = 'https://cdn.getmidnight.com/b5a0b552ae89a91aa34705031852bd16/2022/08/1_1---2022-08-24T165236.013-1.png'
+            rep[
+                'image'] = 'https://cdn.getmidnight.com/b5a0b552ae89a91aa34705031852bd16/2022/08/1_1---2022-08-24T165236.013-1.png'
 
         return rep
 

@@ -28,12 +28,17 @@ const Header = () => {
     const onLogout = (e) => {
         e.preventDefault();
         logout();
-        navigate('/')
+        navigate('/');
     }
 
     const onProfileClick = (e) => {
         e.preventDefault();
-        navigate(`/profile/${user.id}/`)
+        navigate(`/profile/${user.id}/`);
+    }
+
+    const onUploadClick = (e) => {
+        e.preventDefault();
+        navigate('/upload/');
     }
 
     return (
@@ -72,14 +77,27 @@ const Header = () => {
                                         className="rounded-circle" />
                                 </button>
                                 <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-                                    <li>
-                                        <a  onClick={onProfileClick}
-                                            className="dropdown-item"
-                                            href="/profile/">Hồ sơ</a>
+                                    <li onClick={onProfileClick}>
+                                        <a className="dropdown-item" href="/profile/">
+                                            <i class="fa-regular fa-user"></i> Hồ sơ
+                                        </a>
                                     </li>
-                                    <li><a className="dropdown-item" href="#/settings">Cài đặt</a></li>
+                                    <li>
+                                        <a className="dropdown-item" href="#/settings">
+                                            <i class="fa-solid fa-gear"></i> Cài đặt
+                                        </a>
+                                    </li>
+                                    <li onClick={onUploadClick}>
+                                        <a className="dropdown-item" href="/upload/">
+                                            <i class="fa-solid fa-upload"></i> Tải lên
+                                        </a>
+                                    </li>
                                     <li><hr className="dropdown-divider" /></li>
-                                    <li><a className="dropdown-item" onClick={onLogout} href="/logout/">Đăng xuất</a></li>
+                                    <li onClick={onLogout}>
+                                        <a className="dropdown-item" href="/logout/">
+                                            <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+                                        </a>
+                                    </li>
                                 </ul>
                             </div>
                         </div> : <div className="account">

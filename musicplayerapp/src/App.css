@@ -37,7 +37,8 @@ h6,
 p,
 span,
 pre,
-hr {
+hr,
+label {
   color: whitesmoke;
 }
 

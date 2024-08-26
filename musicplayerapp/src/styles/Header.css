@@ -140,3 +140,7 @@
 .dropdown-item:hover {
     background-color: #464b50;
 }
+
+.dropdown-item i {
+    width: 20px;
+}

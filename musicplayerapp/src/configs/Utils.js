@@ -12,3 +12,15 @@ export const renderDescription = (description, nullText = "Không có mô tả c
         <span dangerouslySetInnerHTML={{ __html: processedDescription }} />
     );
 };
+
+export const normalizeFileName = (fileName) => {
+    const nameWithoutExtension = fileName.replace(/\.[^/.]+$/, "");
+    
+    const formattedName = nameWithoutExtension
+        .replace(/-/g, ' ')
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+
+    return formattedName;
+};

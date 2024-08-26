@@ -4,6 +4,7 @@ from rest_framework.decorators import action, api_view
 from rest_framework import serializers as rest_serializers
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser, FormParser
 from music.models import *
 from music import serializers, paginators, perms, utils
 from django.shortcuts import get_object_or_404
@@ -199,6 +200,7 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
     serializer_class = serializers.SongSerializer
     pagination_class = paginators.SongPaginator
     permission_classes = [permissions.AllowAny(), ]
+    parser_classes = (MultiPartParser, FormParser)
 
     def get_serializer_class(self):
         if self.action in ['retrieve', 'update', 'partial_update']:
