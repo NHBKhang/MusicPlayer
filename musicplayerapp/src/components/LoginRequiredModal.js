@@ -1,33 +1,25 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const LoginRequiredModal = ({ isModalOpen, setIsModalOpen }) => {
+const LoginRequiredModal = ({ visible, onClose }) => {
     const navigate = useNavigate();
-
-    const closeModal = () => setIsModalOpen(false);
+    if (!visible) return;
 
     const onLogin = () => {
-        closeModal();
+        onClose();
         navigate('/login/');
     };
 
-    const onClose = () => {
-        closeModal();
-    };
-    
-    if (isModalOpen) {
-        return (
-            <div style={modalOverlayStyle}>
-                <div style={modalContentStyle}>
-                    <h2 className='text-dark'>Yêu cầu đăng nhập</h2>
-                    <p className='text-dark'>Bạn cần đăng nhập để thực hiện hành động này.</p>
-                    <button onClick={onLogin} style={buttonStyle}>Đăng nhập</button>
-                    <button onClick={onClose} style={buttonStyle}>Đóng</button>
-                </div>
+    return (
+        <div style={modalOverlayStyle}>
+            <div style={modalContentStyle}>
+                <h2 className='text-dark'>Yêu cầu đăng nhập</h2>
+                <p className='text-dark'>Bạn cần đăng nhập để thực hiện hành động này.</p>
+                <button onClick={onLogin} style={buttonStyle}>Đăng nhập</button>
+                <button onClick={onClose} style={buttonStyle}>Đóng</button>
             </div>
-        );
-    } else
-        return null;
+        </div>
+    );
 };
 
 const modalOverlayStyle = {

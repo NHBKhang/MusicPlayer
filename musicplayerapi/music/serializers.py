@@ -91,7 +91,10 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class SongSerializer(serializers.ModelSerializer):
-    uploader = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
+    uploader = PublicUserSerializer(read_only=True)
+    uploader_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), source='uploader', write_only=True, required=False
+    )
     likes = serializers.SerializerMethodField()
     streams = serializers.SerializerMethodField()
 
@@ -114,12 +117,20 @@ class SongSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Song
-        fields = ['id', 'title', 'uploader', 'image', 'artists', 'file', 'likes', 'streams', 'created_date']
+        fields = ['id', 'title', 'uploader', 'uploader_id', 'image', 'artists', 'file', 'likes', 'streams', 'created_date']
+
+    def create(self, validated_data):
+        uploader_id = validated_data.pop('uploader_id', None)
+        if uploader_id:
+            validated_data['uploader'] = uploader_id
+
+        return super().create(validated_data)
 
 
 class AuthenticatedSongSerializer(SongSerializer):
     liked = serializers.SerializerMethodField()
     followed = serializers.SerializerMethodField()
+    is_owner = serializers.SerializerMethodField()
 
     def get_liked(self, song):
         request = self.context.get('request')
@@ -133,9 +144,15 @@ class AuthenticatedSongSerializer(SongSerializer):
             return song.uploader.followers.filter(follower=request.user, active=True).exists()
         return False
 
+    def get_is_owner(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.uploader == request.user
+        return False
+
     class Meta:
         model = SongSerializer.Meta.model
-        fields = SongSerializer.Meta.fields + ['liked', 'followed']
+        fields = SongSerializer.Meta.fields + ['liked', 'followed', 'is_owner']
 
 
 class SongDetailsSerializer(SongSerializer):

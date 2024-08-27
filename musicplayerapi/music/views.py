@@ -199,7 +199,7 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
     queryset = Song.objects.filter(active=True).order_by('-id').all()
     serializer_class = serializers.SongSerializer
     pagination_class = paginators.SongPaginator
-    permission_classes = [permissions.AllowAny(), ]
+    permission_classes = [perms.SongOwner]
     parser_classes = (MultiPartParser, FormParser)
 
     def get_serializer_class(self):
@@ -215,10 +215,10 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
                 return self.serializer_class
 
     def get_permissions(self):
-        if self.action in ['like', 'add-comment', ]:
+        if self.action in ['like', 'add-comment', 'stream']:
             return [permissions.IsAuthenticated(), ]
 
-        return self.permission_classes
+        return [permission() for permission in self.permission_classes]
 
     def get_queryset(self):
         queryset = self.queryset.filter(active=True)
@@ -288,7 +288,7 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
     def stream(self, request, pk=None):
         try:
             song = self.get_object()
-            Stream.objects.create(song=song, user=request.user if request.user.is_authenticated else None)
+            Stream.objects.create(song=song, user=self.request.user if self.request.user.is_authenticated else None)
             return Response({'message': 'Stream count incremented successfully'}, status=status.HTTP_200_OK)
         except Song.DoesNotExist:
             return Response({'error': 'Song not found'}, status=status.HTTP_404_NOT_FOUND)
@@ -411,7 +411,7 @@ class PlaylistViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Ret
     queryset = Playlist.objects.filter(active=True, is_public=True).all()
     serializer_class = serializers.PlaylistSerializer
     pagination_class = paginators.PlaylistPaginator
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [perms.PlaylistOwner]
 
     def get_serializer_class(self):
         if self.action in ['retrieve', 'update', 'partial_update']:

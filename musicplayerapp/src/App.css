@@ -6,6 +6,11 @@
 html {
   background: #282c34 !important;
   position: relative;
+  overflow-x: hidden;
+}
+
+body {
+  padding: 0 !important;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -117,3 +122,18 @@ label {
 .text-end {
   text-align: right;
 }
+
+.custom-dropdown {
+  width: 100%;
+  margin: 5px 0;
+}
+
+.modal-dialog, .modal {
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 2rem auto;
+}
+
+/* .modal-dialog .modal-content {
+  width: 120% !important;
+} */

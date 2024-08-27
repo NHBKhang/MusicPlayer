@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { Comments, LoginRequiredModal, TabView, VerifiedBadge } from "../components";
+import { Comments, LoginRequiredModal, Modal, SongModal, TabView, VerifiedBadge } from "../components";
 import '../styles/SongDetailsPage.css';
 import { useEffect, useState } from "react";
 import { authAPI, endpoints } from "../configs/API";
@@ -16,10 +16,18 @@ const SongDetailsPage = () => {
     const { getAccessToken, user } = useUser();
     const { id } = useParams();
     const [song, setSong] = useState(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState({
+        like: false,
+        delete: false,
+        edit: false
+    });
     const [comments, setComments] = useState([]);
     const [relatedSongs, setRelatedSong] = useState([]);
     const navigate = useNavigate();
+
+    const updateIsModalOpen = (field, value) => {
+        setIsModalOpen(current => ({ ...current, [field]: value }));
+    };
 
     useEffect(() => {
         const loadComments = async () => {
@@ -66,10 +74,34 @@ const SongDetailsPage = () => {
                 if (isPlaying && currentSong.id === song.id)
                     setCurrentSong(res.data);
             } catch (error) {
-                alert(error);
+                alert("Không thể thích bài hát");
             }
         } else {
-            setIsModalOpen(true);
+            updateIsModalOpen('like', true);
+        }
+    };
+
+    const onDelete = async () => {
+        try {
+            let res = await authAPI(await getAccessToken()).delete(endpoints.song(song.id));
+
+            if (res.status === 204) {
+                navigate('/');
+            }
+        } catch (error) {
+            alert("Không thể xóa bài hát")
+        } finally {
+            updateIsModalOpen('delete', false);
+        }
+    };
+
+    const onUpdate = async () => {
+        try {
+
+        } catch (error) {
+            alert("Không thể cập nhật bài hát")
+        } finally {
+            updateIsModalOpen('edit', false);
         }
     };
 
@@ -176,6 +208,17 @@ const SongDetailsPage = () => {
                                 </div>
                             </div>
                         </div>
+                        {song?.is_owner &&
+                            <div className="d-flex align-items-center button-group" style={{ gap: '12px' }}>
+                                <button onClick={() => updateIsModalOpen('edit', true)}>
+                                    <i class="fa-solid fa-pen-to-square me-1"></i>
+                                    <p className="d-none d-md-inline fs-6 text-dark">Chỉnh sửa</p>
+                                </button>
+                                <button onClick={() => updateIsModalOpen('delete', true)}>
+                                    <i class="fa-solid fa-trash me-1"></i>
+                                    <p className="d-none d-md-inline fs-6 text-dark">Xóa bài hát</p>
+                                </button>
+                            </div>}
                         <br />
                     </div>
                 </div>
@@ -217,8 +260,18 @@ const SongDetailsPage = () => {
                 </div>
             </div>
             <LoginRequiredModal
-                isModalOpen={isModalOpen}
-                setIsModalOpen={setIsModalOpen} />
+                visible={isModalOpen.like}
+                onClose={() => updateIsModalOpen('like', false)} />
+            <Modal
+                label={`Bạn có chắc muốn xóa bài hát ${song?.title} không?`}
+                visible={isModalOpen.delete}
+                onConfirm={onDelete}
+                onCancel={() => updateIsModalOpen('delete', false)} />
+            <SongModal
+                visible={isModalOpen.edit}
+                song={song}
+                onUpdate={onUpdate}
+                onClose={() => updateIsModalOpen('edit', false)} />
         </Page>
     )
 }

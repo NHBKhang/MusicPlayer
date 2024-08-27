@@ -11,3 +11,6 @@ export { default as TabView } from './TabView';
 export { default as PageTitle } from './PageTitle';
 export { default as MusicTabView } from './MusicTabView';
 export { default as VerifiedBadge } from './VerifiedBadge';
+export { default as ImageUpload } from './ImageUpload';
+export { default as Modal } from './Modal';
+export { default as SongModal } from './SongModal';

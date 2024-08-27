@@ -20,7 +20,7 @@ export const AudioProvider = ({ children }) => {
     const postStreamAfterDelay = useCallback((songId, delay = 5000) => {
         const timerId = setTimeout(async () => {
             try {
-                await authAPI(getAccessToken()).post(endpoints.stream(songId));
+                await authAPI(await getAccessToken()).post(endpoints.stream(songId));
             } catch (error) {
                 console.error('Error posting stream:', error);
             }
