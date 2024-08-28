@@ -11,44 +11,53 @@ import axios from "axios";
 export const routes = {
     home: {
         url: '/',
-        component: HomePage
+        component: HomePage,
+        required: false
     },
     login: {
         url: '/login/',
-        component: LoginPage
+        component: LoginPage,
+        required: false
     },
     signup: {
         url: '/signup/',
-        component: SignupPage
-
+        component: SignupPage,
+        required: false
     },
     song: {
         url: '/songs/:id/',
-        component: SongDetailsPage
+        component: SongDetailsPage,
+        required: false
     },
     playlist: {
         url: '/playlists/:id/',
-        component: PlaylistDetailsPage
+        component: PlaylistDetailsPage,
+        required: false
     },
     setPassword: {
         url: '/set-password/',
-        component: SetPasswordPage
+        component: SetPasswordPage,
+        required: true
     },
     search: {
         url: '/search/',
-        component: SearchPage
+        component: SearchPage,
+        required: false
     },
     profile: {
         url: '/profile/:id/',
-        component: ProfilePage
+        component: ProfilePage,
+        required: false
     },
     library: {
         url: '/library/',
-        component: LibraryPage
+        component: LibraryPage,
+        required: true
     },
     upload: {
         url: '/upload/',
-        component: UploadPage
+        component: UploadPage,
+        required: true
     }
 }
 

@@ -11,7 +11,7 @@ const LibraryPage = () => {
 
     return (
         <Page title={'Library'}>
-            <div className='content-container library-container'>
+            <div className='library-container'>
                 <TabView />
             </div>
         </Page>
@@ -44,10 +44,10 @@ const TabView = () => {
         <div className="tabview mt-3">
             <div className="tabs">
                 {/* <div className={`tab ${activeTab === 0 ? 'active' : ''}`} onClick={() => setActiveTab(0)}>Overview</div> */}
-                <div className={`tab ${activeTab === 1 ? 'active' : ''}`} onClick={() => setActiveTab(1)}>Likes</div>
+                <div className={`tab ${activeTab === 1 ? 'active' : ''}`} onClick={() => setActiveTab(1)}>Đã thích</div>
                 <div className={`tab ${activeTab === 2 ? 'active' : ''}`} onClick={() => setActiveTab(2)}>Playlists</div>
                 <div className={`tab ${activeTab === 3 ? 'active' : ''}`} onClick={() => setActiveTab(3)}>Albums</div>
-                <div className={`tab ${activeTab === 4 ? 'active' : ''}`} onClick={() => setActiveTab(4)}>Following</div>
+                <div className={`tab ${activeTab === 4 ? 'active' : ''}`} onClick={() => setActiveTab(4)}>Đã theo dõi</div>
                 {/* <div className={`tab ${activeTab === 5 ? 'active' : ''}`} onClick={() => setActiveTab(5)}>History</div> */}
             </div>
             <div className="tab-content">
@@ -67,7 +67,6 @@ const Likes = () => {
     const { getAccessToken } = useUser();
 
     const updateSongs = (newData, append = false) => {
-        console.info(newData);
         setSongs(prev => append ? [...newData, ...prev] : newData);
     };
 

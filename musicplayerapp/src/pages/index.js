@@ -10,7 +10,11 @@ const Page = ({ children, title }) => {
                 <Sidebar />
             </div>
             <div className='content w-100'>
-                <div className='mb-5 music-content'>{children}</div>
+                <div className='mb-5 music-content'>
+                    <div className='content-container'>
+                        {children}
+                    </div>
+                </div>
                 <Footer />
             </div>
         </div>
@@ -25,6 +29,6 @@ export { default as SongDetailsPage } from './SongDetailsPage';
 export { default as PlaylistDetailsPage } from './PlaylistDetailsPage';
 export { default as SetPasswordPage } from './SetPasswordPage';
 export { default as SearchPage } from './SearchPage';
-export { default as ProfilePage } from './ProfilePage';
+export { default as ProfilePage, TrackItem } from './ProfilePage';
 export { default as LibraryPage } from './LibraryPage';
 export { default as UploadPage } from './UploadPage';

@@ -95,16 +95,6 @@ const SongDetailsPage = () => {
         }
     };
 
-    const onUpdate = async () => {
-        try {
-
-        } catch (error) {
-            alert("Không thể cập nhật bài hát")
-        } finally {
-            updateIsModalOpen('edit', false);
-        }
-    };
-
     const play = () => {
         togglePlayPauseNewSong(song);
     };
@@ -152,7 +142,7 @@ const SongDetailsPage = () => {
 
     return (
         <Page title={`${song?.artists} - ${song?.title}`}>
-            <div className="song-container content-container">
+            <div className="song-container">
                 <div className="song-detail row">
                     <div className="song-cover col-xxl-3 col-xl-4 col-lg-4 col-md-6 col-sm-12">
                         <img src={song?.image} alt={song?.title} />
@@ -223,7 +213,7 @@ const SongDetailsPage = () => {
                     </div>
                 </div>
             </div>
-            <div className="content-container row">
+            <div className="row p-1">
                 <div className="col-md-8 p-0">
                     <TabView tabs={tabs} />
                 </div>
@@ -270,7 +260,7 @@ const SongDetailsPage = () => {
             <SongModal
                 visible={isModalOpen.edit}
                 song={song}
-                onUpdate={onUpdate}
+                onSaveChange={(song) => setSong(song)}
                 onClose={() => updateIsModalOpen('edit', false)} />
         </Page>
     )

@@ -3,7 +3,7 @@ import Page from ".";
 import { useUser } from "../configs/UserContext";
 import '../styles/ProfilePage.css';
 import { useNavigate, useParams } from "react-router-dom";
-import { LoginRequiredModal, VerifiedBadge } from "../components";
+import { LoginRequiredModal, Modal, SongModal, VerifiedBadge } from "../components";
 import { authAPI, endpoints } from "../configs/API";
 import { useAudio } from "../configs/AudioContext";
 import moment from "moment";
@@ -57,57 +57,55 @@ const ProfilePage = () => {
 
     return (
         <Page title={`Stream ${profile?.name} music`}>
-            <div className="content-container">
-                <div className="row profile-container">
-                    <div className="profile-detail">
-                        <img
-                            src={profile?.avatar}
-                            alt={profile?.name}
-                            className="profile-cover rounded-circle" />
-                        <div className="mt-1">
-                            <h4 className="profile-display-name">
-                                {profile?.info?.display_name ?? profile?.name}
-                                {profile?.info?.verified && <VerifiedBadge />}
-                            </h4>
-                            <p className="profile-name">
-                                {`${profile?.first_name ?? ''} ${profile?.last_name ?? ''}`}
-                            </p>
-                        </div>
+            <div className="row profile-container">
+                <div className="profile-detail mt-4">
+                    <img
+                        src={profile?.avatar}
+                        alt={profile?.name}
+                        className="profile-cover rounded-circle" />
+                    <div className="mt-1">
+                        <h4 className="profile-display-name">
+                            {profile?.info?.display_name ?? profile?.name}
+                            {profile?.info?.verified && <VerifiedBadge />}
+                        </h4>
+                        <p className="profile-name">
+                            {`${profile?.first_name ?? ''} ${profile?.last_name ?? ''}`}
+                        </p>
                     </div>
-                    <div className="info-container">
-                        <div className="info-item">
-                            <span>Người theo dõi</span>
-                            <span>{profile?.followers}</span>
-                        </div>
-                        <div className="info-item">
-                            <span>Đang theo dõi</span>
-                            <span>{profile?.following}</span>
-                        </div>
-                        <div className="info-item">
-                            <span>Số bài hát</span>
-                            <span>{profile?.songs}</span>
-                        </div>
-                    </div>
-                    {user?.id !== profile?.id && <button
-                        className={`mt-1 mb-2 follow-button ${profile?.followed ? 'followed' : ''}`}
-                        onClick={follow}>
-                        {profile?.followed ? (<>
-                            <i class="fa-solid fa-user-check"></i>
-                            <p className='d-none d-sm-inline text-black'> Đã theo dõi</p>
-                        </>) : (<>
-                            <i class="fa-solid fa-user-plus"></i>
-                            <p className='d-none d-sm-inline text-black p-1'> Theo dõi</p>
-                        </>)}
-                    </button>}
                 </div>
-                <UserProfileTabs
-                    profile={profile}
-                    getAccessToken={getAccessToken}
-                    state={{ isModalOpen, setIsModalOpen }} />
+                <div className="info-container">
+                    <div className="info-item">
+                        <span>Người theo dõi</span>
+                        <span>{profile?.followers}</span>
+                    </div>
+                    <div className="info-item">
+                        <span>Đang theo dõi</span>
+                        <span>{profile?.following}</span>
+                    </div>
+                    <div className="info-item">
+                        <span>Số bài hát</span>
+                        <span>{profile?.songs}</span>
+                    </div>
+                </div>
+                {user?.id !== profile?.id && <button
+                    className={`mt-1 mb-2 follow-button ${profile?.followed ? 'followed' : ''}`}
+                    onClick={follow}>
+                    {profile?.followed ? (<>
+                        <i class="fa-solid fa-user-check"></i>
+                        <p className='d-none d-sm-inline text-black'> Đã theo dõi</p>
+                    </>) : (<>
+                        <i class="fa-solid fa-user-plus"></i>
+                        <p className='d-none d-sm-inline text-black p-1'> Theo dõi</p>
+                    </>)}
+                </button>}
             </div>
+            <UserProfileTabs
+                profile={profile}
+                getAccessToken={getAccessToken}
+                state={{ isModalOpen, setIsModalOpen }} />
             <LoginRequiredModal
-                isModalOpen={isModalOpen}
-                setIsModalOpen={setIsModalOpen} />
+                visible={isModalOpen}
+                onClose={() => setIsModalOpen(false)} />
         </Page>
     );
 };
@@ -305,12 +303,20 @@ const TabView = memo(({ tabs, activeTab, onTabClick }) => (
     </div>
 ));
 
-const TrackItem = memo(({ song, state }) => {
-    const { setIsModalOpen } = state;
+export const TrackItem = memo(({ song, state }) => {
+    const setIsModalOpen = state?.setIsModalOpen;
     const { getAccessToken, user } = useUser();
     const { isPlaying, currentSong, togglePlayPauseNewSong } = useAudio();
     const navigate = useNavigate();
     const [item, setItem] = useState(song);
+    const [visible, setVisible] = useState({
+        delete: false,
+        edit: false
+    });
+
+    const updateVisible = (field, value) => {
+        setVisible(current => ({ ...current, [field]: value }));
+    };
 
     const like = async () => {
         if (user) {
@@ -330,6 +336,20 @@ const TrackItem = memo(({ song, state }) => {
         navigate(`/songs/${item.id}/`);
     }
 
+    const onDelete = async () => {
+        try {
+            let res = await authAPI(await getAccessToken()).delete(endpoints.song(song.id));
+
+            if (res.status === 204) {
+                navigate('/');
+            }
+        } catch (error) {
+            alert("Không thể xóa bài hát")
+        } finally {
+            updateVisible('delete', false);
+        }
+    }
+
     return (
         <div className="track-item">
             <button style={{ left: '20px !important' }}
@@ -346,12 +366,25 @@ const TrackItem = memo(({ song, state }) => {
                 <h5 onClick={goToDetails} className="cursor-pointer">{item.title}</h5>
                 <p>{item.artists}</p>
                 <div className="d-flex justify-content-between align-items-center w-100 mt-2">
-                    <button
-                        type="button"
-                        onClick={like}
-                        className={`m-0 me-4 ${item.liked ? 'liked' : ''}`}>
-                        <i class="fa-solid fa-heart me-1"></i> {item.liked ? 'Bỏ thích' : 'Thích'}
-                    </button>
+                    <div>
+                        <button
+                            type="button"
+                            onClick={like}
+                            className={`m-0 ${item.liked ? 'liked' : ''}`}>
+                            <i class="fa-solid fa-heart me-1"></i>
+                            <span className={`d-none d-md-inline fs-6 ${item.liked ? '' : 'text-dark'}`}>{item.liked ? 'Bỏ thích' : 'Thích'}</span>
+                        </button>
+                        {item.is_owner && <>
+                            <button onClick={() => updateVisible('edit', true)} className="m-0">
+                                <i class="fa-solid fa-pen-to-square me-1"></i>
+                                <span className="d-none d-md-inline fs-6 text-dark">Chỉnh sửa</span>
+                            </button>
+                            <button onClick={() => updateVisible('delete', true)} className="m-0">
+                                <i class="fa-solid fa-trash me-1"></i>
+                                <span className="d-none d-md-inline fs-6 text-dark">Xóa bài hát</span>
+                            </button>
+                        </>}
+                    </div>
                     <div>
                         <span className="me-4">
                             <i class="fa-solid fa-heart me-1"></i> {item.likes}
@@ -362,6 +395,16 @@ const TrackItem = memo(({ song, state }) => {
                     </div>
                 </div>
             </div>
+            <Modal
+                label={`Bạn có chắc muốn xóa bài hát ${item?.title} không?`}
+                visible={visible.delete}
+                onConfirm={onDelete}
+                onCancel={() => updateVisible('delete', false)} />
+            <SongModal
+                visible={visible.edit}
+                song={item}
+                onSaveChange={(song) => setItem(song)}
+                onClose={() => updateVisible('edit', false)} />
         </div>
     )
 });

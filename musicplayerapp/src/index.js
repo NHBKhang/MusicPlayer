@@ -3,11 +3,17 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { AudioProvider } from './configs/AudioContext';
+import { UserProvider } from './configs/UserContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-      <App />
+    <UserProvider>
+      <AudioProvider>
+        <App />
+      </AudioProvider>
+    </UserProvider>
   </React.StrictMode>
 );
 

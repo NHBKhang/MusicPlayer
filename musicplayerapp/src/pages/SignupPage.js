@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import '../styles/SignupPage.css';
 import API, { endpoints } from "../configs/API";
 import { useNavigate } from "react-router-dom";
 import { GoogleButton, FacebookButton } from '../components';
 import { usePageTitle } from "../components/PageTitle";
+import { useUser } from "../configs/UserContext";
 
 const SignupPage = () => {
     usePageTitle("Sign up");
@@ -12,6 +13,7 @@ const SignupPage = () => {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
+    const { user: currentUser } = useUser();
 
     const updateUser = (field, value) => {
         setUser(current => ({ ...current, [field]: value }));
@@ -20,6 +22,11 @@ const SignupPage = () => {
     const updateShowPassword = (field, value) => {
         setShowPassword(current => ({ ...current, [field]: value }));
     };
+
+    useEffect(() => {
+        if (currentUser)
+            navigate('/');
+    }, [currentUser, navigate]);
 
     const onSignup = async (e) => {
         e.preventDefault();

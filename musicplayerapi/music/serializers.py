@@ -156,15 +156,30 @@ class AuthenticatedSongSerializer(SongSerializer):
 
 
 class SongDetailsSerializer(SongSerializer):
-    genres = GenreSerializer(many=True)
+    genres = GenreSerializer(many=True, read_only=True)
+    genre_ids = serializers.ListField(write_only=True, child=serializers.IntegerField(), required=False)
     comments = serializers.SerializerMethodField()
 
     def get_comments(self, song):
         return song.comment_set.count()
 
+    def create(self, validated_data):
+        genre_ids = validated_data.pop('genre_ids', [])
+        song = super().create(validated_data)
+        if genre_ids:
+            song.genres.set(genre_ids)
+        return song
+
+    def update(self, instance, validated_data):
+        genre_ids = validated_data.pop('genre_ids', [])
+        instance = super().update(instance, validated_data)
+        if genre_ids:
+            instance.genres.set(genre_ids)
+        return instance
+
     class Meta:
         model = SongSerializer.Meta.model
-        fields = SongSerializer.Meta.fields + ['genres', 'comments', 'lyrics', 'description']
+        fields = SongSerializer.Meta.fields + ['genres', 'genre_ids', 'comments', 'lyrics', 'description']
 
 
 class AuthenticatedSongDetailsSerializer(SongDetailsSerializer, AuthenticatedSongSerializer):

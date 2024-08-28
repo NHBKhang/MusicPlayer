@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { authAPI, endpoints } from '../configs/API';
 import { useLocation, useNavigate } from 'react-router-dom';
 import '../styles/SetPasswordPage.css';
@@ -15,6 +15,11 @@ const SetPasswordPage = () => {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (user)
+            navigate('/');
+    }, [user, navigate]);
 
     const handleSubmit = async (event) => {
         event.preventDefault();

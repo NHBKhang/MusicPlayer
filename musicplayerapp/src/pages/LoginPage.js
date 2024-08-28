@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import '../styles/LoginPage.css';
 import { useUser } from '../configs/UserContext';
 import { useNavigate } from 'react-router-dom';
@@ -12,8 +12,13 @@ const LoginPage = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [showPassword, setShowPassword] = useState(false);
-    const { login } = useUser();
+    const { login, user } = useUser();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (user)
+            navigate('/');
+    }, [user, navigate]);
 
     const onLogin = async (e) => {
         e.preventDefault();

@@ -6,13 +6,10 @@
 .song-detail {
     display: flex;
     justify-content: center;
+    gap: 25px;
     align-items: flex-start;
     padding: 10px;
     width: 100%;
-}
-
-.song-cover {
-    margin-right: 20px;
 }
 
 .song-cover img {

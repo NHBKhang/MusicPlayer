@@ -37,11 +37,9 @@ const HomePage = () => {
 
     return (
         <Page title={"Home"}>
-            <div className='content-container'>
-                <Carousel label='Bài hát hàng đầu' items={topMusic} />
-                {user && <Carousel label='Nghe gần đây' items={recentlyMusic} />}
-                {/* <Carousel label='Có thể bạn sẽ thích' items={topMusic} /> */}
-            </div>
+            <Carousel label='Bài hát hàng đầu' items={topMusic} />
+            {user && <Carousel label='Nghe gần đây' items={recentlyMusic} />}
+            {/* <Carousel label='Có thể bạn sẽ thích' items={topMusic} /> */}
         </Page>
     )
 }

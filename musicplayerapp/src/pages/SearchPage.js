@@ -238,18 +238,16 @@ const SearchPage = () => {
 
     return (
         <Page title={`Kết quả cho "${query}"`}>
-            <div className="content-container" style={{ height: '85%' }}>
-                <div style={{ width: '100%', position: 'relative' }}>
-                    <MusicTabView
-                        tabs={tabs}
-                        queryset={{ query, genreQuery, setGenreQuery, genreParam }}
-                        activeTab={activeTab}
-                        onTabChange={handleTabChange} />
-                </div>
+            <div style={{ width: '100%', position: 'relative' }}>
+                <MusicTabView
+                    tabs={tabs}
+                    queryset={{ query, genreQuery, setGenreQuery, genreParam }}
+                    activeTab={activeTab}
+                    onTabChange={handleTabChange} />
             </div>
             <LoginRequiredModal
-                isModalOpen={isModalOpen}
-                setIsModalOpen={setIsModalOpen} />
+                visible={isModalOpen}
+                onClose={() => setIsModalOpen(false)} />
         </Page>
     );
 };

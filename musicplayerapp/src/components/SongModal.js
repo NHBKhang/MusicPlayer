@@ -1,60 +1,100 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
-import axios from 'axios';
-import API, { endpoints } from '../configs/API';
+import API, { authAPI, endpoints } from '../configs/API';
 import ReactSelect from 'react-select';
+import ImageUpload from './ImageUpload';
+import { useUser } from '../configs/UserContext';
 
-const SongModal = ({ visible, song, onUpdate, onClose }) => {
+const SongModal = ({ visible, song, onSaveChange, onClose }) => {
+    const [image, setImage] = useState('');
     const [title, setTitle] = useState('');
     const [artists, setArtists] = useState('');
     const [genres, setGenres] = useState([]);
     const [lyrics, setLyrics] = useState('');
     const [description, setDescription] = useState('');
     const [availableGenres, setAvailableGenres] = useState([]);
+    const { getAccessToken } = useUser();
 
     useEffect(() => {
-        if (song) {
-            setTitle(song.title || '');
-            setArtists(song.artists || '');
-            setGenres(song.genres.map(genre => ({
-                value: genre.id,
-                label: genre.name
-            })));
-            setLyrics(song.lyrics || '');
-            setDescription(song.description || '');
+        if (song && visible) {
+            let loadSong = async () => {
+                try {
+                    setImage(song.image || '');
+                    setTitle(song.title || '');
+                    setArtists(song.artists || '');
+                    if (!song.genres) {
+                        let res = await authAPI(await getAccessToken()).get(endpoints.song(song.id));
+                        let data = res.data;
+                        setGenres(data.genres?.map(genre => ({
+                            value: genre.id,
+                            label: genre.name
+                        })) || []);
+                        console.info(data)
+                        setLyrics(data.lyrics || '');
+                        setDescription(data.description || '');
+                    } else {
+                        setGenres(song.genres?.map(genre => ({
+                            value: genre.id,
+                            label: genre.name
+                        })) || []);
+                        setLyrics(song.lyrics || '');
+                        setDescription(song.description || '');
+                    }
+                } catch (error) {
+                    console.error(error);
+                }
+            };
+
+            loadSong();
         }
-    }, [song, availableGenres]);
+    }, [song, visible, availableGenres, getAccessToken]);
 
     useEffect(() => {
-        const loadGenres = async () => {
-            try {
-                let res = await API.get(endpoints.genres);
-                const genresFormatted = res.data.map(genre => ({
-                    value: genre.id,
-                    label: genre.name
-                }));
-                setAvailableGenres(genresFormatted);
-            } catch (error) {
-                console.error(error);
-            }
-        };
+        if (visible) {
+            const loadGenres = async () => {
+                try {
+                    let res = await API.get(endpoints.genres);
+                    const genresFormatted = res.data.map(genre => ({
+                        value: genre.id,
+                        label: genre.name
+                    }));
+                    setAvailableGenres(genresFormatted);
+                } catch (error) {
+                    console.error(error);
+                }
+            };
 
-        loadGenres();
-    }, []);
+            loadGenres();
+        }
+    }, [visible]);
 
     const handleSubmit = async () => {
-        try {
-            await axios.put(`/api/songs/${song.id}/`, {
-                title,
-                artists,
-                genres: genres.map(g => g.value),
-                lyrics,
-                description,
+        let formData = new FormData();
+        if (image !== song.image) formData.append('image', image);
+        if (title !== song.title) formData.append('title', title);
+        if (artists !== song.artists) formData.append('artirts', artists);
+        const genreIds = genres.map(genre => genre.value);
+        const originalGenreIds = availableGenres.map(genre => genre.id);
+        if (genreIds.length !== originalGenreIds.length || !genreIds.every(id => originalGenreIds.includes(id)))
+            genreIds.forEach(id => {
+                formData.append('genre_ids', id);
             });
-            onUpdate();
-            onClose();
+        if (lyrics !== song.lyrics) formData.append('lyrics', lyrics);
+        if (description !== song.description) formData.append('description', description);
+
+        try {
+            let res = await authAPI(await getAccessToken()).patch(endpoints.song(song.id),
+                formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            onSaveChange?.(res.data);
         } catch (error) {
-            console.error('Error updating song:', error);
+            alert("Không thể lưu thay đổi");
+            console.error(error);
+        } finally {
+            onClose();
         }
     };
 
@@ -68,18 +108,17 @@ const SongModal = ({ visible, song, onUpdate, onClose }) => {
                 <Modal.Title>Chỉnh sửa bài hát</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Form className='d-flex'>
-                    <Form.Group>
-                        <Form.Label className='text-dark'>Title</Form.Label>
-                        <Form.Control
-                            type="text"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                        />
+                <Form className='d-flex' style={{ gap: '50px' }}>
+                    <Form.Group style={{ width: '350px', height: '350px' }}>
+                        <Form.Label className='text-dark'>Ảnh bìa</Form.Label>
+                        <ImageUpload
+                            style={{ width: '100%', height: '100%' }}
+                            src={image}
+                            onDrop={(f) => setImage(f.file[0])} />
                     </Form.Group>
-                    <Form.Group style={{ width: '300px' }}>
+                    <Form.Group style={{ width: '600px' }}>
                         <Form.Group controlId="formTitle">
-                            <Form.Label className='text-dark'>Title</Form.Label>
+                            <Form.Label className='text-dark'>Tên bài hát</Form.Label>
                             <Form.Control
                                 type="text"
                                 value={title}
@@ -87,7 +126,7 @@ const SongModal = ({ visible, song, onUpdate, onClose }) => {
                             />
                         </Form.Group>
                         <Form.Group controlId="formArtists">
-                            <Form.Label className='text-dark'>Artists</Form.Label>
+                            <Form.Label className='text-dark'>Nghệ sĩ</Form.Label>
                             <Form.Control
                                 type="text"
                                 value={artists}
@@ -95,7 +134,7 @@ const SongModal = ({ visible, song, onUpdate, onClose }) => {
                             />
                         </Form.Group>
                         <Form.Group controlId="formGenres">
-                            <Form.Label className='text-dark'>Genres</Form.Label>
+                            <Form.Label className='text-dark'>Thể loại</Form.Label>
                             <ReactSelect
                                 value={genres}
                                 onChange={handleGenresChange}
@@ -107,7 +146,7 @@ const SongModal = ({ visible, song, onUpdate, onClose }) => {
                             />
                         </Form.Group>
                         <Form.Group controlId="formLyrics">
-                            <Form.Label className='text-dark'>Lyrics</Form.Label>
+                            <Form.Label className='text-dark'>Lời bài hát</Form.Label>
                             <Form.Control
                                 as="textarea"
                                 rows={3}
@@ -129,10 +168,10 @@ const SongModal = ({ visible, song, onUpdate, onClose }) => {
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={onClose}>
-                    Close
+                    Đóng
                 </Button>
                 <Button variant="primary" onClick={handleSubmit}>
-                    Save Changes
+                    Lưu thay đổi
                 </Button>
             </Modal.Footer>
         </Modal>

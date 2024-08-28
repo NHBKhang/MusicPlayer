@@ -203,7 +203,7 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
     parser_classes = (MultiPartParser, FormParser)
 
     def get_serializer_class(self):
-        if self.action in ['retrieve', 'update', 'partial_update']:
+        if self.action in ['retrieve', 'update', 'partial_update', 'create']:
             if self.request.user.is_authenticated:
                 return serializers.AuthenticatedSongDetailsSerializer
             else:

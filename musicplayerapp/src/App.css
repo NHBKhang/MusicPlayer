@@ -129,11 +129,10 @@ label {
 }
 
 .modal-dialog, .modal {
-  width: 100% !important;
   padding: 0 !important;
   margin: 2rem auto;
 }
 
-/* .modal-dialog .modal-content {
-  width: 120% !important;
-} */
+.modal-dialog {
+  max-width: 1000px !important;
+}

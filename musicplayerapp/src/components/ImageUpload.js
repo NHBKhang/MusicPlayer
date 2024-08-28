@@ -32,14 +32,14 @@ const ImageUpload = ({ src, onDrop }) => {
                 textAlign: 'center',
                 cursor: 'pointer',
                 padding: 0,
-                width: '150px',
-                height: '150px',
-                margin: '10px',
+                width: '100%',
+                height: '100%',
                 boxSizing: 'unset',
                 backgroundColor: isDragActive ? 'rgba(150, 150, 150, 0.4)' : 'rgba(0, 0, 0, 0.4)',
                 position: 'relative',
                 overflow: 'hidden',
             }}
+
             aria-labelledby="image-upload-label"
         >
             <input {...getInputProps()} />

@@ -80,7 +80,7 @@ const PlaylistDetailsPage = () => {
 
     return (
         <Page title={`${playlist?.title}`}>
-            <div className="song-container content-container">
+            <div className="song-container">
                 <div className="song-detail row">
                     <div className="song-cover col-xxl-3 col-xl-4 col-lg-4 col-md-6 col-sm-12">
                         <img
