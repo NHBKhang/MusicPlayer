@@ -136,3 +136,7 @@ label {
 .modal-dialog {
   max-width: 1000px !important;
 }
+
+.form-check-label {
+  color: #333
+}

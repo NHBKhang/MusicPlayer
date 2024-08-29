@@ -29,7 +29,6 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
                             value: genre.id,
                             label: genre.name
                         })) || []);
-                        console.info(data)
                         setLyrics(data.lyrics || '');
                         setDescription(data.description || '');
                     } else {
@@ -112,13 +111,12 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
                     <Form.Group style={{ width: '350px', height: '350px' }}>
                         <Form.Label className='text-dark'>Ảnh bìa</Form.Label>
                         <ImageUpload
-                            style={{ width: '100%', height: '100%' }}
                             src={image}
                             onDrop={(f) => setImage(f.file[0])} />
                     </Form.Group>
                     <Form.Group style={{ width: '600px' }}>
                         <Form.Group controlId="formTitle">
-                            <Form.Label className='text-dark'>Tên bài hát</Form.Label>
+                            <Form.Label className='text-dark mt-2'>Tên bài hát</Form.Label>
                             <Form.Control
                                 type="text"
                                 value={title}
@@ -126,7 +124,7 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
                             />
                         </Form.Group>
                         <Form.Group controlId="formArtists">
-                            <Form.Label className='text-dark'>Nghệ sĩ</Form.Label>
+                            <Form.Label className='text-dark mt-2'>Nghệ sĩ</Form.Label>
                             <Form.Control
                                 type="text"
                                 value={artists}
@@ -134,7 +132,7 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
                             />
                         </Form.Group>
                         <Form.Group controlId="formGenres">
-                            <Form.Label className='text-dark'>Thể loại</Form.Label>
+                            <Form.Label className='text-dark mt-2'>Thể loại</Form.Label>
                             <ReactSelect
                                 value={genres}
                                 onChange={handleGenresChange}
@@ -146,7 +144,7 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
                             />
                         </Form.Group>
                         <Form.Group controlId="formLyrics">
-                            <Form.Label className='text-dark'>Lời bài hát</Form.Label>
+                            <Form.Label className='text-dark mt-2'>Lời bài hát</Form.Label>
                             <Form.Control
                                 as="textarea"
                                 rows={3}
@@ -155,7 +153,7 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
                             />
                         </Form.Group>
                         <Form.Group controlId="formDescription">
-                            <Form.Label className='text-dark'>Description</Form.Label>
+                            <Form.Label className='text-dark mt-2'>Description</Form.Label>
                             <Form.Control
                                 as="textarea"
                                 rows={3}

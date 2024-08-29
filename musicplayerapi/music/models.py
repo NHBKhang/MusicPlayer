@@ -120,6 +120,10 @@ class Playlist(BaseModel, ImageBaseModel):
     def __str__(self):
         return f"{self.title} ({self.get_playlist_type_display()})"
 
+    def get_type(self):
+        type_dict = dict(self.PLAYLIST_TYPE_CHOICES)
+        return type_dict.get(self.playlist_type, None)
+
 
 class PlaylistDetails(models.Model):
     playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE, related_name='details')

@@ -309,6 +309,7 @@ export const TrackItem = memo(({ song, state }) => {
     const { isPlaying, currentSong, togglePlayPauseNewSong } = useAudio();
     const navigate = useNavigate();
     const [item, setItem] = useState(song);
+    const [showOptions, setShowOptions] = useState(false);
     const [visible, setVisible] = useState({
         delete: false,
         edit: false
@@ -348,7 +349,11 @@ export const TrackItem = memo(({ song, state }) => {
         } finally {
             updateVisible('delete', false);
         }
-    }
+    };
+
+    const handleToggleOptions = () => {
+        setShowOptions(!showOptions);
+    };
 
     return (
         <div className="track-item">
@@ -366,22 +371,38 @@ export const TrackItem = memo(({ song, state }) => {
                 <h5 onClick={goToDetails} className="cursor-pointer">{item.title}</h5>
                 <p>{item.artists}</p>
                 <div className="d-flex justify-content-between align-items-center w-100 mt-2">
-                    <div>
+                    <div className="d-flex" style={{ gap: '4px' }}>
                         <button
                             type="button"
                             onClick={like}
                             className={`m-0 ${item.liked ? 'liked' : ''}`}>
                             <i class="fa-solid fa-heart me-1"></i>
-                            <span className={`d-none d-md-inline fs-6 ${item.liked ? '' : 'text-dark'}`}>{item.liked ? 'Bỏ thích' : 'Thích'}</span>
+                            <span className={`d-none d-md-inline fs-7 p-0 ${item.liked ? '' : 'text-dark'}`}>
+                                {item.liked ? 'Bỏ thích' : 'Thích'}
+                            </span>
                         </button>
                         {item.is_owner && <>
                             <button onClick={() => updateVisible('edit', true)} className="m-0">
                                 <i class="fa-solid fa-pen-to-square me-1"></i>
-                                <span className="d-none d-md-inline fs-6 text-dark">Chỉnh sửa</span>
+                                <span className="d-none d-md-inline fs-7 text-dark p-0">Chỉnh sửa</span>
                             </button>
                             <button onClick={() => updateVisible('delete', true)} className="m-0">
                                 <i class="fa-solid fa-trash me-1"></i>
-                                <span className="d-none d-md-inline fs-6 text-dark">Xóa bài hát</span>
+                                <span className="d-none d-md-inline fs-7 text-dark p-0">Xóa bài hát</span>
+                            </button>
+                            <button style={{ position: 'relative' }}
+                                className="m-0 px-md-2 p-1"
+                                onClick={handleToggleOptions}>
+                                <i class="fa-solid fa-ellipsis"></i>
+                                {showOptions && (
+                                    <div className="options-dropdown">
+                                        <ul>
+                                            <li>Thêm vào playlist</li>
+                                            <li>Option 2</li>
+                                            <li>Option 3</li>
+                                        </ul>
+                                    </div>
+                                )}
                             </button>
                         </>}
                     </div>

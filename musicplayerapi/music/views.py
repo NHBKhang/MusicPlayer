@@ -127,7 +127,7 @@ def set_password(request):
 
 
 class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveAPIView):
-    queryset = User.objects.filter(is_active=True)
+    queryset = User.objects.filter(is_active=True).order_by('id')
     serializer_class = serializers.PublicUserSerializer
     parser_classes = [parsers.MultiPartParser, ]
     pagination_class = paginators.UserPaginator
@@ -152,7 +152,7 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
         follower = self.request.query_params.get('follower')
         if follower:
-            queries = queries.filter(followers__follower__in=follower)
+            queries = queries.filter(followers__follower_id=int(follower))
 
         return queries.distinct()
 

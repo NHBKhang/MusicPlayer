@@ -144,10 +144,10 @@ class AuthenticatedSongSerializer(SongSerializer):
             return song.uploader.followers.filter(follower=request.user, active=True).exists()
         return False
 
-    def get_is_owner(self, obj):
+    def get_is_owner(self, song):
         request = self.context.get('request')
         if request and request.user.is_authenticated:
-            return obj.uploader == request.user
+            return song.uploader == request.user
         return False
 
     class Meta:
@@ -206,6 +206,20 @@ class PlaylistDetailsSerializer(serializers.ModelSerializer):
 class PlaylistSerializer(serializers.ModelSerializer):
     creator = PublicUserSerializer(read_only=True)
     details = PlaylistDetailsSerializer(many=True)
+    type = serializers.SerializerMethodField()
+    is_owner = serializers.SerializerMethodField()
+
+    def get_is_owner(self, playlist):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return playlist.creator == request.user
+        return False
+
+    def get_type(self, playlist):
+        if playlist.playlist_type:
+            return playlist.get_type()
+
+        return None
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)
@@ -219,15 +233,34 @@ class PlaylistSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Playlist
-        fields = ['id', 'title', 'image', 'creator', 'details', 'is_public']
+        fields = ['id', 'title', 'image', 'creator', 'details', 'is_public', 'is_owner', 'type', 'playlist_type']
 
 
 class PlaylistSongsSerializer(PlaylistSerializer):
-    genres = GenreSerializer(many=True)
+    genres = GenreSerializer(many=True, read_only=True)
+    genre_ids = serializers.ListField(write_only=True, child=serializers.IntegerField(), required=False)
+
+    def create(self, validated_data):
+        genre_ids = validated_data.pop('genre_ids', [])
+        playlist = super().create(validated_data)
+        if genre_ids:
+            playlist.genres.set(genre_ids)
+        return playlist
+
+    def update(self, instance, validated_data):
+        genre_ids = validated_data.pop('genre_ids', [])
+        published_date = validated_data.pop('published_date', None)
+        instance = super().update(instance, validated_data)
+        if genre_ids:
+            instance.genres.set(genre_ids)
+        if not published_date:
+            instance.published_date = None
+            instance.save()
+        return instance
 
     class Meta:
         model = PlaylistSerializer.Meta.model
-        fields = PlaylistSerializer.Meta.fields + ['genres', 'description', 'playlist_type', 'created_date',
+        fields = PlaylistSerializer.Meta.fields + ['genres', 'genre_ids', 'description', 'created_date',
                                                    'published_date']
 
 

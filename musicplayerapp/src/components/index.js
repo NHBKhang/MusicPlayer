@@ -14,3 +14,4 @@ export { default as VerifiedBadge } from './VerifiedBadge';
 export { default as ImageUpload } from './ImageUpload';
 export { default as Modal } from './Modal';
 export { default as SongModal } from './SongModal';
+export { default as PlaylistModal } from './PlaylistModal';

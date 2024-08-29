@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { authAPI, endpoints } from "../configs/API";
 import { useUser } from "../configs/UserContext";
 import moment from "moment";
-import { LoginRequiredModal, TabView, VerifiedBadge } from "../components";
+import { LoginRequiredModal, Modal, PlaylistModal, TabView, VerifiedBadge } from "../components";
 import { renderDescription } from "../configs/Utils";
 import { useAudio } from "../configs/AudioContext";
 import '../styles/PlaylistDetailsPage.css';
@@ -16,6 +16,12 @@ const PlaylistDetailsPage = () => {
     const navigate = useNavigate();
     const [playlist, setPlaylist] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [visible, setVisible] = useState({
+        edit: false,
+        delete: false
+    });
+
+    const updateVisible = (field, value) => setVisible(prev => ({ ...prev, [field]: value }))
 
     useEffect(() => {
         const loadPlaylist = async () => {
@@ -78,6 +84,18 @@ const PlaylistDetailsPage = () => {
         },
     ];
 
+    const onDelete = async () => {
+        try {
+            let res = await authAPI(await getAccessToken()).delete(playlist.id);
+
+            if (res.status === 204) {
+                navigate('/');
+            }
+        } catch (error) {
+            alert(`Lỗi không xóa được ${playlist.type}`);
+        }
+    }
+
     return (
         <Page title={`${playlist?.title}`}>
             <div className="song-container">
@@ -90,7 +108,7 @@ const PlaylistDetailsPage = () => {
                             alt={playlist?.title} />
                     </div>
                     <div className="song-info col-xxl-9 col-xl-8 col-lg-8 col-md-6">
-                        <h1 className="mt-2 mb-2">{playlist?.title}</h1>
+                        <h1 className="mt-2 mb-2">{playlist?.title} ({playlist?.type})</h1>
                         <div className="d-flex justify-content-end mb-3">
                             <div className="mt-4">
                                 {playlist?.genres?.map(g =>
@@ -137,11 +155,24 @@ const PlaylistDetailsPage = () => {
                                 <p>Bài hát</p>
                             </div>
                         </div>
+                        <div className="button-group">
+                            {playlist?.is_owner &&
+                                <div className="d-flex align-items-center button-group" style={{ gap: '12px' }}>
+                                    <button onClick={() => updateVisible('edit', true)}>
+                                        <i class="fa-solid fa-pen-to-square me-1"></i>
+                                        <p className="d-none d-md-inline fs-6 text-dark">Chỉnh sửa</p>
+                                    </button>
+                                    <button onClick={() => updateVisible('delete', true)}>
+                                        <i class="fa-solid fa-trash me-1"></i>
+                                        <p className="d-none d-md-inline fs-6 text-dark">Xóa bài hát</p>
+                                    </button>
+                                </div>}
+                        </div>
                         <br />
                     </div>
                 </div>
             </div>
-            <div className="content-container row">
+            <div className="row p-1">
                 <div className="col-md-8 p-0">
                     <TabView tabs={tabs} />
                 </div>
@@ -178,8 +209,18 @@ const PlaylistDetailsPage = () => {
             </div> */}
             </div>
             <LoginRequiredModal
-                isModalOpen={isModalOpen}
-                setIsModalOpen={setIsModalOpen} />
+                visible={isModalOpen.required}
+                onClose={setIsModalOpen} />
+            <PlaylistModal
+                visible={visible.edit}
+                playlist={playlist}
+                onSaveChange={(playlist) => setPlaylist(playlist)}
+                onClose={() => updateVisible('edit', false)} />
+            <Modal
+                label={`Bạn có chắc chắn muốn xóa ${playlist.title} (${playlist.type}) không?`}
+                visible={visible.delete}
+                onCancel={() => updateVisible('delete', false)}
+                onConfirm={onDelete} />
         </Page>
     )
 };
