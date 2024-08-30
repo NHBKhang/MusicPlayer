@@ -250,12 +250,11 @@ class PlaylistSongsSerializer(PlaylistSerializer):
     def update(self, instance, validated_data):
         genre_ids = validated_data.pop('genre_ids', [])
         published_date = validated_data.pop('published_date', None)
+        instance.published_date = published_date
+        instance.save()
         instance = super().update(instance, validated_data)
         if genre_ids:
             instance.genres.set(genre_ids)
-        if not published_date:
-            instance.published_date = None
-            instance.save()
         return instance
 
     class Meta:

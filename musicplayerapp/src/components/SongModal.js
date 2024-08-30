@@ -46,7 +46,7 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
 
             loadSong();
         }
-    }, [song, visible, availableGenres, getAccessToken]);
+    }, [song, visible, getAccessToken]);
 
     useEffect(() => {
         if (visible) {

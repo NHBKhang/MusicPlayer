@@ -140,3 +140,7 @@ label {
 .form-check-label {
   color: #333
 }
+
+.modal-body .tab-content {
+  border: none !important;
+}

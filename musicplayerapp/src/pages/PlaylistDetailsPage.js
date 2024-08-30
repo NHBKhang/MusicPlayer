@@ -164,7 +164,7 @@ const PlaylistDetailsPage = () => {
                                     </button>
                                     <button onClick={() => updateVisible('delete', true)}>
                                         <i class="fa-solid fa-trash me-1"></i>
-                                        <p className="d-none d-md-inline fs-6 text-dark">Xóa bài hát</p>
+                                        <p className="d-none d-md-inline fs-6 text-dark">Xóa playlist</p>
                                     </button>
                                 </div>}
                         </div>
@@ -176,10 +176,10 @@ const PlaylistDetailsPage = () => {
                 <div className="col-md-8 p-0">
                     <TabView tabs={tabs} />
                 </div>
-                {/* <div className="col-md-4 text-start mt-2">
-                <h5>Bài hát liên quan</h5>
-                <hr />
-                {relatedSongs.map(r =>
+                <div className="col-md-4 text-start mt-2">
+                    <h5>Các playlist khác từ {playlist.creator.name}</h5>
+                    <hr />
+                    {/* {relatedSongs.map(r =>
                     <div key={r.id}
                         className="related-song d-flex ms-lg-1">
                         <img
@@ -205,8 +205,8 @@ const PlaylistDetailsPage = () => {
                                 <i class="fa-solid fa-pause"></i> :
                                 <i class="fa-solid fa-play"></i>}
                         </button>
-                    </div>)}
-            </div> */}
+                    </div>)} */}
+                </div>
             </div>
             <LoginRequiredModal
                 visible={isModalOpen.required}

@@ -236,7 +236,7 @@
 .playlist-item .track-list-container {
     width: calc(100% - 30px);
     border: 1px solid rgba(245, 245, 245, 0.25);
-    margin: 20px 15px 5px;
+    margin: 20px 15px 15px;
 }
 
 .playlist-item .track-list {
@@ -276,6 +276,14 @@
     display: flex;
     justify-content: space-between;
     width: 100%;
+}
+
+.playlist-item .playlist-type {
+    font-size: 18px !important;
+    padding: 0 7px;
+    font-weight: 300 !important;
+    color: whitesmoke !important;
+
 }
 
 .playlist-item .view-more-button {

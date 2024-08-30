@@ -3,7 +3,7 @@ import Page from ".";
 import { useUser } from "../configs/UserContext";
 import '../styles/ProfilePage.css';
 import { useNavigate, useParams } from "react-router-dom";
-import { LoginRequiredModal, Modal, SongModal, VerifiedBadge } from "../components";
+import { LoginRequiredModal, Modal, PlaylistModal, SongModal, VerifiedBadge } from "../components";
 import { authAPI, endpoints } from "../configs/API";
 import { useAudio } from "../configs/AudioContext";
 import moment from "moment";
@@ -335,11 +335,11 @@ export const TrackItem = memo(({ song, state }) => {
 
     const goToDetails = () => {
         navigate(`/songs/${item.id}/`);
-    }
+    };
 
     const onDelete = async () => {
         try {
-            let res = await authAPI(await getAccessToken()).delete(endpoints.song(song.id));
+            let res = await authAPI(await getAccessToken()).delete(endpoints.song(item.id));
 
             if (res.status === 204) {
                 navigate('/');
@@ -432,10 +432,19 @@ export const TrackItem = memo(({ song, state }) => {
 
 const PlaylistItem = memo(({ playlist }) => {
     const { isPlaying, currentSong, playlistId, togglePlayPauseNewSong, playSong } = useAudio();
+    const { getAccessToken } = useUser();
     const navigate = useNavigate();
-    const [item,] = useState(playlist);
+    const [item, setItem] = useState(playlist);
     const [visibleCount, setVisibleCount] = useState(5);
     const [isExpanded, setIsExpanded] = useState(false);
+    const [visible, setVisible] = useState({
+        delete: false,
+        edit: false
+    });
+
+    const updateVisible = (field, value) => {
+        setVisible(current => ({ ...current, [field]: value }));
+    };
 
     const handleViewMore = () => {
         if (isExpanded) {
@@ -457,6 +466,20 @@ const PlaylistItem = memo(({ playlist }) => {
             if (item?.details?.length > 0) {
                 playSong(item.details[0]?.song, item?.id);
             }
+        }
+    };
+
+    const onDelete = async () => {
+        try {
+            let res = await authAPI(await getAccessToken()).delete(endpoints.playlist(item.id));
+
+            if (res.status === 204) {
+                navigate('/');
+            }
+        } catch (error) {
+            alert("Không thể xóa playlist")
+        } finally {
+            updateVisible('delete', false);
         }
     };
 
@@ -483,7 +506,10 @@ const PlaylistItem = memo(({ playlist }) => {
                             <p className="date">{moment(item?.created_date).fromNow()}</p>
                         </div>
                         <div className='d-flex justify-content-between'>
-                            <h5 onClick={goToDetails} className="cursor-pointer">{item?.title}</h5>
+                            <h5 onClick={goToDetails} className="cursor-pointer">
+                                {item?.title} 
+                                <span className="playlist-type">{item?.type}</span>
+                            </h5>
                             {!item?.is_public && <span className="privacy">
                                 <i className="fa-solid fa-lock"></i> Private
                             </span>}
@@ -510,7 +536,30 @@ const PlaylistItem = memo(({ playlist }) => {
                         </button>
                     )}
                 </div>
+                <div className="button-group">
+                    {item?.is_owner &&
+                        <div className="d-flex align-items-center button-group" style={{ gap: '12px' }}>
+                            <button onClick={() => updateVisible('edit', true)}>
+                                <i class="fa-solid fa-pen-to-square me-1"></i>
+                                <p className="d-none d-md-inline fs-6 text-dark">Chỉnh sửa</p>
+                            </button>
+                            <button onClick={() => updateVisible('delete', true)}>
+                                <i class="fa-solid fa-trash me-1"></i>
+                                <p className="d-none d-md-inline fs-6 text-dark">Xóa playlist</p>
+                            </button>
+                        </div>}
+                </div>
             </div>
+            <Modal
+                label={`Bạn có chắc muốn xóa bài hát ${item?.title} không?`}
+                visible={visible.delete}
+                onConfirm={onDelete}
+                onCancel={() => updateVisible('delete', false)} />
+            <PlaylistModal
+                visible={visible.edit}
+                playlist={item}
+                onSaveChange={(playlist) => setItem(playlist)}
+                onClose={() => updateVisible('edit', false)} />
         </div>
     )
 });
