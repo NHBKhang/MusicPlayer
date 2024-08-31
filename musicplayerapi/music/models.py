@@ -85,6 +85,7 @@ class Song(ImageBaseModel, BaseModel):
     genres = models.ManyToManyField(Genre, related_name='songs', null=True, blank=True)
     lyrics = models.TextField(null=True, blank=True)
     description = models.TextField(blank=True, null=True)
+    is_public = models.BooleanField(default=True)
 
     def __str__(self):
         return self.title
@@ -110,7 +111,7 @@ class Playlist(BaseModel, ImageBaseModel):
     ]
 
     title = models.CharField(max_length=255, null=False, blank=False)
-    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name='playlists')
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name='playlists', null=False, blank=False)
     description = models.TextField(blank=True, null=True)
     genres = models.ManyToManyField(Genre, related_name='playlists')
     is_public = models.BooleanField(default=True)
@@ -132,7 +133,7 @@ class PlaylistDetails(models.Model):
 
     class Meta:
         ordering = ['order']
-        unique_together = [['playlist', 'song']]
+        unique_together = [['playlist', 'song', 'order']]
         verbose_name = "playlist detail"
         verbose_name_plural = "playlists details"
 

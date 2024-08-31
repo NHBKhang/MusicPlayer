@@ -3,7 +3,7 @@ import Page from ".";
 import { useUser } from "../configs/UserContext";
 import '../styles/ProfilePage.css';
 import { useNavigate, useParams } from "react-router-dom";
-import { LoginRequiredModal, Modal, PlaylistModal, SongModal, VerifiedBadge } from "../components";
+import { AddToPlaylistModal, LoginRequiredModal, Modal, PlaylistModal, SongModal, VerifiedBadge } from "../components";
 import { authAPI, endpoints } from "../configs/API";
 import { useAudio } from "../configs/AudioContext";
 import moment from "moment";
@@ -303,7 +303,7 @@ const TabView = memo(({ tabs, activeTab, onTabClick }) => (
     </div>
 ));
 
-export const TrackItem = memo(({ song, state }) => {
+export const TrackItem = ({ song, state }) => {
     const setIsModalOpen = state?.setIsModalOpen;
     const { getAccessToken, user } = useUser();
     const { isPlaying, currentSong, togglePlayPauseNewSong } = useAudio();
@@ -312,7 +312,8 @@ export const TrackItem = memo(({ song, state }) => {
     const [showOptions, setShowOptions] = useState(false);
     const [visible, setVisible] = useState({
         delete: false,
-        edit: false
+        edit: false,
+        add: false,
     });
 
     const updateVisible = (field, value) => {
@@ -339,11 +340,7 @@ export const TrackItem = memo(({ song, state }) => {
 
     const onDelete = async () => {
         try {
-            let res = await authAPI(await getAccessToken()).delete(endpoints.song(item.id));
-
-            if (res.status === 204) {
-                navigate('/');
-            }
+            await authAPI(await getAccessToken()).delete(endpoints.song(item.id));
         } catch (error) {
             alert("Không thể xóa bài hát")
         } finally {
@@ -397,7 +394,7 @@ export const TrackItem = memo(({ song, state }) => {
                                 {showOptions && (
                                     <div className="options-dropdown">
                                         <ul>
-                                            <li>Thêm vào playlist</li>
+                                            <li onClick={() => updateVisible('add', true)}>Thêm vào playlist</li>
                                             <li>Option 2</li>
                                             <li>Option 3</li>
                                         </ul>
@@ -426,11 +423,15 @@ export const TrackItem = memo(({ song, state }) => {
                 song={item}
                 onSaveChange={(song) => setItem(song)}
                 onClose={() => updateVisible('edit', false)} />
+            <AddToPlaylistModal
+                visible={visible.add}
+                song={item}
+                onClose={() => updateVisible('add', false)} />
         </div>
     )
-});
+};
 
-const PlaylistItem = memo(({ playlist }) => {
+const PlaylistItem = ({ playlist }) => {
     const { isPlaying, currentSong, playlistId, togglePlayPauseNewSong, playSong } = useAudio();
     const { getAccessToken } = useUser();
     const navigate = useNavigate();
@@ -471,13 +472,9 @@ const PlaylistItem = memo(({ playlist }) => {
 
     const onDelete = async () => {
         try {
-            let res = await authAPI(await getAccessToken()).delete(endpoints.playlist(item.id));
-
-            if (res.status === 204) {
-                navigate('/');
-            }
+            await authAPI(await getAccessToken()).delete(endpoints.playlist(item.id));
         } catch (error) {
-            alert("Không thể xóa playlist")
+            alert("Không thể xóa playlist");
         } finally {
             updateVisible('delete', false);
         }
@@ -507,7 +504,7 @@ const PlaylistItem = memo(({ playlist }) => {
                         </div>
                         <div className='d-flex justify-content-between'>
                             <h5 onClick={goToDetails} className="cursor-pointer">
-                                {item?.title} 
+                                {item?.title}
                                 <span className="playlist-type">{item?.type}</span>
                             </h5>
                             {!item?.is_public && <span className="privacy">
@@ -551,7 +548,7 @@ const PlaylistItem = memo(({ playlist }) => {
                 </div>
             </div>
             <Modal
-                label={`Bạn có chắc muốn xóa bài hát ${item?.title} không?`}
+                label={`Bạn có chắc muốn xóa playlist ${item?.title} không?`}
                 visible={visible.delete}
                 onConfirm={onDelete}
                 onCancel={() => updateVisible('delete', false)} />
@@ -562,6 +559,6 @@ const PlaylistItem = memo(({ playlist }) => {
                 onClose={() => updateVisible('edit', false)} />
         </div>
     )
-});
+};
 
 export default ProfilePage;

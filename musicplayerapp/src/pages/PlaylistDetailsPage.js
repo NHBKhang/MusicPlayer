@@ -86,13 +86,15 @@ const PlaylistDetailsPage = () => {
 
     const onDelete = async () => {
         try {
-            let res = await authAPI(await getAccessToken()).delete(playlist.id);
+            let res = await authAPI(await getAccessToken())
+                .delete(endpoints.playlist(playlist.id));
 
             if (res.status === 204) {
                 navigate('/');
             }
         } catch (error) {
             alert(`Lỗi không xóa được ${playlist.type}`);
+            console.error(error)
         }
     }
 
@@ -177,7 +179,7 @@ const PlaylistDetailsPage = () => {
                     <TabView tabs={tabs} />
                 </div>
                 <div className="col-md-4 text-start mt-2">
-                    <h5>Các playlist khác từ {playlist.creator.name}</h5>
+                    <h5>Các playlist khác từ {playlist?.creator?.name}</h5>
                     <hr />
                     {/* {relatedSongs.map(r =>
                     <div key={r.id}

@@ -23,8 +23,8 @@ class PlaylistOwner(permissions.BasePermission):
 
 
 class PlaylistDetailsPermission(permissions.BasePermission):
-    def has_object_permission(self, request, view, playlist_detail):
+    def has_object_permission(self, request, view, detail):
         if request.method in permissions.SAFE_METHODS:
             return True
 
-        return playlist_detail.playlist.creator == request.user
+        return detail.playlist.creator == request.user

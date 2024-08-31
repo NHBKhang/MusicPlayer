@@ -10,7 +10,7 @@ from music import serializers, paginators, perms, utils
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from django.contrib.auth import update_session_auth_hash
-from django.db.models import Count, Max, Q
+from django.db.models import Count, Max, Q, Prefetch
 from google.oauth2 import id_token
 from google.auth.transport import requests as gg_requests
 from oauth2_provider.settings import oauth2_settings
@@ -140,6 +140,7 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
     def get_queryset(self):
         queries = self.queryset
+
         if self.request.user.is_authenticated:
             queries = queries.exclude(id=self.request.user.id)
 
@@ -420,7 +421,11 @@ class PlaylistViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Ret
         return self.serializer_class
 
     def get_queryset(self):
-        queryset = self.queryset
+        if self.action == 'destroy':
+            return Playlist.objects.all()
+
+        queryset = self.queryset.prefetch_related(
+            Prefetch('details', queryset=PlaylistDetails.objects.order_by('order')))
 
         q = self.request.query_params.get('q')
         if q:

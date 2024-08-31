@@ -96,18 +96,25 @@ const PlaylistModal = ({ visible, playlist, onSaveChange, onClose }) => {
         if (!validateForm()) return;
 
         let formData = new FormData();
-        if (image !== playlist.image) formData.append('image', image);
+        if (image !== playlist.image && image) formData.append('image', image);
         if (title !== playlist.title) formData.append('title', title);
         if (Number(playlistType) !== Number(playlist.playlist_type)) formData.append('playlist_type', playlistType);
         if (isPublic !== playlist.is_public) formData.append('is_public', isPublic);
-        if (Number(playlistType) === 4)
-            formData.append('published_date', '');
-        else
-            formData.append('published_date', publishedDate);
-
+        if (Number(playlistType) !== 4 && publishedDate) formData.append('published_date', publishedDate);
         const genreIds = genres.map(genre => genre.value);
-        genreIds.forEach(id => formData.append('genre_ids', id));
-        formData.append('description', description);
+        const originalGenreIds = playlist.genres.map(genre => genre.id);
+        if (genreIds.length !== originalGenreIds.length || !genreIds.every(id => originalGenreIds.includes(id)))
+            genreIds.forEach(id => {
+                formData.append('genre_ids', id);
+            });
+        if (description !== playlist.description) formData.append('description', description);
+        songs.forEach((d, index) => {
+            formData.append('details_list', JSON.stringify({
+                id: d.id,
+                song: d.song.id,
+                order: index + 1
+            }));
+        });
 
         try {
             let res = await authAPI(await getAccessToken()).patch(endpoints.playlist(playlist.id),
@@ -138,7 +145,7 @@ const PlaylistModal = ({ visible, playlist, onSaveChange, onClose }) => {
     };
 
     return (
-        <Modal show={visible} onHide={closeModal}>
+        <Modal show={visible} onHide={closeModal} className="edit-modal">
             <Modal.Header closeButton>
                 <Modal.Title>Chỉnh sửa {playlist?.type}</Modal.Title>
             </Modal.Header>
@@ -235,12 +242,10 @@ const PlaylistModal = ({ visible, playlist, onSaveChange, onClose }) => {
                                                             gap: '15px',
                                                             cursor: 'pointer',
                                                             ...provided.draggableProps.style,
-                                                            top: provided.draggableProps.style.top
-                                                                ? `${parseFloat(provided.draggableProps.style.top) - 210}px`
-                                                                : '5px',
-                                                            left: provided.draggableProps.style.left
-                                                                ? `${parseFloat(provided.draggableProps.style.left) - 85}px` // Adjust the left value by adding a small offset
-                                                                : '5px',
+                                                            top: provided.draggableProps.top ?
+                                                                0 : provided.draggableProps.top,
+                                                            left: provided.draggableProps.left ?
+                                                                0 : provided.draggableProps.left,
                                                         }}>
                                                         <img
                                                             src={d.song.image}

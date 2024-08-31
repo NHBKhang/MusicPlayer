@@ -92,9 +92,6 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class SongSerializer(serializers.ModelSerializer):
     uploader = PublicUserSerializer(read_only=True)
-    uploader_id = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), source='uploader', write_only=True, required=False
-    )
     likes = serializers.SerializerMethodField()
     streams = serializers.SerializerMethodField()
 
@@ -117,14 +114,7 @@ class SongSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Song
-        fields = ['id', 'title', 'uploader', 'uploader_id', 'image', 'artists', 'file', 'likes', 'streams', 'created_date']
-
-    def create(self, validated_data):
-        uploader_id = validated_data.pop('uploader_id', None)
-        if uploader_id:
-            validated_data['uploader'] = uploader_id
-
-        return super().create(validated_data)
+        fields = ['id', 'title', 'uploader', 'image', 'artists', 'file', 'likes', 'streams', 'created_date']
 
 
 class AuthenticatedSongSerializer(SongSerializer):
@@ -158,16 +148,22 @@ class AuthenticatedSongSerializer(SongSerializer):
 class SongDetailsSerializer(SongSerializer):
     genres = GenreSerializer(many=True, read_only=True)
     genre_ids = serializers.ListField(write_only=True, child=serializers.IntegerField(), required=False)
-    comments = serializers.SerializerMethodField()
+    uploader_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), source='uploader', write_only=True, required=False)
+    comments = serializers.SerializerMethodField(read_only=True)
 
     def get_comments(self, song):
         return song.comment_set.count()
 
     def create(self, validated_data):
         genre_ids = validated_data.pop('genre_ids', [])
+        uploader_id = validated_data.pop('uploader_id', None)
+        if uploader_id:
+            validated_data['uploader'] = uploader_id
         song = super().create(validated_data)
         if genre_ids:
             song.genres.set(genre_ids)
+
         return song
 
     def update(self, instance, validated_data):
@@ -175,11 +171,13 @@ class SongDetailsSerializer(SongSerializer):
         instance = super().update(instance, validated_data)
         if genre_ids:
             instance.genres.set(genre_ids)
+
         return instance
 
     class Meta:
         model = SongSerializer.Meta.model
-        fields = SongSerializer.Meta.fields + ['genres', 'genre_ids', 'comments', 'lyrics', 'description']
+        fields = SongSerializer.Meta.fields + ['genres', 'genre_ids', 'comments', 'lyrics', 'description',
+                                               'uploader_id']
 
 
 class AuthenticatedSongDetailsSerializer(SongDetailsSerializer, AuthenticatedSongSerializer):
@@ -189,6 +187,7 @@ class AuthenticatedSongDetailsSerializer(SongDetailsSerializer, AuthenticatedSon
 
 
 class PlaylistDetailsSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)
     song = serializers.SerializerMethodField()
 
     def get_song(self, detail):
@@ -200,12 +199,15 @@ class PlaylistDetailsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PlaylistDetails
-        fields = ['id', 'song']
+        fields = ['id', 'song', 'order']
 
 
 class PlaylistSerializer(serializers.ModelSerializer):
     creator = PublicUserSerializer(read_only=True)
-    details = PlaylistDetailsSerializer(many=True)
+    creator_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), source='creator', write_only=True, required=False)
+    details = PlaylistDetailsSerializer(many=True, required=False)
+    details_list = serializers.ListField(child=serializers.CharField(), required=False, write_only=True)
     type = serializers.SerializerMethodField()
     is_owner = serializers.SerializerMethodField()
 
@@ -218,7 +220,6 @@ class PlaylistSerializer(serializers.ModelSerializer):
     def get_type(self, playlist):
         if playlist.playlist_type:
             return playlist.get_type()
-
         return None
 
     def to_representation(self, instance):
@@ -226,14 +227,43 @@ class PlaylistSerializer(serializers.ModelSerializer):
         if type(instance.image) is cloudinary.CloudinaryResource:
             rep['image'] = instance.image.url
         elif instance.details.count() == 0:
-            rep[
-                'image'] = 'https://cdn.getmidnight.com/b5a0b552ae89a91aa34705031852bd16/2022/08/1_1---2022-08-24T165236.013-1.png'
+            rep['image'] = 'https://cdn.getmidnight.com/b5a0b552ae89a91aa34705031852bd16/2022/08/1_1---2022-08-24T165236.013-1.png'
 
         return rep
 
     class Meta:
         model = Playlist
-        fields = ['id', 'title', 'image', 'creator', 'details', 'is_public', 'is_owner', 'type', 'playlist_type']
+        fields = ['id', 'title', 'image', 'creator_id', 'creator', 'details', 'is_public', 'is_owner', 'type',
+                  'playlist_type', 'details_list']
+
+    def create(self, validated_data):
+        creator_id = validated_data.pop('creator_id', None)
+        details = validated_data.pop('details_list', [])
+        if creator_id:
+            validated_data['creator'] = creator_id
+        playlist = super().create(validated_data)
+
+        if details:
+            for detail_data in details:
+                if isinstance(detail_data, str):
+                    import json
+                    detail_data = json.loads(detail_data)
+
+                song_id = detail_data.get('song')
+                if song_id:
+                    try:
+                        song = Song.objects.get(id=song_id)
+                    except Song.DoesNotExist:
+                        continue
+
+                    PlaylistDetails.objects.create(
+                        playlist=playlist,
+                        song=song,
+                        order=detail_data.get('order', 1))
+                else:
+                    continue
+
+        return playlist
 
 
 class PlaylistSongsSerializer(PlaylistSerializer):
@@ -243,18 +273,44 @@ class PlaylistSongsSerializer(PlaylistSerializer):
     def create(self, validated_data):
         genre_ids = validated_data.pop('genre_ids', [])
         playlist = super().create(validated_data)
+
         if genre_ids:
             playlist.genres.set(genre_ids)
+
         return playlist
 
     def update(self, instance, validated_data):
         genre_ids = validated_data.pop('genre_ids', [])
+        details = validated_data.pop('details_list', [])
         published_date = validated_data.pop('published_date', None)
-        instance.published_date = published_date
-        instance.save()
         instance = super().update(instance, validated_data)
+
         if genre_ids:
             instance.genres.set(genre_ids)
+        instance.published_date = published_date
+        instance.save()
+
+        if details:
+            updated_ids = []
+            for detail_data in details:
+                if isinstance(detail_data, str):
+                    import json
+                    detail_data = json.loads(detail_data)
+                detail_id = detail_data.get('id')
+                if detail_id:
+                    try:
+                        playlist_detail = PlaylistDetails.objects.get(id=detail_id, playlist=instance)
+                        playlist_detail.song_id = detail_data.get('song_id', playlist_detail.song_id)
+                        playlist_detail.order = detail_data.get('order', playlist_detail.order)
+                        playlist_detail.save()
+                        updated_ids.append(detail_id)
+                    except PlaylistDetails.DoesNotExist:
+                        pass
+                else:
+                    PlaylistDetails.objects.create(playlist=instance, **detail_data)
+
+            PlaylistDetails.objects.filter(playlist=instance).exclude(id__in=updated_ids).delete()
+
         return instance
 
     class Meta:

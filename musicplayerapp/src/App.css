@@ -133,8 +133,17 @@ label {
   margin: 2rem auto;
 }
 
-.modal-dialog {
+.edit-modal .modal-dialog {
   max-width: 1000px !important;
+}
+
+.modal-dialog {
+  max-width: 1000px;
+}
+
+
+.add-modal .modal-dialog {
+  max-width: 550px !important;
 }
 
 .form-check-label {

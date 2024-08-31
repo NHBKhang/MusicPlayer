@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import '../styles/Sidebar.css';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-const Sidebar = ({ contentArea }) => {
+const Sidebar = () => {
     const contents = [{
         href: '/',
         icon: <i class="fa-solid fa-house"></i>,
