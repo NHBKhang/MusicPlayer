@@ -63,6 +63,10 @@ MIDDLEWARE = [
 
 CORS_ORIGIN_ALLOW_ALL = True
 
+CORS_ALLOW_HEADERS = ['*'] + [
+    'Song-ID',
+]
+
 ROOT_URLCONF = 'musicplayerapi.urls'
 
 TEMPLATES = [

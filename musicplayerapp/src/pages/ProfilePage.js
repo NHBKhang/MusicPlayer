@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Page from ".";
 import { useUser } from "../configs/UserContext";
 import '../styles/ProfilePage.css';
@@ -147,46 +147,27 @@ const UserProfileTabs = ({ profile, getAccessToken, state }) => {
         albums: false,
         playlists: false
     });
-    const observerRefs = useRef({
-        all: null,
-        songs: null,
-        popular: null,
-        albums: null,
-        playlists: null
-    });
-    const loadMoreRefs = useRef({
-        all: null,
-        songs: null,
-        popular: null,
-        albums: null,
-        playlists: null
-    });
+    const loadMoreRefs = useRef({});
 
-    const handleTabClick = (index) => {
-        setActiveTab(index);
-    };
+    const handleTabClick = (index) => setActiveTab(index)
 
-    const updatePage = (field, value) => {
-        setPage(prev => ({ ...prev, [field]: value }));
-    };
+    const updatePage = (field, value) => setPage(prev => ({ ...prev, [field]: value }))
 
     const updateData = (field, newData, append = false) => {
         setData(prev => ({
             ...prev,
-            [field]: append ? [...newData, ...prev[field]] : newData,
+            [field]: append ? [...prev[field], ...newData] : newData,
         }));
     };
 
-    const updateLoading = (field, value) => {
-        setLoading(prev => ({ ...prev, [field]: value }));
-    };
+    const updateLoading = (field, value) => setLoading(prev => ({ ...prev, [field]: value }))
 
     const loadItems = useCallback(
         async (field, append = false) => {
             if (page[field] > 0 && profile?.id) {
                 updateLoading(field, true);
                 try {
-                    const url = urls[tabKeys[activeTab]](profile.id, page[field]);
+                    const url = urls[field](profile?.id, page[field]);
                     const res = await authAPI(await getAccessToken()).get(url);
 
                     if (res.data.next === null) updatePage(field, 0);
@@ -199,86 +180,72 @@ const UserProfileTabs = ({ profile, getAccessToken, state }) => {
                 }
             }
         },
-        [page, getAccessToken, profile?.id, activeTab, tabKeys, urls]
+        [page, getAccessToken, profile?.id, urls]
     );
 
-    const loadMore = useCallback((field) => {
-        if (page[field] > 0 && !loading[field] && data[field].length > 0) {
+    useEffect(() => {
+        setData({ all: [], songs: [], popular: [], albums: [], playlists: [] });
+        setPage({ all: 1, songs: 1, popular: 1, albums: 1, playlists: 1 });
+        setLoading({ all: false, songs: false, popular: false, albums: false, playlists: false });
+    }, []);
+
+    useEffect(() => {
+        const loadMore = (field) => {
             updatePage(field, page[field] + 1);
             loadItems(field, true);
-        }
-    }, [page, loading, loadItems, data]);
-
-    useEffect(() => {
-        const tabKey = tabKeys[activeTab];
-        loadItems(tabKey);
-    }, [activeTab, loadItems, tabKeys]);
-
-    useEffect(() => {
-        setData({
-            all: [],
-            songs: [],
-            popular: [],
-            albums: [],
-            playlists: []
-        });
-        setPage({
-            all: 1,
-            songs: 1,
-            popular: 1,
-            albums: 1,
-            playlists: 1
-        });
-        setLoading({
-            all: false,
-            songs: false,
-            popular: false,
-            albums: false,
-            playlists: false
-        });
-    }, [profile]);
-
-    useEffect(() => {
-        const currentField = tabKeys[activeTab];
-        const currentObserver = observerRefs.current[currentField];
-
-
-        if (currentObserver) {
-            currentObserver.disconnect();
-        }
-
-        const callback = (entries) => {
-            if (entries[0].isIntersecting && page[currentField] > 0) {
-                loadMore(currentField);
-            }
         };
 
-        const newObserver = new IntersectionObserver(callback);
-        observerRefs.current[currentField] = newObserver;
+        const currentField = tabKeys[activeTab];
 
-        if (loadMoreRefs.current[currentField]) {
-            newObserver.observe(loadMoreRefs.current[currentField]);
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && !loading[currentField] &&
+                page[currentField] > 0) {
+                loadMore(currentField);
+            }
+        });
+
+        const loadMoreElement = loadMoreRefs.current[currentField];
+
+        if (loadMoreElement) {
+            observer.observe(loadMoreElement);
         }
 
         return () => {
-            if (currentObserver) {
-                currentObserver.disconnect();
+            if (loadMoreElement) {
+                observer.unobserve(loadMoreElement);
             }
         };
-    }, [activeTab, loadMore, page, tabKeys]);
+    }, [loading, page, data, tabKeys, activeTab, loadItems]);
 
     return (
         <div className="user-profile-tabs">
-            <TabView tabs={tabs} activeTab={activeTab} onTabClick={handleTabClick} />
+            <div className="tab-view">
+                {tabs.map((tab, index) => (
+                    <div
+                        key={index}
+                        className={`tab ${activeTab === index ? 'active' : ''}`}
+                        onClick={() => handleTabClick(index)}>
+                        {tab}
+                    </div>
+                ))}
+            </div>
             <div className="tracks-container">
                 {data[tabKeys[activeTab]].map(item => (
                     activeTab === 0 ? (item.type === 'song' ? (
-                        <TrackItem key={item.id} song={item} state={state} />
+                        <TrackItem
+                            key={`track-${tabKeys[activeTab]}-${item.id}`}
+                            song={item} state={state} />
                     ) : (
-                        <PlaylistItem key={item.id} playlist={item} state={state} />
+                        <PlaylistItem
+                            key={`playlist-${tabKeys[activeTab]}-${item.id}`}
+                            playlist={item} state={state} />
                     )) : (activeTab !== 3 && activeTab !== 4 ?
-                        <TrackItem key={item.id} song={item} state={state} /> :
-                        <PlaylistItem key={item.id} playlist={item} />)
+                        <TrackItem
+                            key={`track-${tabKeys[activeTab]}-${item.id}`}
+                            song={item} state={state} /> :
+                        <PlaylistItem
+                            key={`playlist-${tabKeys[activeTab]}-${item.id}`}
+                            playlist={item} />)
                 ))}
                 {page[tabKeys[activeTab]] > 0 && (
                     <div ref={el => loadMoreRefs.current[tabKeys[activeTab]] = el} className="load-more-container">
@@ -289,19 +256,6 @@ const UserProfileTabs = ({ profile, getAccessToken, state }) => {
         </div>
     );
 };
-
-const TabView = memo(({ tabs, activeTab, onTabClick }) => (
-    <div className="tab-view">
-        {tabs.map((tab, index) => (
-            <div
-                key={index}
-                className={`tab ${activeTab === index ? 'active' : ''}`}
-                onClick={() => onTabClick(index)}>
-                {tab}
-            </div>
-        ))}
-    </div>
-));
 
 export const TrackItem = ({ song, state }) => {
     const setIsModalOpen = state?.setIsModalOpen;
@@ -320,7 +274,7 @@ export const TrackItem = ({ song, state }) => {
         setVisible(current => ({ ...current, [field]: value }));
     };
 
-    const like = async () => {
+    const like = useCallback(async () => {
         if (user) {
             try {
                 let res = await authAPI(await getAccessToken())
@@ -332,13 +286,13 @@ export const TrackItem = ({ song, state }) => {
         } else {
             setIsModalOpen(true);
         }
-    };
+    }, [item.id, getAccessToken, setIsModalOpen, user]);
 
     const goToDetails = () => {
         navigate(`/songs/${item.id}/`);
     };
 
-    const onDelete = async () => {
+    const onDelete = useCallback(async () => {
         try {
             await authAPI(await getAccessToken()).delete(endpoints.song(item.id));
         } catch (error) {
@@ -346,11 +300,11 @@ export const TrackItem = ({ song, state }) => {
         } finally {
             updateVisible('delete', false);
         }
-    };
+    }, [getAccessToken, item.id]);
 
-    const handleToggleOptions = () => {
+    const handleToggleOptions = useCallback(() => {
         setShowOptions(!showOptions);
-    };
+    }, [showOptions]);
 
     return (
         <div className="track-item">
@@ -470,7 +424,7 @@ const PlaylistItem = ({ playlist }) => {
         }
     };
 
-    const onDelete = async () => {
+    const onDelete = useCallback(async () => {
         try {
             await authAPI(await getAccessToken()).delete(endpoints.playlist(item.id));
         } catch (error) {
@@ -478,7 +432,7 @@ const PlaylistItem = ({ playlist }) => {
         } finally {
             updateVisible('delete', false);
         }
-    };
+    }, [getAccessToken, item.id]);
 
     return (
         <div className="playlist-item cursor-pointer">

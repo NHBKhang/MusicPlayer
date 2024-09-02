@@ -2,13 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { Modal, Button, Form, Tabs, Tab } from 'react-bootstrap';
 import { useUser } from '../configs/UserContext';
 import { authAPI, endpoints } from '../configs/API';
+import { useNavigate } from 'react-router-dom';
 
 const AddToPlaylistModal = ({ visible, song, onClose }) => {
     const { getAccessToken, user } = useUser();
+    const navigate = useNavigate();
     const [filterText, setFilterText] = useState('');
     const [playlists, setPlaylists] = useState([]);
     const [newPlaylist, setNewPlaylist] = useState(null);
     const [errors, setErrors] = useState({});
+    const [created, setCreated] = useState(false);
 
     const updateNewPlaylist = (field, value) => {
         setNewPlaylist(current => ({ ...current, [field]: value }));
@@ -31,11 +34,15 @@ const AddToPlaylistModal = ({ visible, song, onClose }) => {
     }
 
     useEffect(() => {
-        if (visible && user?.id) {
+        if (visible && user?.id && song?.id) {
             const loadPlaylists = async () => {
                 try {
                     let res = await authAPI(await getAccessToken()).get(
-                        `${endpoints.playlists}?creator=${user?.id}`);
+                        `${endpoints.playlists}?creator=${user?.id}`, {
+                        headers: {
+                            "Song-ID": song?.id
+                        }
+                    });
                     setPlaylists(res.data.results);
                 } catch (error) {
                     console.error(error);
@@ -48,8 +55,9 @@ const AddToPlaylistModal = ({ visible, song, onClose }) => {
                 title: '',
                 is_public: true
             });
+            setCreated(false);
         }
-    }, [getAccessToken, visible, user?.id]);
+    }, [getAccessToken, visible, user?.id, song?.id]);
 
     const onSave = async () => {
         if (!validateForm()) return;
@@ -65,13 +73,15 @@ const AddToPlaylistModal = ({ visible, song, onClose }) => {
         try {
             let res = await authAPI(await getAccessToken()).post(endpoints.playlists,
                 formData, {
-                    headers: {
-                        "Content-Type": "multipart/form-data"
-                    }
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                }
             });
 
-            // if (res.status === 201)
-
+            if (res.status === 201) {
+                setCreated(true);
+                setNewPlaylist(res.data);
+            }
         } catch (error) {
             alert("Lỗi không tạo được playlist");
         }
@@ -123,30 +133,54 @@ const AddToPlaylistModal = ({ visible, song, onClose }) => {
                         </div>
                     </Tab>
                     <Tab eventKey="create" title="Tạo playlist mới" className='bg-white'>
-                        <Form.Group>
-                            <Form.Label className='text-dark'>Tên Playlist</Form.Label>
-                            <Form.Control
-                                type="text"
-                                value={newPlaylist?.title}
-                                onChange={(e) => updateNewPlaylist('title', e.target.value)} />
-                            {errors.title && <Form.Text className="text-danger">{errors.title}</Form.Text>}
-                        </Form.Group>
-                        <Form.Group>
-                            <Form.Check
-                                className='mt-2'
-                                type="checkbox"
-                                label="Công khai"
-                                checked={playlists?.is_public ?? true}
-                                onChange={(e) => updateNewPlaylist('is_public', e.target.checked)} />
-                        </Form.Group>
-                        <Form.Group className='text-end mt-3'>
-                            <Button
-                                variant="primary"
-                                size="md"
-                                onClick={onSave}>
-                                Lưu
-                            </Button>
-                        </Form.Group>
+                        {created ? <>
+                            <div
+                                className="d-flex align-items-center justify-content-between mb-2"
+                                style={{ cursor: 'pointer', padding: '5px', borderBottom: '1px solid #ddd' }}>
+                                <div className="d-flex align-items-center">
+                                    <img
+                                        src={newPlaylist.image ??
+                                            (newPlaylist?.details?.length > 0 && newPlaylist?.details[0].song.image)}
+                                        alt={newPlaylist.title}
+                                        style={{ width: '40px', height: '40px', borderRadius: '4px', marginRight: '10px' }} />
+                                    <div>
+                                        <div className="text-dark">{newPlaylist.title}</div>
+                                        <div className="text-muted">{newPlaylist.details.length} bài hát</div>
+                                    </div>
+                                </div>
+                                <Button
+                                    variant="success"
+                                    size="sm"
+                                    onClick={() => navigate(`/playlists/${newPlaylist.id}/`)}>
+                                    Đi tới playlist
+                                </Button>
+                            </div>
+                        </> : <>
+                            <Form.Group>
+                                <Form.Label className='text-dark'>Tên Playlist</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    value={newPlaylist?.title}
+                                    onChange={(e) => updateNewPlaylist('title', e.target.value)} />
+                                {errors.title && <Form.Text className="text-danger">{errors.title}</Form.Text>}
+                            </Form.Group>
+                            <Form.Group>
+                                <Form.Check
+                                    className='mt-2'
+                                    type="checkbox"
+                                    label="Công khai"
+                                    checked={playlists?.is_public ?? true}
+                                    onChange={(e) => updateNewPlaylist('is_public', e.target.checked)} />
+                            </Form.Group>
+                            <Form.Group className='text-end mt-3'>
+                                <Button
+                                    variant="primary"
+                                    size="md"
+                                    onClick={onSave}>
+                                    Lưu
+                                </Button>
+                            </Form.Group>
+                        </>}
                     </Tab>
                 </Tabs>
             </Modal.Body>

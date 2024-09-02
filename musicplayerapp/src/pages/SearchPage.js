@@ -12,7 +12,7 @@ const SearchPage = () => {
     const { getAccessToken } = useUser();
     const [searchParams] = useSearchParams();
     const [query, setQuery] = useState(searchParams.get('q') || '');
-    const [genreQuery, setGenreQuery] = useState(searchParams.get('genre'));
+    const [genreQuery, setGenreQuery] = useState(searchParams.get('genre') || '');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const tabKeys = useMemo(() => ['all', 'songs', 'artists', 'albums', 'playlists'], []);
     const [activeTab, setActiveTab] = useState(0);

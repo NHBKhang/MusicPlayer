@@ -114,7 +114,8 @@ class SongSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Song
-        fields = ['id', 'title', 'uploader', 'image', 'artists', 'file', 'likes', 'streams', 'created_date']
+        fields = ['id', 'title', 'uploader', 'image', 'artists', 'file', 'likes', 'streams', 'created_date',
+                  'is_public']
 
 
 class AuthenticatedSongSerializer(SongSerializer):
@@ -208,8 +209,9 @@ class PlaylistSerializer(serializers.ModelSerializer):
         queryset=User.objects.all(), source='creator', write_only=True, required=False)
     details = PlaylistDetailsSerializer(many=True, required=False)
     details_list = serializers.ListField(child=serializers.CharField(), required=False, write_only=True)
-    type = serializers.SerializerMethodField()
-    is_owner = serializers.SerializerMethodField()
+    type = serializers.SerializerMethodField(read_only=True)
+    is_owner = serializers.SerializerMethodField(read_only=True)
+    added = serializers.SerializerMethodField(read_only=True)
 
     def get_is_owner(self, playlist):
         request = self.context.get('request')
@@ -222,6 +224,10 @@ class PlaylistSerializer(serializers.ModelSerializer):
             return playlist.get_type()
         return None
 
+    def get_added(self, playlist):
+        song_id = self.context.get('song_id')
+        return playlist.details.filter(song_id=song_id).exists()
+
     def to_representation(self, instance):
         rep = super().to_representation(instance)
         if type(instance.image) is cloudinary.CloudinaryResource:
@@ -233,7 +239,7 @@ class PlaylistSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Playlist
-        fields = ['id', 'title', 'image', 'creator_id', 'creator', 'details', 'is_public', 'is_owner', 'type',
+        fields = ['id', 'title', 'image', 'creator_id', 'creator', 'details', 'is_public', 'is_owner', 'type', 'added',
                   'playlist_type', 'details_list']
 
     def create(self, validated_data):

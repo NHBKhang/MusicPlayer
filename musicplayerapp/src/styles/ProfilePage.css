@@ -226,11 +226,13 @@
     vertical-align: middle;
 }
 
-.playlist-item .privacy {
+.privacy {
     top: 45px;
     border: 1px solid whitesmoke;
     padding: 2px 7px;
     background-color: rgba(255, 85, 0);
+    border-radius: 4px;
+    vertical-align: middle;
 }
 
 .playlist-item .track-list-container {

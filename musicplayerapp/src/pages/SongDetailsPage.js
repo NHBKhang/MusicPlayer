@@ -148,7 +148,13 @@ const SongDetailsPage = () => {
                         <img src={song?.image} alt={song?.title} />
                     </div>
                     <div className="song-info col-xxl-9 col-xl-8 col-lg-8 col-md-6">
-                        <h1 className="mt-2 mb-2">{song?.title}</h1>
+                        <h1 className="mt-2 mb-2">
+                            {song?.title}
+                            {!song?.is_public &&
+                                <span className="privacy fs-4 m-2">
+                                    <i className="fa-solid fa-lock"></i>
+                                </span>}
+                        </h1>
                         <p className="mt-2 mb-4 p-1">Nghệ sĩ: {song?.artists}</p>
                         <div className="d-flex justify-content-end mb-3">
                             <div>

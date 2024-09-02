@@ -4,7 +4,7 @@ from rest_framework.decorators import action, api_view
 from rest_framework import serializers as rest_serializers
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.views import APIView
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from music.models import *
 from music import serializers, paginators, perms, utils
 from django.shortcuts import get_object_or_404
@@ -201,7 +201,7 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
     serializer_class = serializers.SongSerializer
     pagination_class = paginators.SongPaginator
     permission_classes = [perms.SongOwner]
-    parser_classes = (MultiPartParser, FormParser)
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     def get_serializer_class(self):
         if self.action in ['retrieve', 'update', 'partial_update', 'create']:
@@ -443,10 +443,16 @@ class PlaylistViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Ret
         if type and 1 <= int(type) <= 4:
             queryset = queryset.filter(playlist_type=int(type))
         else:
-            if self.action not in ['retrieve', 'update', 'partial_update']:
+            if (self.action not in ['retrieve', 'update', 'partial_update']
+                    and self.request.headers.get('Song-ID') is None):
                 queryset = queryset.exclude(playlist_type=Playlist.PLAYLIST)
 
         return queryset.distinct()
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['song_id'] = self.request.headers.get('Song-ID')
+        return context
 
 
 class MixedSearchView(APIView):

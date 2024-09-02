@@ -102,8 +102,8 @@ const PlaylistModal = ({ visible, playlist, onSaveChange, onClose }) => {
         if (isPublic !== playlist.is_public) formData.append('is_public', isPublic);
         if (Number(playlistType) !== 4 && publishedDate) formData.append('published_date', publishedDate);
         const genreIds = genres.map(genre => genre.value);
-        const originalGenreIds = playlist.genres.map(genre => genre.id);
-        if (genreIds.length !== originalGenreIds.length || !genreIds.every(id => originalGenreIds.includes(id)))
+        const originalGenreIds = playlist.genres?.map(genre => genre.id);
+        if (genreIds.length !== originalGenreIds?.length || !genreIds.every(id => originalGenreIds?.includes(id)))
             genreIds.forEach(id => {
                 formData.append('genre_ids', id);
             });

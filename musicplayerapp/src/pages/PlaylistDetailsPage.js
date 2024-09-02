@@ -110,7 +110,13 @@ const PlaylistDetailsPage = () => {
                             alt={playlist?.title} />
                     </div>
                     <div className="song-info col-xxl-9 col-xl-8 col-lg-8 col-md-6">
-                        <h1 className="mt-2 mb-2">{playlist?.title} ({playlist?.type})</h1>
+                        <h1 className="mt-2 mb-2">
+                            {playlist?.title} ({playlist?.type})
+                            {!playlist?.is_public &&
+                                <span className="privacy fs-4 m-2">
+                                    <i className="fa-solid fa-lock"></i>
+                                </span>}
+                        </h1>
                         <div className="d-flex justify-content-end mb-3">
                             <div className="mt-4">
                                 {playlist?.genres?.map(g =>

@@ -13,6 +13,7 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
     const [lyrics, setLyrics] = useState('');
     const [description, setDescription] = useState('');
     const [availableGenres, setAvailableGenres] = useState([]);
+    const [isPublic, setIsPublic] = useState(true);
     const { getAccessToken } = useUser();
 
     useEffect(() => {
@@ -22,6 +23,7 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
                     setImage(song.image || '');
                     setTitle(song.title || '');
                     setArtists(song.artists || '');
+                    setIsPublic(song.is_public);
                     if (!song.genres) {
                         let res = await authAPI(await getAccessToken()).get(endpoints.song(song.id));
                         let data = res.data;
@@ -80,6 +82,7 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
             });
         if (lyrics !== song.lyrics) formData.append('lyrics', lyrics);
         if (description !== song.description) formData.append('description', description);
+        if (isPublic !== song.is_public) formData.append('is_public', isPublic);
 
         try {
             let res = await authAPI(await getAccessToken()).patch(endpoints.song(song.id),
@@ -160,6 +163,14 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                             />
+                        </Form.Group>
+                        <Form.Group>
+                            <Form.Check
+                                className='mt-2'
+                                type="checkbox"
+                                label="Công khai"
+                                checked={isPublic}
+                                onChange={(e) => setIsPublic(e.target.checked)} />
                         </Form.Group>
                     </Form.Group>
                 </Form>
