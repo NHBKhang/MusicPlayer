@@ -1,0 +1,149 @@
+.profile-container .follow-button {
+    position: absolute;
+    bottom: 0;
+    right: 5px;
+    width: auto;
+    min-width: 40px;
+    max-width: 150px;
+    text-align: center;
+    padding: 3px;
+}
+
+.playlist-item {
+    display: flex;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    width: 100%;
+    text-align: left;
+    gap: 10px;
+}
+
+.playlist-item .date {
+    font-size: 14px;
+    margin: 0;
+    margin-bottom: 5px !important;
+    color: aqua;
+}
+
+.playlist-item .play-button {
+    color: rgba(245, 245, 245, 0.9);
+    background-color: rgba(255, 85, 0, 0.9) !important;
+    border-radius: 50% !important;
+    border: none;
+    width: 50px;
+    min-width: 50px;
+    height: 50px !important;
+}
+
+.playlist-item .play-button i {
+    font-size: 25px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.privacy {
+    top: 45px;
+    border: 1px solid whitesmoke;
+    padding: 2px 7px;
+    background-color: rgba(255, 85, 0);
+    border-radius: 4px;
+    vertical-align: middle;
+}
+
+.playlist-item .track-list-container {
+    width: calc(100% - 1rem);
+    border: 1px solid rgba(245, 245, 245, 0.25);
+    margin: 1rem;
+}
+
+.playlist-item .track-list {
+    max-height: 250px;
+    width: 100%;
+    overflow-y: hidden;
+    transition: max-height 0.3s ease-in-out;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.playlist-item .track-item {
+    display: flex;
+    align-items: center;
+    padding: 3px 10px 3px 3px;
+    border-bottom: 1px solid rgba(245, 245, 245, 0.25);
+}
+
+.playlist-item .track-item:last-child {
+    border-bottom: none;
+}
+
+.playlist-item .track-item.active span {
+    color: rgb(255, 108, 35);
+}
+
+.playlist-item .track-image {
+    width: 35px;
+    height: 35px;
+    object-fit: cover;
+    margin-right: 0;
+    border-radius: 4px;
+}
+
+.playlist-item .track-info {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.playlist-item .playlist-type {
+    font-size: 18px !important;
+    padding: 0 7px;
+    font-weight: 300 !important;
+    color: whitesmoke !important;
+
+}
+
+.playlist-item .view-more-button {
+    width: 100%;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 10px;
+    text-align: center;
+    vertical-align: middle;
+    border-top: 1px solid rgba(245, 245, 245, 0.25);
+}
+
+.playlist-item .view-more-button:hover {
+    text-decoration: underline;
+}
+
+.options-dropdown {
+    position: absolute;
+    top: 30px;
+    left: 0;
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    padding: 7px;
+    z-index: 1000;
+    width: 150px;
+}
+
+.options-dropdown ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.options-dropdown li {
+    padding: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.options-dropdown li:hover {
+    background-color: #f0f0f0;
+}

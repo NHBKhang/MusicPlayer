@@ -1,0 +1,14 @@
+.artist-cover {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+}
+
+.artist-item {
+    display: flex;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    width: 100%;
+    text-align: left;
+    gap: 10px;
+}

@@ -16,3 +16,6 @@ export { default as Modal } from './Modal';
 export { default as SongModal } from './SongModal';
 export { default as PlaylistModal } from './PlaylistModal';
 export { default as AddToPlaylistModal } from './AddToPlaylistModal';
+export { default as SongItem } from './SongItem';
+export { default as PlaylistItem } from './PlaylistItem';
+export { default as ArtistItem } from './ArtistItem';

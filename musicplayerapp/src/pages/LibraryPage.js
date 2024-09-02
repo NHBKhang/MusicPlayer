@@ -428,7 +428,13 @@ const SongCard = ({ song }) => {
             <img onClick={goToDetails}
                 src={item.image} alt={item.title}
                 className='song-card-image' />
-            <h6 className='song-card-title' onClick={goToDetails}>{item.title}</h6>
+            <h6 className='song-card-title' onClick={goToDetails}>
+                {item.title}
+                {!item?.is_public &&
+                    <span className="privacy m-2" style={{ fontSize: '10px' }}>
+                        <i className="fa-solid fa-lock"></i>
+                    </span>}
+            </h6>
             <span className='song-card-artists' onClick={goToArtist}>{item.artists}</span>
         </div>
     )
@@ -465,7 +471,13 @@ const PlaylistCard = ({ playlist }) => {
             <img onClick={goToDetails}
                 src={item?.image ?? (item?.details && item.details[0]?.song?.image)} alt={item.title}
                 className='song-card-image' />
-            <h6 className='song-card-title' onClick={goToDetails}>{item.title}</h6>
+            <h6 className='song-card-title' onClick={goToDetails}>
+                {item.title}
+                {!item?.is_public &&
+                    <span className="privacy m-2" style={{ fontSize: '10px' }}>
+                        <i className="fa-solid fa-lock"></i>
+                    </span>}
+            </h6>
             <span className='song-card-artists' onClick={goToArtist}>{item.creator.name}</span>
         </div>
     )

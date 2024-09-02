@@ -11,6 +11,7 @@ const AddToPlaylistModal = ({ visible, song, onClose }) => {
     const [playlists, setPlaylists] = useState([]);
     const [newPlaylist, setNewPlaylist] = useState(null);
     const [errors, setErrors] = useState({});
+    const [formError, setFormError] = useState('');
     const [created, setCreated] = useState(false);
 
     const updateNewPlaylist = (field, value) => {
@@ -74,22 +75,64 @@ const AddToPlaylistModal = ({ visible, song, onClose }) => {
             let res = await authAPI(await getAccessToken()).post(endpoints.playlists,
                 formData, {
                 headers: {
-                    "Content-Type": "multipart/form-data"
+                    "Content-Type": "multipart/form-data",
+                    "Song-ID": song?.id
                 }
             });
 
             if (res.status === 201) {
                 setCreated(true);
                 setNewPlaylist(res.data);
+            } else {
+                throw new Error("Response code is invalid");
             }
         } catch (error) {
-            alert("Lỗi không tạo được playlist");
+            setFormError("Lỗi không tạo được playlist");
         }
     };
 
-    const addToPlaylist = async (playlistId) => {
+    const addToPlaylist = async (playlist) => {
+        try {
+            let formData = new FormData();
 
-    }
+            if (playlist.added) {
+                formData.append('details_list', JSON.stringify({
+                    id: playlist.details.find(d => d.song.id === song.id).id,
+                    song: song.id,
+                    action: 'remove'
+                }));
+            } else {
+                formData.append('details_list', JSON.stringify({
+                    song: song.id
+                }));
+            }
+
+            let res = await authAPI(await getAccessToken()).patch(endpoints.playlist(playlist.id),
+                formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    "Song-ID": song?.id
+                }
+            });
+
+            if (res.status === 200 || res.status === 204) {
+                setPlaylists(currentPlaylists =>
+                    currentPlaylists.map(pl =>
+                        pl.id === playlist.id
+                            ? { ...pl, added: !pl.added }
+                            : pl
+                    )
+                );
+            } else {
+                throw new Error("Response code is invalid");
+            }
+        } catch (error) {
+            setFormError("Lỗi không thể cập nhật playlist");
+        }
+    };
+
+
+    const goToPlaylist = (playlistId) => navigate(`/playlists/${playlistId}/`)
 
     return (
         <Modal show={visible} onHide={closeModal} className='add-modal'>
@@ -111,7 +154,7 @@ const AddToPlaylistModal = ({ visible, song, onClose }) => {
                                     key={playlist.id}
                                     className="d-flex align-items-center justify-content-between mb-2"
                                     style={{ cursor: 'pointer', padding: '5px', borderBottom: '1px solid #ddd' }}>
-                                    <div className="d-flex align-items-center">
+                                    <div onClick={() => goToPlaylist(playlist.id)} className="d-flex align-items-center">
                                         <img
                                             src={playlist.image ??
                                                 (playlist?.details?.length > 0 && playlist?.details[0].song.image)}
@@ -125,7 +168,7 @@ const AddToPlaylistModal = ({ visible, song, onClose }) => {
                                     <Button
                                         variant={playlist.added ? "success" : "outline-primary"}
                                         size="sm"
-                                        onClick={() => addToPlaylist(playlist.id)}>
+                                        onClick={() => addToPlaylist(playlist)}>
                                         {playlist.added ? "Đã thêm" : "Thêm vào playlist"}
                                     </Button>
                                 </div>
@@ -183,6 +226,7 @@ const AddToPlaylistModal = ({ visible, song, onClose }) => {
                         </>}
                     </Tab>
                 </Tabs>
+                {formError && <Form.Text className="text-danger">{formError}</Form.Text>}
             </Modal.Body>
         </Modal>
     );

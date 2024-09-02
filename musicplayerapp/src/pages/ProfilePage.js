@@ -2,11 +2,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Page from ".";
 import { useUser } from "../configs/UserContext";
 import '../styles/ProfilePage.css';
-import { useNavigate, useParams } from "react-router-dom";
-import { AddToPlaylistModal, LoginRequiredModal, Modal, PlaylistModal, SongModal, VerifiedBadge } from "../components";
+import { useParams } from "react-router-dom";
+import { LoginRequiredModal, PlaylistItem,  SongItem, VerifiedBadge } from "../components";
 import { authAPI, endpoints } from "../configs/API";
 import { useAudio } from "../configs/AudioContext";
-import moment from "moment";
 
 const ProfilePage = () => {
     const { id } = useParams();
@@ -187,7 +186,7 @@ const UserProfileTabs = ({ profile, getAccessToken, state }) => {
         setData({ all: [], songs: [], popular: [], albums: [], playlists: [] });
         setPage({ all: 1, songs: 1, popular: 1, albums: 1, playlists: 1 });
         setLoading({ all: false, songs: false, popular: false, albums: false, playlists: false });
-    }, []);
+    }, [profile?.id]);
 
     useEffect(() => {
         const loadMore = (field) => {
@@ -232,7 +231,7 @@ const UserProfileTabs = ({ profile, getAccessToken, state }) => {
             <div className="tracks-container">
                 {data[tabKeys[activeTab]].map(item => (
                     activeTab === 0 ? (item.type === 'song' ? (
-                        <TrackItem
+                        <SongItem
                             key={`track-${tabKeys[activeTab]}-${item.id}`}
                             song={item} state={state} />
                     ) : (
@@ -240,7 +239,7 @@ const UserProfileTabs = ({ profile, getAccessToken, state }) => {
                             key={`playlist-${tabKeys[activeTab]}-${item.id}`}
                             playlist={item} state={state} />
                     )) : (activeTab !== 3 && activeTab !== 4 ?
-                        <TrackItem
+                        <SongItem
                             key={`track-${tabKeys[activeTab]}-${item.id}`}
                             song={item} state={state} /> :
                         <PlaylistItem
@@ -255,264 +254,6 @@ const UserProfileTabs = ({ profile, getAccessToken, state }) => {
             </div>
         </div>
     );
-};
-
-export const TrackItem = ({ song, state }) => {
-    const setIsModalOpen = state?.setIsModalOpen;
-    const { getAccessToken, user } = useUser();
-    const { isPlaying, currentSong, togglePlayPauseNewSong } = useAudio();
-    const navigate = useNavigate();
-    const [item, setItem] = useState(song);
-    const [showOptions, setShowOptions] = useState(false);
-    const [visible, setVisible] = useState({
-        delete: false,
-        edit: false,
-        add: false,
-    });
-
-    const updateVisible = (field, value) => {
-        setVisible(current => ({ ...current, [field]: value }));
-    };
-
-    const like = useCallback(async () => {
-        if (user) {
-            try {
-                let res = await authAPI(await getAccessToken())
-                    .post(endpoints.like(item.id));
-                setItem(res.data);
-            } catch (error) {
-                alert(error);
-            }
-        } else {
-            setIsModalOpen(true);
-        }
-    }, [item.id, getAccessToken, setIsModalOpen, user]);
-
-    const goToDetails = () => {
-        navigate(`/songs/${item.id}/`);
-    };
-
-    const onDelete = useCallback(async () => {
-        try {
-            await authAPI(await getAccessToken()).delete(endpoints.song(item.id));
-        } catch (error) {
-            alert("Không thể xóa bài hát")
-        } finally {
-            updateVisible('delete', false);
-        }
-    }, [getAccessToken, item.id]);
-
-    const handleToggleOptions = useCallback(() => {
-        setShowOptions(!showOptions);
-    }, [showOptions]);
-
-    return (
-        <div className="track-item">
-            <button style={{ left: '20px !important' }}
-                className="play-button"
-                title="Phát bài hát"
-                onClick={() => togglePlayPauseNewSong(item)}>
-                {isPlaying && currentSong?.id === item.id ?
-                    <i class="fa-solid fa-pause"></i> :
-                    <i class="fa-solid fa-play"></i>}
-            </button>
-            <span className="date">{moment(item.created_date).fromNow()}</span>
-            <img src={item.image} alt={item.title} className="track-cover" onClick={goToDetails} />
-            <div className="track-info w-100">
-                <h5 onClick={goToDetails} className="cursor-pointer">{item.title}</h5>
-                <p>{item.artists}</p>
-                <div className="d-flex justify-content-between align-items-center w-100 mt-2">
-                    <div className="d-flex" style={{ gap: '4px' }}>
-                        <button
-                            type="button"
-                            onClick={like}
-                            className={`m-0 ${item.liked ? 'liked' : ''}`}>
-                            <i class="fa-solid fa-heart me-1"></i>
-                            <span className={`d-none d-md-inline fs-7 p-0 ${item.liked ? '' : 'text-dark'}`}>
-                                {item.liked ? 'Bỏ thích' : 'Thích'}
-                            </span>
-                        </button>
-                        {item.is_owner && <>
-                            <button onClick={() => updateVisible('edit', true)} className="m-0">
-                                <i class="fa-solid fa-pen-to-square me-1"></i>
-                                <span className="d-none d-md-inline fs-7 text-dark p-0">Chỉnh sửa</span>
-                            </button>
-                            <button onClick={() => updateVisible('delete', true)} className="m-0">
-                                <i class="fa-solid fa-trash me-1"></i>
-                                <span className="d-none d-md-inline fs-7 text-dark p-0">Xóa bài hát</span>
-                            </button>
-                            <button style={{ position: 'relative' }}
-                                className="m-0 px-md-2 p-1"
-                                onClick={handleToggleOptions}>
-                                <i class="fa-solid fa-ellipsis"></i>
-                                {showOptions && (
-                                    <div className="options-dropdown">
-                                        <ul>
-                                            <li onClick={() => updateVisible('add', true)}>Thêm vào playlist</li>
-                                            <li>Option 2</li>
-                                            <li>Option 3</li>
-                                        </ul>
-                                    </div>
-                                )}
-                            </button>
-                        </>}
-                    </div>
-                    <div>
-                        <span className="me-4">
-                            <i class="fa-solid fa-heart me-1"></i> {item.likes}
-                        </span>
-                        <span>
-                            <i class="fa-solid fa-play me-1"></i> {item.streams}
-                        </span>
-                    </div>
-                </div>
-            </div>
-            <Modal
-                label={`Bạn có chắc muốn xóa bài hát ${item?.title} không?`}
-                visible={visible.delete}
-                onConfirm={onDelete}
-                onCancel={() => updateVisible('delete', false)} />
-            <SongModal
-                visible={visible.edit}
-                song={item}
-                onSaveChange={(song) => setItem(song)}
-                onClose={() => updateVisible('edit', false)} />
-            <AddToPlaylistModal
-                visible={visible.add}
-                song={item}
-                onClose={() => updateVisible('add', false)} />
-        </div>
-    )
-};
-
-const PlaylistItem = ({ playlist }) => {
-    const { isPlaying, currentSong, playlistId, togglePlayPauseNewSong, playSong } = useAudio();
-    const { getAccessToken } = useUser();
-    const navigate = useNavigate();
-    const [item, setItem] = useState(playlist);
-    const [visibleCount, setVisibleCount] = useState(5);
-    const [isExpanded, setIsExpanded] = useState(false);
-    const [visible, setVisible] = useState({
-        delete: false,
-        edit: false
-    });
-
-    const updateVisible = (field, value) => {
-        setVisible(current => ({ ...current, [field]: value }));
-    };
-
-    const handleViewMore = () => {
-        if (isExpanded) {
-            setVisibleCount(5);
-        } else {
-            setVisibleCount(item?.details?.length || 0);
-        }
-        setIsExpanded(!isExpanded);
-    };
-
-    const goToDetails = () => navigate(`/playlists/${item.id}/`);
-
-    const goToArtist = () => navigate(`/profile/${item.creator.id}/`);
-
-    const play = () => {
-        if (currentSong && `${playlistId}` === `${item?.id}`) {
-            togglePlayPauseNewSong(currentSong, item?.id);
-        } else {
-            if (item?.details?.length > 0) {
-                playSong(item.details[0]?.song, item?.id);
-            }
-        }
-    };
-
-    const onDelete = useCallback(async () => {
-        try {
-            await authAPI(await getAccessToken()).delete(endpoints.playlist(item.id));
-        } catch (error) {
-            alert("Không thể xóa playlist");
-        } finally {
-            updateVisible('delete', false);
-        }
-    }, [getAccessToken, item.id]);
-
-    return (
-        <div className="playlist-item cursor-pointer">
-            <img
-                src={item?.image ?? (item?.details && item.details[0]?.song?.image)}
-                alt={item?.title}
-                className="track-cover"
-                onClick={goToDetails} />
-            <div className="w-100">
-                <div className="d-flex" style={{ gap: 12 }}>
-                    <button
-                        className="play-button"
-                        title="Phát bài hát"
-                        onClick={play}>
-                        {isPlaying && `${playlistId}` === `${item?.id}` ?
-                            <i className="fa-solid fa-pause"></i> :
-                            <i className="fa-solid fa-play"></i>}
-                    </button>
-                    <div className="playlist-info w-100">
-                        <div className='d-flex justify-content-between'>
-                            <p className="p-0 m-0" onClick={goToArtist}>{item?.creator?.name}</p>
-                            <p className="date">{moment(item?.created_date).fromNow()}</p>
-                        </div>
-                        <div className='d-flex justify-content-between'>
-                            <h5 onClick={goToDetails} className="cursor-pointer">
-                                {item?.title}
-                                <span className="playlist-type">{item?.type}</span>
-                            </h5>
-                            {!item?.is_public && <span className="privacy">
-                                <i className="fa-solid fa-lock"></i> Private
-                            </span>}
-                        </div>
-                    </div>
-                </div>
-                <div className="track-list-container">
-                    <ul className="track-list">
-                        {item?.details?.slice(0, visibleCount).map((d, index) => (
-                            <li key={index}
-                                className={`track-item cursor-pointer${currentSong?.id === d.song?.id ? ' active' : ''}`}
-                                onClick={() => playSong(d.song, item?.id)}>
-                                <img src={d.song?.image} alt={d.song?.title} className="track-image" />
-                                <div className="track-info">
-                                    <span>{index + 1}. {`${d.song?.artists} - ${d.song?.title}`}</span>
-                                    <span><i className="fa-solid fa-play me-2"></i>{d.song?.streams}</span>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                    {item?.details?.length > 5 && (
-                        <button onClick={handleViewMore} className="view-more-button">
-                            {isExpanded ? `View Less` : `View ${item.details.length - 5} more tracks`}
-                        </button>
-                    )}
-                </div>
-                <div className="button-group">
-                    {item?.is_owner &&
-                        <div className="d-flex align-items-center button-group" style={{ gap: '12px' }}>
-                            <button onClick={() => updateVisible('edit', true)}>
-                                <i class="fa-solid fa-pen-to-square me-1"></i>
-                                <p className="d-none d-md-inline fs-6 text-dark">Chỉnh sửa</p>
-                            </button>
-                            <button onClick={() => updateVisible('delete', true)}>
-                                <i class="fa-solid fa-trash me-1"></i>
-                                <p className="d-none d-md-inline fs-6 text-dark">Xóa playlist</p>
-                            </button>
-                        </div>}
-                </div>
-            </div>
-            <Modal
-                label={`Bạn có chắc muốn xóa playlist ${item?.title} không?`}
-                visible={visible.delete}
-                onConfirm={onDelete}
-                onCancel={() => updateVisible('delete', false)} />
-            <PlaylistModal
-                visible={visible.edit}
-                playlist={item}
-                onSaveChange={(playlist) => setItem(playlist)}
-                onClose={() => updateVisible('edit', false)} />
-        </div>
-    )
 };
 
 export default ProfilePage;

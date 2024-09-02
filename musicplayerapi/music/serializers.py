@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.db.models import Max
 from music.models import *
 import cloudinary
 
@@ -271,6 +272,44 @@ class PlaylistSerializer(serializers.ModelSerializer):
 
         return playlist
 
+    def update(self, instance, validated_data):
+        details = validated_data.pop('details_list', [])
+
+        if details:
+            updated_ids = []
+            songs_to_remove = []
+            for detail_data in details:
+                if isinstance(detail_data, str):
+                    import json
+                    detail_data = json.loads(detail_data)
+                detail_id = detail_data.get('id')
+                if detail_id:
+                    try:
+                        if detail_data.get('action') == 'remove':
+                            songs_to_remove.append(detail_id)
+                        else:
+                            playlist_detail = PlaylistDetails.objects.get(id=detail_id, playlist=instance)
+                            playlist_detail.song_id = detail_data.get('song', playlist_detail.song_id)
+                            playlist_detail.order = detail_data.get('order', playlist_detail.order)
+                            playlist_detail.save()
+                            updated_ids.append(detail_id)
+                    except PlaylistDetails.DoesNotExist:
+                        pass
+                else:
+                    max_order = PlaylistDetails.objects.filter(
+                        playlist=instance).aggregate(Max('order'))['order__max'] or 0
+                    PlaylistDetails.objects.create(
+                        playlist=instance, order=max_order + 1, song_id=int(detail_data.get('song')))
+                    updated_ids = None
+
+            if songs_to_remove:
+                PlaylistDetails.objects.filter(id__in=songs_to_remove).delete()
+
+            if updated_ids and len(updated_ids) > 0:
+                PlaylistDetails.objects.filter(playlist=instance).exclude(id__in=updated_ids).delete()
+
+        return super().update(instance, validated_data)
+
 
 class PlaylistSongsSerializer(PlaylistSerializer):
     genres = GenreSerializer(many=True, read_only=True)
@@ -287,7 +326,6 @@ class PlaylistSongsSerializer(PlaylistSerializer):
 
     def update(self, instance, validated_data):
         genre_ids = validated_data.pop('genre_ids', [])
-        details = validated_data.pop('details_list', [])
         published_date = validated_data.pop('published_date', None)
         instance = super().update(instance, validated_data)
 
@@ -295,27 +333,6 @@ class PlaylistSongsSerializer(PlaylistSerializer):
             instance.genres.set(genre_ids)
         instance.published_date = published_date
         instance.save()
-
-        if details:
-            updated_ids = []
-            for detail_data in details:
-                if isinstance(detail_data, str):
-                    import json
-                    detail_data = json.loads(detail_data)
-                detail_id = detail_data.get('id')
-                if detail_id:
-                    try:
-                        playlist_detail = PlaylistDetails.objects.get(id=detail_id, playlist=instance)
-                        playlist_detail.song_id = detail_data.get('song_id', playlist_detail.song_id)
-                        playlist_detail.order = detail_data.get('order', playlist_detail.order)
-                        playlist_detail.save()
-                        updated_ids.append(detail_id)
-                    except PlaylistDetails.DoesNotExist:
-                        pass
-                else:
-                    PlaylistDetails.objects.create(playlist=instance, **detail_data)
-
-            PlaylistDetails.objects.filter(playlist=instance).exclude(id__in=updated_ids).delete()
 
         return instance
 

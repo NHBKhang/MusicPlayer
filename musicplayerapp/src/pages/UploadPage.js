@@ -1,11 +1,11 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
-import Page, { TrackItem } from '.';
+import Page from '.';
 import API, { authAPI, endpoints } from '../configs/API';
 import { normalizeFileName } from '../configs/Utils';
 import { useUser } from '../configs/UserContext';
 import ReactSelect from 'react-select';
-import { ImageUpload, LoginRequiredModal } from '../components';
+import { ImageUpload, LoginRequiredModal, SongItem } from '../components';
 
 const UploadPage = () => (
     <Page>
@@ -293,7 +293,7 @@ const MySong = () => {
 
     return (
         <div>
-            {songs.map((song) => <TrackItem song={song} state={{ setIsModalOpen }} />)}
+            {songs.map((song) => <SongItem song={song} state={{ setIsModalOpen }} />)}
             <LoginRequiredModal
                 visible={isModalOpen}
                 onClose={() => setIsModalOpen(false)} />

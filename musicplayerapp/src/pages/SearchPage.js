@@ -1,11 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Page from '.';
-import { LoginRequiredModal, MusicTabView, VerifiedBadge } from '../components';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ArtistItem, LoginRequiredModal, MusicTabView, PlaylistItem, SongItem } from '../components';
+import { useSearchParams } from 'react-router-dom';
 import { authAPI, endpoints } from '../configs/API';
 import '../styles/SearchPage.css';
-import { useAudio } from '../configs/AudioContext';
-import moment from 'moment';
 import { useUser } from '../configs/UserContext';
 
 const SearchPage = () => {
@@ -158,7 +156,7 @@ const SearchPage = () => {
         {
             label: 'Tất cả',
             content: (
-                <div>
+                <div className='search-container'>
                     {data.all?.map(item => item.type === 'song' ? (
                         <SongItem key={item.id} song={item} state={{ isModalOpen, setIsModalOpen }} />
                     ) : (item.type === 'artist' ? (
@@ -177,7 +175,7 @@ const SearchPage = () => {
         {
             label: 'Bài hát',
             content: (
-                <div>
+                <div className='search-container'>
                     {data.songs?.map(song => (
                         <SongItem key={song.id} song={song} state={{ isModalOpen, setIsModalOpen }} />
                     ))}
@@ -192,7 +190,7 @@ const SearchPage = () => {
         {
             label: 'Nghệ sĩ',
             content: (
-                <div>
+                <div className='search-container'>
                     {data.artists?.map(artist => (
                         <ArtistItem key={artist.id} artist={artist} state={{ isModalOpen, setIsModalOpen }} />
                     ))}
@@ -207,7 +205,7 @@ const SearchPage = () => {
         {
             label: 'Albums',
             content: (
-                <div>
+                <div className='search-container'>
                     {data.albums?.map(album => (
                         <PlaylistItem key={album.id} playlist={album} />
                     ))}
@@ -222,7 +220,7 @@ const SearchPage = () => {
         {
             label: 'Danh sách phát',
             content: (
-                <div>
+                <div className='search-container'>
                     {data.playlists?.map(playlist => (
                         <PlaylistItem key={playlist.id} playlist={playlist} />
                     ))}
@@ -250,228 +248,6 @@ const SearchPage = () => {
                 onClose={() => setIsModalOpen(false)} />
         </Page>
     );
-};
-
-const SongItem = ({ song, state }) => {
-    const { togglePlayPauseNewSong, isPlaying, currentSong, setCurrentSong } = useAudio();
-    const { setIsModalOpen } = state;
-    const { getAccessToken, user } = useUser();
-    const [item, setItem] = useState(song);
-    const navigate = useNavigate();
-
-    const togglePlayPause = (song) => {
-        togglePlayPauseNewSong(song);
-    };
-
-    const like = async () => {
-        if (user) {
-            try {
-                let token = await getAccessToken();
-                let res = await authAPI(token).post(endpoints.like(item.id));
-                setItem(res.data);
-
-                if (isPlaying && currentSong.id === item.id)
-                    setCurrentSong(res.data);
-            } catch (error) {
-                alert(error);
-            }
-        } else {
-            setIsModalOpen(true);
-        }
-    };
-
-    const goToDetails = () => {
-        navigate(`/songs/${item.id}/`);
-    }
-
-    return (
-        <div key={item.id} className='d-flex item'>
-            <img onClick={goToDetails}
-                src={item.image} alt={item.title}
-                width={120} height={120} className='song-item-image' />
-            <div className='song-item-button'>
-                <button
-                    className="play-button"
-                    title="Phát bài hát"
-                    onClick={() => togglePlayPause(item)}>
-                    {isPlaying && currentSong?.id === item.id ?
-                        <i class="fa-solid fa-pause"></i> :
-                        <i class="fa-solid fa-play"></i>}
-                </button>
-            </div>
-            <div className='text-start w-100'>
-                <div className='d-flex justify-content-between w-100'>
-                    <span className='song-item-uploader'>{item.uploader.name}</span>
-                    <span className='text-end text-info'>{moment(item.created_date).fromNow()}</span>
-                </div>
-                <h5 className='song-item-title mb-1' onClick={goToDetails}>{item.title}</h5>
-                <p className='d-block w-100 song-item-artists'>Nghệ sĩ: {item.artists}</p>
-                <div className="d-flex align-items-center mb-3">
-                    <div className="button-group">
-                        {item.liked !== null && <button
-                            type="button"
-                            onClick={like}
-                            className={`me-4 ${item.liked ? 'liked' : ''}`}>
-                            <i class="fa-solid fa-heart me-1"></i> {item.liked ? 'Bỏ thích' : 'Thích'}
-                        </button>}
-                        <div className="mt-md-2">
-                            <span className="me-4">
-                                <i class="fa-solid fa-heart me-1"></i> {item.likes}
-                            </span>
-                            <span>
-                                <i class="fa-solid fa-play me-1"></i> {item.streams}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    )
-};
-
-const ArtistItem = ({ artist, state }) => {
-    const [item, setItem] = useState(artist);
-    const { setIsModalOpen } = state;
-    const { getAccessToken, user } = useUser();
-    const navigate = useNavigate();
-
-    const goToArtist = () => {
-        navigate(`/profile/${item.id}/`);
-    };
-
-    const follow = async () => {
-        if (user) {
-            try {
-                let res = await authAPI(await getAccessToken())
-                    .post(endpoints.follow(item?.id));
-                setItem(res.data);
-            } catch (error) {
-                console.error(error);
-                alert("Lỗi");
-            }
-        } else {
-            setIsModalOpen(true);
-        }
-    };
-
-    return (
-        <div key={item.id} className='d-flex item cursor-pointer'>
-            <img onClick={goToArtist}
-                src={item.avatar} alt={item.name}
-                width={120} height={120} className='artist-item-image rounded-circle' />
-            <div className='ms-4 text-start mt-1'>
-                <h5 onClick={goToArtist}>
-                    {item.name}
-                    {item.info?.verified && <VerifiedBadge />}
-                </h5>
-                <div className='mb-2 mt-1 d-flex justify-content-evenly w-100' onClick={goToArtist}>
-                    <div className='d-flex align-items-center'>
-                        <i class="fa-solid fa-users text-white"></i>
-                        <p className='mb-0 ms-1'>{item.followers}</p>
-                    </div>
-                    <div className='d-flex align-items-center ms-2'>
-                        <i class="fa-solid fa-music text-white"></i>
-                        <p className='mb-0 ms-1'>{item.songs}</p>
-                    </div>
-                </div>
-                <button onClick={follow}
-                    className={`mt-1 mb-2 follow-button ${item?.followed ? 'followed' : ''}`}>
-                    {item?.followed ? <>
-                        <i class="fa-solid fa-user-check"></i>
-                        <p className='d-none d-lg-inline text-black'> Đã theo dõi</p>
-                    </> : <>
-                        <i class="fa-solid fa-user-plus"></i>
-                        <p className='d-inline text-black p-1'> Theo dõi</p>
-                    </>}
-                </button>
-            </div>
-        </div>
-    )
-};
-
-const PlaylistItem = ({ playlist }) => {
-    const { isPlaying, currentSong, playlistId, togglePlayPauseNewSong, playSong } = useAudio();
-    const navigate = useNavigate();
-    const [item,] = useState(playlist);
-    const [visibleCount, setVisibleCount] = useState(5);
-    const [isExpanded, setIsExpanded] = useState(false);
-
-    const handleViewMore = () => {
-        if (isExpanded) {
-            setVisibleCount(5);
-        } else {
-            setVisibleCount(item?.details?.length || 0);
-        }
-        setIsExpanded(!isExpanded);
-    };
-
-    const goToDetails = () => navigate(`/playlists/${item.id}/`);
-
-    const goToArtist = () => navigate(`/profile/${item.creator.id}/`);
-
-    const play = () => {
-        if (currentSong && `${playlistId}` === `${item?.id}`) {
-            togglePlayPauseNewSong(currentSong, item?.id);
-        } else {
-            if (item?.details?.length > 0) {
-                playSong(item.details[0]?.song, item?.id);
-            }
-        }
-    };
-
-    return (
-        <div className="playlist-item item cursor-pointer">
-            <img
-                src={item?.image ?? (item?.details && item.details[0]?.song?.image)}
-                alt={item?.title}
-                className="track-cover"
-                onClick={goToDetails} />
-            <div className="w-100">
-                <div className="d-flex" style={{ gap: 12 }}>
-                    <button
-                        className="play-button"
-                        title="Phát bài hát"
-                        onClick={play}>
-                        {isPlaying && `${playlistId}` === `${item?.id}` ?
-                            <i className="fa-solid fa-pause"></i> :
-                            <i className="fa-solid fa-play"></i>}
-                    </button>
-                    <div className="playlist-info w-100">
-                        <div className='d-flex justify-content-between'>
-                            <p className="p-0 m-0" onClick={goToArtist}>{item?.creator?.name}</p>
-                            <p className="date">{moment(item?.created_date).fromNow()}</p>
-                        </div>
-                        <div className='d-flex justify-content-between'>
-                            <h5 onClick={goToDetails} className="cursor-pointer">{item?.title}</h5>
-                            {!item?.is_public && <span className="privacy">
-                                <i className="fa-solid fa-lock"></i> Private
-                            </span>}
-                        </div>
-                    </div>
-                </div>
-                <div className="track-list-container">
-                    <ul className="track-list">
-                        {item?.details?.slice(0, visibleCount).map((d, index) => (
-                            <li key={index}
-                                className={`track-item cursor-pointer${currentSong?.id === d.song?.id ? ' active' : ''}`}
-                                onClick={() => playSong(d.song, item?.id)}>
-                                <img src={d.song?.image} alt={d.song?.title} className="track-image" />
-                                <div className="track-info">
-                                    <span>{index + 1}. {`${d.song?.artists} - ${d.song?.title}`}</span>
-                                    <span><i className="fa-solid fa-play me-2"></i>{d.song?.streams}</span>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                    {item?.details?.length > 5 && (
-                        <button onClick={handleViewMore} className="view-more-button">
-                            {isExpanded ? `View Less` : `View ${item.details.length - 5} more tracks`}
-                        </button>
-                    )}
-                </div>
-            </div>
-        </div>
-    )
 };
 
 export default SearchPage;

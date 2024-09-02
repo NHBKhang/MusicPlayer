@@ -413,6 +413,7 @@ class PlaylistViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Ret
     serializer_class = serializers.PlaylistSerializer
     pagination_class = paginators.PlaylistPaginator
     permission_classes = [perms.PlaylistOwner]
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     def get_serializer_class(self):
         if self.action in ['retrieve', 'update', 'partial_update']:
