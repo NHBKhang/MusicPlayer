@@ -63,9 +63,10 @@ class UserAdmin(admin.ModelAdmin):
 
 
 class SongAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'artists', ]
+    list_display = ['id', 'title', 'artists', 'is_downloadable']
     search_fields = ['id', 'title', 'artists']
     list_filter = ['genres']
+    list_editable = ['is_downloadable',]
     readonly_fields = ['song_cover', 'created_date', 'updated_date']
 
     def song_cover(self, song):

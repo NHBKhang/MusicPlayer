@@ -71,3 +71,38 @@
     text-align: center;
     vertical-align: middle;
 }
+
+
+.options-dropdown {
+    position: absolute;
+    top: 30px;
+    left: 0;
+    background-color: whitesmoke;
+    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.75);
+    border-radius: 4px;
+    padding: 7px;
+    z-index: 1000;
+    width: 150px;
+}
+
+.options-dropdown ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.options-dropdown li {
+    padding: 4px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background-color 0.2s;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.options-dropdown li:last-child {
+    border-bottom: none;
+}
+
+.options-dropdown li:hover {
+    background-color: #b9b9b9;
+}

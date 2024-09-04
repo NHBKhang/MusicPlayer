@@ -14,6 +14,7 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
     const [description, setDescription] = useState('');
     const [availableGenres, setAvailableGenres] = useState([]);
     const [isPublic, setIsPublic] = useState(true);
+    const [isDownloadable, setIsDownloadable] = useState(false);
     const { getAccessToken } = useUser();
 
     useEffect(() => {
@@ -24,6 +25,7 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
                     setTitle(song.title || '');
                     setArtists(song.artists || '');
                     setIsPublic(song.is_public);
+                    setIsDownloadable(song.access?.is_downloadable);
                     if (!song.genres) {
                         let res = await authAPI(await getAccessToken()).get(endpoints.song(song.id));
                         let data = res.data;
@@ -84,7 +86,29 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
         if (description !== song.description) formData.append('description', description);
         if (isPublic !== song.is_public) formData.append('is_public', isPublic);
 
+
         try {
+            let accessData = new FormData();
+            accessData.append('is_downloadable', isDownloadable);
+            accessData.append('is_downloadable', isDownloadable);
+            accessData.append('is_downloadable', isDownloadable);
+
+            if (!song.access) {
+                await authAPI(await getAccessToken()).post(
+                    endpoints['song-access'](song.id), accessData, {
+                    headers: {
+                        "Content-Type": "multipart/form-dat"
+                    }
+                });
+            } else {
+                await authAPI(await getAccessToken()).patch(
+                    endpoints['song-access'](song.id), accessData, {
+                    headers: {
+                        "Content-Type": "multipart/form-dat"
+                    }
+                });
+            }
+
             let res = await authAPI(await getAccessToken()).patch(endpoints.song(song.id),
                 formData, {
                 headers: {
@@ -161,16 +185,25 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
                                 as="textarea"
                                 rows={3}
                                 value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                            />
+                                onChange={(e) => setDescription(e.target.value)} />
                         </Form.Group>
-                        <Form.Group>
-                            <Form.Check
-                                className='mt-2'
-                                type="checkbox"
-                                label="Công khai"
-                                checked={isPublic}
-                                onChange={(e) => setIsPublic(e.target.checked)} />
+                        <Form.Group className='d-flex' style={{ gap: '50px' }}>
+                            <Form.Group>
+                                <Form.Check
+                                    className='mt-2'
+                                    type="checkbox"
+                                    label="Công khai"
+                                    checked={isPublic}
+                                    onChange={(e) => setIsPublic(e.target.checked)} />
+                            </Form.Group>
+                            <Form.Group>
+                                <Form.Check
+                                    className='mt-2'
+                                    type="checkbox"
+                                    label="Cho phép tải về"
+                                    checked={isDownloadable}
+                                    onChange={(e) => setIsDownloadable(e.target.checked)} />
+                            </Form.Group>
                         </Form.Group>
                     </Form.Group>
                 </Form>

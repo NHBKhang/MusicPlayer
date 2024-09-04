@@ -118,32 +118,3 @@
 .playlist-item .view-more-button:hover {
     text-decoration: underline;
 }
-
-.options-dropdown {
-    position: absolute;
-    top: 30px;
-    left: 0;
-    background-color: white;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
-    padding: 7px;
-    z-index: 1000;
-    width: 150px;
-}
-
-.options-dropdown ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-}
-
-.options-dropdown li {
-    padding: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.2s;
-}
-
-.options-dropdown li:hover {
-    background-color: #f0f0f0;
-}

@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAudio } from "../configs/AudioContext";
 import { useUser } from "../configs/UserContext";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { authAPI, endpoints } from "../configs/API";
 import moment from "moment";
 import SongModal from "./SongModal";
@@ -21,6 +21,7 @@ const SongItem = ({ song, state }) => {
         edit: false,
         add: false,
     });
+    const optionsRef = useRef(null);
 
     const updateVisible = (field, value) => {
         setVisible(current => ({ ...current, [field]: value }));
@@ -57,6 +58,19 @@ const SongItem = ({ song, state }) => {
     const handleToggleOptions = () => setShowOptions(!showOptions)
 
     const goToArtist = () => navigate(`/profile/${item.uploader.id}/`);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (optionsRef.current && !optionsRef.current.contains(event.target)) {
+                setShowOptions(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     return (
         <div className="track-item cursor-pointer">
@@ -104,15 +118,17 @@ const SongItem = ({ song, state }) => {
                                 <span className="d-none d-md-inline fs-7 text-dark p-0">Xóa bài hát</span>
                             </button>
                         </>}
-                        <button style={{ position: 'relative' }}
+                        <button
+                            style={{ position: 'relative' }}
                             className="m-0 px-md-2 p-1"
-                            onClick={handleToggleOptions}>
+                            onClick={handleToggleOptions}
+                            ref={optionsRef}>
                             <i class="fa-solid fa-ellipsis"></i>
                             {showOptions && (
                                 <div className="options-dropdown">
                                     <ul>
                                         <li onClick={() => updateVisible('add', true)}>Thêm vào playlist</li>
-                                        <li>Option 2</li>
+                                        {item.is_downloadable && <li>Tải bài hát</li>}
                                         <li>Option 3</li>
                                     </ul>
                                 </div>

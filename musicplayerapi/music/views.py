@@ -407,6 +407,17 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @action(methods=['post', 'patch'], url_path='access', detail=True)
+    def song_access(self, request, pk=None):
+        song = self.get_object()
+        access, created = SongAccess.objects.get_or_create(song=song)
+
+        serializer = SongAccessSerializer(access, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class PlaylistViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
     queryset = Playlist.objects.filter(active=True, is_public=True).all()

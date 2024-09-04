@@ -88,13 +88,20 @@ class AuthenticatedUserSerializer(PublicUserSerializer):
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
-        fields = ['id', 'name']
+        fields = '__all__'
+
+
+class SongAccessSerializer(serializers.Serializer):
+    class Meta:
+        model = SongAccess
+        fields = '__all__'
 
 
 class SongSerializer(serializers.ModelSerializer):
     uploader = PublicUserSerializer(read_only=True)
     likes = serializers.SerializerMethodField()
     streams = serializers.SerializerMethodField()
+    access = SongAccessSerializer(read_only=True)
 
     def get_likes(self, song):
         return song.like_set.filter(active=True).count()
@@ -116,7 +123,7 @@ class SongSerializer(serializers.ModelSerializer):
     class Meta:
         model = Song
         fields = ['id', 'title', 'uploader', 'image', 'artists', 'file', 'likes', 'streams', 'created_date',
-                  'is_public']
+                  'is_public', 'access']
 
 
 class AuthenticatedSongSerializer(SongSerializer):

@@ -112,9 +112,9 @@ const SongControls = () => {
         }
     };
 
-    const goToDetails = () => {
-        navigate(`/songs/${currentSong.id}/`);
-    };
+    const goToDetails = () => navigate(`/songs/${currentSong.id}/`)
+
+    const goToArtist = () => navigate(`/profile/${currentSong.uploader.id}/`)
 
     return (
         <div className={`song-control fixed-bottom bg-dark text-white d-flex align-items-center p-2${visible ? ' show' : ''}`}>
@@ -183,9 +183,9 @@ const SongControls = () => {
                         width={50}
                         height={50} />
                 </div>
-                <div className="song-info" onClick={goToDetails}>
-                    <h5 className='mb-0'>{currentSong?.title}</h5>
-                    <p className='fs-6'>{currentSong?.artists}</p>
+                <div className="song-info">
+                    <h5 className='mb-0' onClick={goToDetails}>{currentSong?.title}</h5>
+                    <p className='fs-6' onClick={goToArtist}>{currentSong?.artists}</p>
                 </div>
                 {user && <div className='btn-group ms-1'>
                     <button

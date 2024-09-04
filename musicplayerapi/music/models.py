@@ -86,6 +86,7 @@ class Song(ImageBaseModel, BaseModel):
     lyrics = models.TextField(null=True, blank=True)
     description = models.TextField(blank=True, null=True)
     is_public = models.BooleanField(default=True)
+    is_downloadable = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title
@@ -175,6 +176,16 @@ class Like(Interaction):
         return f'{self.user} đã thích {self.song}'
 
 
+class SongAccess(models.Model):
+    song = models.OneToOneField(Song, on_delete=models.CASCADE, related_name='access')
+    is_downloadable = models.BooleanField(default=False)
+    is_free = models.BooleanField(default=False)
+    price = models.DecimalField(max_digits=10, decimal_places=0, null=True, blank=True, help_text="Price in VND")
+
+    def __str__(self):
+        return f"Access for {self.song.title}"
+
+
 class Transaction(models.Model):
     transaction_id = models.BigIntegerField(null=False, blank=False)
     transaction_date = models.DateTimeField(auto_now_add=True)
@@ -183,6 +194,12 @@ class Transaction(models.Model):
 
     def __str__(self):
         return self.bank_code + str(self.transaction_id)
+
+
+class Purchase(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='purchases')
+    song = models.ForeignKey(Song, on_delete=models.CASCADE, related_name='purchases')
+    transaction = models.OneToOneField(Transaction, on_delete=models.CASCADE, related_name='purchase')
 
 
 class Follow(BaseModel):

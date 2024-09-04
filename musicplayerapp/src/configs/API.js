@@ -73,6 +73,7 @@ export const endpoints = {
     'genres': '/genres/',
     'songs': '/songs/',
     'song': (songId) => `/songs/${songId}/`,
+    'song-access': (songId) => `/songs/${songId}/access/`,
     'previous-song': (songId) => `/songs/${songId}/previous/`,
     'next-song': (songId) => `/songs/${songId}/next/`,
     'related-songs': (songId) => `/songs/${songId}/related/`,
