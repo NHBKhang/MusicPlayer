@@ -32,3 +32,4 @@ export { default as SearchPage } from './SearchPage';
 export { default as ProfilePage } from './ProfilePage';
 export { default as LibraryPage } from './LibraryPage';
 export { default as UploadPage } from './UploadPage';
+export { default as DownloadPage } from './DownloadPage';

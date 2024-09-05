@@ -41,10 +41,6 @@ const SongItem = ({ song, state }) => {
         }
     };
 
-    const goToDetails = () => {
-        navigate(`/songs/${item.id}/`);
-    };
-
     const onDelete = async () => {
         try {
             await authAPI(await getAccessToken()).delete(endpoints.song(item.id));
@@ -57,7 +53,9 @@ const SongItem = ({ song, state }) => {
 
     const handleToggleOptions = () => setShowOptions(!showOptions)
 
-    const goToArtist = () => navigate(`/profile/${item.uploader.id}/`);
+    const goToDetails = () => navigate(`/songs/${item.id}/`)
+
+    const goToArtist = () => navigate(`/profile/${item.uploader.id}/`)
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -127,8 +125,17 @@ const SongItem = ({ song, state }) => {
                             {showOptions && (
                                 <div className="options-dropdown">
                                     <ul>
-                                        <li onClick={() => updateVisible('add', true)}>Thêm vào playlist</li>
-                                        {item.is_downloadable && <li>Tải bài hát</li>}
+                                        <li onClick={() => updateVisible('add', true)}>
+                                            Thêm vào playlist</li>
+                                        {item.access?.is_downloadable &&
+                                            <li>
+                                                <a style={{color: 'inherit'}}
+                                                    href={`/download/?songId=${item.id}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer">
+                                                    Tải bài hát
+                                                </a>
+                                            </li>}
                                         <li>Option 3</li>
                                     </ul>
                                 </div>

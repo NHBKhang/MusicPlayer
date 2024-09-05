@@ -93,7 +93,6 @@
 
 .options-dropdown li {
     padding: 4px;
-    cursor: pointer;
     font-size: 15px;
     transition: background-color 0.2s;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
@@ -105,4 +104,8 @@
 
 .options-dropdown li:hover {
     background-color: #b9b9b9;
+}
+
+.options-dropdown li a {
+    color: inherit !important;
 }

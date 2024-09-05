@@ -91,10 +91,15 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class SongAccessSerializer(serializers.Serializer):
+class SongAccessSerializer(serializers.ModelSerializer):
     class Meta:
         model = SongAccess
-        fields = '__all__'
+        fields = ['is_downloadable', 'is_free', 'price']
+
+    def update(self, instance, validated_data):
+        validated_data['price'] = None if validated_data['price'] == 0 or validated_data['is_free'] \
+            else validated_data['price']
+        return super().update(instance, validated_data)
 
 
 class SongSerializer(serializers.ModelSerializer):

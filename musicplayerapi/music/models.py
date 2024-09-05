@@ -37,6 +37,9 @@ class User(AbstractUser):
             if file_type not in ['jpeg', 'png', 'gif']:
                 raise ValidationError("File uploaded must be an image (JPEG, PNG, or GIF).")
 
+    def has_purchased(self, song):
+        return Purchase.objects.filter(user=self, song=song).exists()
+
     # def save(self, *args, **kwargs):
     #     if self.password:
     #         self.password = make_password(self.password)
@@ -86,7 +89,6 @@ class Song(ImageBaseModel, BaseModel):
     lyrics = models.TextField(null=True, blank=True)
     description = models.TextField(blank=True, null=True)
     is_public = models.BooleanField(default=True)
-    is_downloadable = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title

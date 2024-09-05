@@ -62,12 +62,17 @@ class UserAdmin(admin.ModelAdmin):
     inlines = [UserInfoInline]
 
 
+class SongAccessInline(admin.TabularInline):
+    model = SongAccess
+
+
 class SongAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'artists', 'is_downloadable']
+    list_display = ['id', 'title', 'artists', 'is_public']
     search_fields = ['id', 'title', 'artists']
     list_filter = ['genres']
-    list_editable = ['is_downloadable',]
+    list_editable = ['is_public',]
     readonly_fields = ['song_cover', 'created_date', 'updated_date']
+    inlines = [SongAccessInline]
 
     def song_cover(self, song):
         if song.image:

@@ -1,0 +1,183 @@
+.background-wrapper {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+}
+
+.blurred-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: blur(20px);
+    -webkit-filter: blur(20px);
+    z-index: -1;
+}
+
+.song-download-container {
+    position: absolute;
+    top: 420px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(50, 50, 50, 0.8);
+    padding: 25px;
+    border-radius: 8px;
+    color: white;
+    text-align: center;
+    z-index: 1;
+}
+
+.download-btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: rgba(255, 85, 0);
+    box-shadow: 0 2px 4px rgba(255, 255, 255, 0.75);
+    border: 1px solid rgb(255, 100, 100);
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px;
+}
+
+.download-btn:hover {
+    background-color: rgb(217, 72, 0);
+}
+
+.payment-options {
+    background-color: rgb(244, 244, 244);
+    margin: 20px -25px -25px;
+    border: 1px solid rgb(0, 0, 0);
+    padding: 10px 0 0;
+    border-radius: 0 0 8px 8px;
+}
+
+.payment-method-list {
+    list-style-type: none;
+    padding: 0;
+    text-align: left;
+}
+
+.payment-method-list li {
+    margin: 0;
+    padding: 15px 50px;
+    color: black;
+    border-top: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.payment-method-list li:last-child {
+    margin-bottom: -15px;
+}
+
+.price {
+    color: black;
+    margin-bottom: 10px;
+}
+
+.payment-logo {
+    width: 40px;
+    height: auto;
+    margin-right: 10px;
+}
+
+.container-fluid.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    border-bottom: 1px solid #dddddd37;
+    position: fixed;
+    z-index: 100;
+}
+
+.container-fluid.header .navbar-brand {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.container-fluid.header .navbar-brand strong {
+    font-size: 1.5rem;
+    color: #c1c1c1;
+}
+
+.container-fluid.header .account {
+    display: flex;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    margin: 0;
+    width: auto;
+}
+
+.container-fluid.header .account .btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    color: white;
+}
+
+.container-fluid.header .login {
+    background-color: #007bff;
+}
+
+.container-fluid.header .signin {
+    background-color: #28a745;
+}
+
+.container-fluid.header .login:hover,
+.container-fluid.header .signin:hover {
+    opacity: 0.9;
+}
+
+.loading-slider {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-slider .spinner {
+    width: 25px;
+    height: 25px;
+}
+
+.progress-container {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    flex: 1;
+    height: 10px;
+    background: #f3f3f3;
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+    margin-right: 10px;
+    width: 80%;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: #007bff;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.cancel-btn {
+    background: none;
+    border: none;
+    color: #ff4d4d;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 10px;
+    transition: color 0.3s ease;
+}
+
+.cancel-btn:hover {
+    color: #cc0000;
+}
+
+.cancel-btn i {
+    font-size: 20px;
+}

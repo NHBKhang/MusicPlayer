@@ -57,7 +57,7 @@ const PlaylistModal = ({ visible, playlist, onSaveChange, onClose }) => {
 
     const validateForm = () => {
         const newErrors = {};
-        if (!title) newErrors.title = 'Tên bài hát là bắt buộc.';
+        if (!title) newErrors.title = 'Tên playlist là bắt buộc.';
         if (genres.length === 0) newErrors.genres = 'Bạn phải chọn ít nhất một thể loại.';
         if (Number(playlistType) !== 4 && !publishedDate) newErrors.publishedDate = 'Ngày xuất bản là bắt buộc cho loại playlist này.';
         setErrors(newErrors);

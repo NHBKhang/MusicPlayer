@@ -10,11 +10,20 @@ const App = () => {
   return (
     <div className="App">
       <Router>
-        <SongControls />
         <Routes>
-          {Object.values(routes).map((route, index) => (
-            (user || !route.required) && <Route key={index} path={route.url} element={<route.component />} />
-          ))}
+          {Object.values(routes).map((route, index) =>
+            (user || !route.required) && (
+              <Route
+                key={index}
+                path={route.url}
+                element={<>
+                  <route.component />
+                  {route.controlShow && <SongControls />}
+                </>
+                }
+              />
+            )
+          )}
         </Routes>
       </Router>
     </div>

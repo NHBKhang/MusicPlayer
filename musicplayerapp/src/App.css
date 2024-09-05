@@ -128,7 +128,8 @@ label {
   margin: 5px 0;
 }
 
-.modal-dialog, .modal {
+.modal-dialog,
+.modal {
   padding: 0 !important;
   margin: 2rem auto;
 }
@@ -152,4 +153,53 @@ label {
 
 .modal-body .tab-content {
   border: none !important;
+}
+
+.modal {
+  margin: 0;
+}
+
+.modal .modal-body {
+  padding: 10px 20px;
+}
+
+.permissions-checkbox {
+  display: flex;
+  align-items: center;
+  text-align: justify;
+}
+
+.permissions-checkbox input[type="checkbox"] {
+  appearance: none;
+  background-color: #fff;
+  border: 2px solid #FF5000;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin-right: 10px;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+}
+
+.permissions-checkbox input[type="checkbox"]:checked {
+  background-color: #FF5000;
+  border-color: #FF5000;
+}
+
+.permissions-checkbox input[type="checkbox"]:checked::before {
+  font-size: 12px;
+  color: white;
+  position: absolute;
+  top: 1px;
+  left: 4px;
+}
+
+.permissions-checkbox label {
+  font-size: 16px;
+  color: #333;
+}
+
+.permissions-item {
+  width: calc(50% - 10px);
 }

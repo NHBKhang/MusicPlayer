@@ -1,4 +1,5 @@
 import {
+    DownloadPage,
     HomePage,
     LibraryPage,
     LoginPage, PlaylistDetailsPage, ProfilePage, SearchPage, SetPasswordPage, SignupPage,
@@ -12,52 +13,68 @@ export const routes = {
     home: {
         url: '/',
         component: HomePage,
-        required: false
+        required: false,
+        controlShow: true
     },
     login: {
         url: '/login/',
         component: LoginPage,
-        required: false
+        required: false,
+        controlShow: false
     },
     signup: {
         url: '/signup/',
         component: SignupPage,
-        required: false
+        required: false,
+        controlShow: false
     },
     song: {
         url: '/songs/:id/',
         component: SongDetailsPage,
-        required: false
+        required: false,
+        controlShow: true
     },
     playlist: {
         url: '/playlists/:id/',
         component: PlaylistDetailsPage,
-        required: false
+        required: false,
+        controlShow: true
     },
     setPassword: {
         url: '/set-password/',
         component: SetPasswordPage,
-        required: true
+        required: true,
+        controlShow: true
     },
     search: {
         url: '/search/',
         component: SearchPage,
-        required: false
+        required: false,
+        controlShow: true
     },
     profile: {
         url: '/profile/:id/',
         component: ProfilePage,
-        required: false
+        required: false,
+        controlShow: true
     },
     library: {
         url: '/library/',
         component: LibraryPage,
-        required: true
+        required: true,
+        controlShow: true
     },
     upload: {
         url: '/upload/',
         component: UploadPage,
-        required: true
+        required: true,
+        controlShow: true
+    }, 
+    download: {
+        url: '/download/',
+        component: DownloadPage,
+        require: false,
+        controlShow: false
     }
 }
 
@@ -74,6 +91,7 @@ export const endpoints = {
     'songs': '/songs/',
     'song': (songId) => `/songs/${songId}/`,
     'song-access': (songId) => `/songs/${songId}/access/`,
+    'download-song': (songId) => `/songs/${songId}/download/`,
     'previous-song': (songId) => `/songs/${songId}/previous/`,
     'next-song': (songId) => `/songs/${songId}/next/`,
     'related-songs': (songId) => `/songs/${songId}/related/`,

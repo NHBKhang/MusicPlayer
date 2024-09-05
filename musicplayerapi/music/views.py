@@ -6,15 +6,18 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from music.models import *
-from music import serializers, paginators, perms, utils
+from music import serializers, paginators, perms, utils, exceptions
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from django.contrib.auth import update_session_auth_hash
 from django.db.models import Count, Max, Q, Prefetch
+from django.http import JsonResponse
 from google.oauth2 import id_token
 from google.auth.transport import requests as gg_requests
 from oauth2_provider.settings import oauth2_settings
+from botocore.exceptions import NoCredentialsError
 import requests
+import boto3
 
 
 @api_view(['POST'])
@@ -410,13 +413,47 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
     @action(methods=['post', 'patch'], url_path='access', detail=True)
     def song_access(self, request, pk=None):
         song = self.get_object()
-        access, created = SongAccess.objects.get_or_create(song=song)
+        access, created = SongAccess.objects.get_or_create(song=song, defaults=request.data)
 
-        serializer = SongAccessSerializer(access, data=request.data, partial=True)
+        serializer = serializers.SongAccessSerializer(access, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['get'], url_path='download')
+    def download(self, request, pk=None):
+        try:
+            song = self.get_object()
+            if not song.file:
+                return Response({"detail": "Song file not found."}, status=status.HTTP_404_NOT_FOUND)
+            if not song.access.is_downloadable:
+                    raise exceptions.NotDownloadableException()
+            if not song.access.is_free and not request.user.has_purchased(song):
+                raise exceptions.PurchaseRequiredException()
+
+            s3_bucket = settings.AWS_STORAGE_BUCKET_NAME
+            s3_key = song.file.name
+            s3_client = boto3.client(
+                's3',
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                region_name=settings.AWS_S3_REGION_NAME
+            )
+            try:
+                presigned_url = s3_client.generate_presigned_url(
+                    'get_object',
+                    Params={'Bucket': s3_bucket, 'Key': s3_key},
+                    ExpiresIn=3600
+                )
+
+                return JsonResponse({"download_url": presigned_url})
+            except NoCredentialsError:
+                return Response({"detail": "Invalid AWS credentials"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Song.DoesNotExist:
+            return Response({"detail": "Song not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class PlaylistViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
