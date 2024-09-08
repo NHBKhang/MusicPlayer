@@ -107,12 +107,19 @@ class SongSerializer(serializers.ModelSerializer):
     likes = serializers.SerializerMethodField()
     streams = serializers.SerializerMethodField()
     access = SongAccessSerializer(read_only=True)
+    has_purchased = serializers.SerializerMethodField()
 
     def get_likes(self, song):
         return song.like_set.filter(active=True).count()
 
     def get_streams(self, song):
         return song.streams.count()
+
+    def get_has_purchased(self, song):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return song.has_purchased(request.user)
+        return False
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)
@@ -128,7 +135,7 @@ class SongSerializer(serializers.ModelSerializer):
     class Meta:
         model = Song
         fields = ['id', 'title', 'uploader', 'image', 'artists', 'file', 'likes', 'streams', 'created_date',
-                  'is_public', 'access']
+                  'is_public', 'has_purchased', 'access']
 
 
 class AuthenticatedSongSerializer(SongSerializer):

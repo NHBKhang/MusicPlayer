@@ -2,11 +2,12 @@ import {
     DownloadPage,
     HomePage,
     LibraryPage,
-    LoginPage, PlaylistDetailsPage, ProfilePage, SearchPage, SetPasswordPage, SignupPage,
+    LoginPage, PaymentSuccessPage, PlaylistDetailsPage, ProfilePage, SearchPage, SetPasswordPage, SignupPage,
     SongDetailsPage,
     UploadPage
 } from "../pages";
 import axios from "axios";
+import PaymentCancelPage from "../pages/PaymentCancelPage";
 
 
 export const routes = {
@@ -75,6 +76,18 @@ export const routes = {
         component: DownloadPage,
         require: false,
         controlShow: false
+    }, 
+    paymentSuccess: {
+        url: '/payment-success/',
+        component: PaymentSuccessPage,
+        require: true,
+        controlShow: false
+    }, 
+    paymentCancel: {
+        url: '/payment-cancel/',
+        component: PaymentCancelPage,
+        require: true,
+        controlShow: false
     }
 }
 
@@ -102,6 +115,8 @@ export const endpoints = {
     'comments': (songId) => `/songs/${songId}/comments/`,
     'add-comment': (songId) => `/songs/${songId}/comment/`,
     'mixed-search': '/search/',
+    'paypal-create-order': '/paypal/create-order/',
+    'paypal-payment-success': '/paypal/payment-success/',
 }
 
 export const authAPI = (accessToken) =>

@@ -33,3 +33,5 @@ export { default as ProfilePage } from './ProfilePage';
 export { default as LibraryPage } from './LibraryPage';
 export { default as UploadPage } from './UploadPage';
 export { default as DownloadPage } from './DownloadPage';
+export { default as PaymentSuccessPage } from './PaymentSuccessPage';
+export { default as PaymentCancelPage } from './PaymentCancelPage';

@@ -1,0 +1,90 @@
+.payment-cancel-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.payment-cancel-container {
+    margin-top: 50px;
+    padding: 20px;
+    background-color: aliceblue;
+    border: 2px solid rgb(0, 47, 255);
+    border-radius: 5px;
+    max-width: 600px;
+}
+
+.payment-cancel-container h1 {
+    font-size: 2em;
+    margin-bottom: 20px;
+    color: black;
+}
+
+.payment-cancel-container>p {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    color: rgb(170, 0, 0);
+}
+
+.payment-cancel-container button {
+    padding: 10px 20px;
+    font-size: 1em;
+    background-color: #007bff;
+    color: rgb(255, 255, 255);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.payment-cancel-container button:hover {
+    background-color: #0056b3;
+}
+
+.payment-success-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.payment-success-container {
+    margin-top: 50px;
+    padding: 30px;
+    background-color: aliceblue;
+    border: 2px solid rgb(0, 47, 255);
+    border-radius: 5px;
+    max-width: 700px;
+}
+
+.payment-success-container h1 {
+    font-size: 2em;
+    margin-bottom: 20px;
+    color: black;
+}
+
+.payment-success-container>p {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    color: rgb(0, 181, 6);
+}
+
+.payment-success-container button {
+    padding: 10px 20px;
+    font-size: 1em;
+    background-color: #007bff;
+    color: rgb(255, 255, 255);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.payment-success-container button:hover {
+    background-color: #0056b3;
+}
+
+.payment-info p {
+    font-size: 15px;
+    color: black;
+}

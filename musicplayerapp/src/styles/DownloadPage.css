@@ -41,10 +41,33 @@
     border-radius: 5px;
     cursor: pointer;
     margin: 10px;
+    transition: background-color 0.3s, box-shadow 0.3s;
 }
 
 .download-btn:hover {
     background-color: rgb(217, 72, 0);
+    box-shadow: 0 2px 4px rgba(255, 255, 255, 0.65);
+}
+
+.download-btn:active {
+    background-color: rgba(255, 85, 0, 0.7);
+}
+
+
+.download-btn.not-purchase {
+    color: rgb(240, 240, 2401);
+    background-color: rgb(79, 79, 79);
+    border: 1px solid rgb(100, 100, 100);
+    box-shadow: 0 2px 4px rgba(255, 255, 255, 0.5);
+}
+
+.download-btn.not-purchase:hover {
+    background-color: rgb(70, 70, 70);
+    color: white;
+}
+
+.download-btn.not-purchase:active {
+    background-color: rgb(60, 60, 60);
 }
 
 .payment-options {
@@ -78,8 +101,8 @@
 }
 
 .payment-logo {
-    width: 40px;
-    height: auto;
+    width: auto;
+    height: 40px;
     margin-right: 10px;
 }
 

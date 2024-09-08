@@ -35,13 +35,15 @@ const DownloadPage = () => {
     }, [songId]);
 
     const download = async () => {
-        const controller = new AbortController();
-        setAbortController(controller);
-        setDownloadLoading(true);
-        setProgress(0);
         try {
             const res = await authAPI(await getAccessToken())
                 .get(endpoints['download-song'](songId));
+
+            const controller = new AbortController();
+            setDownloadLoading(true);
+            setAbortController(controller);
+            setProgress(0);
+
             const url = res.data.download_url;
             const fileResponse = await fetch(url, { signal: controller.signal });
 
@@ -88,17 +90,38 @@ const DownloadPage = () => {
         }
     };
 
-    const payWithVNPAY = () => {
-        const vnpayUrl = `https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?vnp_Amount=${song.access?.price * 100}&vnp_Command=pay&vnp_TxnRef=${song.id}&vnp_OrderInfo=Payment for ${song.title}&vnp_ReturnUrl=${window.location.origin}/payment-success&vnp_Version=2.1.0`;
+    const payWithPayPal = async () => {
+        const amount = song.access?.price ? Math.round(song.access.price) : 0;
+        if (amount <= 0) {
+            setDownloadError('Invalid amount');
+            return;
+        }
+        const txnRef = `${song.id}${new Date().getTime()}`;
+        const orderInfo = `Payment for ${song.title}`;
 
-        window.location.href = vnpayUrl;
+        const payload = {
+            amount: amount,
+            return_url: `${window.location.origin}/payment-success/`,
+            cancel_url: `${window.location.origin}/payment-cancel/`,
+            txn_ref: txnRef,
+            order_info: orderInfo,
+            song_id: song.id,
+            user_id: user.id
+        };
+
+        try {
+            const res = await API.post(endpoints['paypal-create-order'], payload);
+            const { approval_url } = res.data;
+            window.location.href = approval_url;
+        } catch (error) {
+            console.error(error);
+            if (error.response?.data) {
+                setDownloadError(error.response?.data?.detail);
+            } else {
+                setDownloadError(error.message);
+            }
+        }
     };
-
-    // const payWithPayPal = () => {
-    //     const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=your-paypal-id&item_name=${song.title}&amount=${song.access?.price}&currency_code=VND&return=${window.location.origin}/payment-success`;
-
-    //     window.location.href = paypalUrl;
-    // };
 
     // const payWithCreditCard = () => {
     //     alert('Chuyển tới trang thanh toán bằng thẻ tín dụng');
@@ -143,24 +166,22 @@ const DownloadPage = () => {
                             </button>
                         </div>
                     </div> :
-                    <button onClick={download} className="download-btn">
+                    <button
+                        onClick={download}
+                        className={`download-btn ${song.access?.is_free || song.has_purchased ? '' : 'not-purchase'}`}>
                         Tải xuống {song.access?.is_free && 'miễn phí'}
                     </button>}
                 {downloadError && <p className='text-danger'>{downloadError}</p>}
-                {!song.access?.is_free &&
+                {!song.access?.is_free && !song.has_purchased &&
                     <div className="payment-options">
                         <h6 className="price">Giá: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(song.access?.price)}</h6>
                         <p className='text-dark mb-1'>Chọn phương thức thanh toán:</p>
                         <ul className="payment-method-list cursor-pointer">
-                            <li onClick={payWithVNPAY}>
-                                <img src="https://vnpay.vn/s1/statics.vnpay.vn/2023/6/0oxhzjmxbksr1686814746087.png" alt="VNPAY" className="payment-logo" />
-                                Thanh toán với VNPAY
-                            </li>
-                            {/* <li onClick={payWithPayPal}>
-                                <img src="/path/to/paypal-logo.png" alt="PayPal" className="payment-logo" />
+                            <li onClick={payWithPayPal}>
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Paypal_2014_logo.png" alt="PayPal" className="payment-logo" />
                                 Thanh toán với PayPal
                             </li>
-                            <li onClick={payWithCreditCard}>
+                            {/* <li onClick={payWithCreditCard}>
                                 <img src="/path/to/credit-card-logo.png" alt="Credit Card" className="payment-logo" />
                                 Thanh toán với Thẻ tín dụng
                             </li> */}

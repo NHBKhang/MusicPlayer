@@ -17,6 +17,7 @@ from google.auth.transport import requests as gg_requests
 from oauth2_provider.settings import oauth2_settings
 from botocore.exceptions import NoCredentialsError
 import requests
+from requests.auth import HTTPBasicAuth
 import boto3
 
 
@@ -428,7 +429,9 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
             if not song.file:
                 return Response({"detail": "Song file not found."}, status=status.HTTP_404_NOT_FOUND)
             if not song.access.is_downloadable:
-                    raise exceptions.NotDownloadableException()
+                raise exceptions.NotDownloadableException()
+            if not request.user.is_authenticated:
+                raise exceptions.AnonymousException()
             if not song.access.is_free and not request.user.has_purchased(song):
                 raise exceptions.PurchaseRequiredException()
 
@@ -440,18 +443,26 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
                 aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
                 region_name=settings.AWS_S3_REGION_NAME
             )
-            try:
-                presigned_url = s3_client.generate_presigned_url(
-                    'get_object',
-                    Params={'Bucket': s3_bucket, 'Key': s3_key},
-                    ExpiresIn=3600
-                )
+            presigned_url = s3_client.generate_presigned_url(
+                'get_object',
+                Params={'Bucket': s3_bucket, 'Key': s3_key},
+                ExpiresIn=3600
+            )
 
-                return JsonResponse({"download_url": presigned_url})
-            except NoCredentialsError:
-                return Response({"detail": "Invalid AWS credentials"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return JsonResponse({"download_url": presigned_url})
+        except NoCredentialsError:
+            return Response({"detail": "Invalid AWS credentials"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Song.DoesNotExist:
             return Response({"detail": "Song not found."}, status=status.HTTP_404_NOT_FOUND)
+        except exceptions.NotDownloadableException:
+            return Response({"detail": "This song is not available for download."},
+                            status=status.HTTP_403_FORBIDDEN)
+        except exceptions.AnonymousException:
+            return Response({"detail": "You must be logged in to download songs."},
+                            status=status.HTTP_403_FORBIDDEN)
+        except exceptions.PurchaseRequiredException:
+            return Response({"detail": "You need to purchase this song to download it."},
+                            status=status.HTTP_402_PAYMENT_REQUIRED)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

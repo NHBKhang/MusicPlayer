@@ -6,6 +6,7 @@ from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.db import models
 from django.conf import settings
 from music.validate import validate_audio_file
+from datetime import datetime
 import imghdr
 
 
@@ -38,7 +39,7 @@ class User(AbstractUser):
                 raise ValidationError("File uploaded must be an image (JPEG, PNG, or GIF).")
 
     def has_purchased(self, song):
-        return Purchase.objects.filter(user=self, song=song).exists()
+        return Transaction.objects.filter(user=self, song=song, status=Transaction.COMPLETED).exists()
 
     # def save(self, *args, **kwargs):
     #     if self.password:
@@ -98,6 +99,9 @@ class Song(ImageBaseModel, BaseModel):
             self.artists = 'Various artists'
 
         super().save(*args, **kwargs)
+
+    def has_purchased(self, user):
+        return Transaction.objects.filter(user=user, song=self, status=Transaction.COMPLETED).exists()
 
 
 class Playlist(BaseModel, ImageBaseModel):
@@ -189,19 +193,30 @@ class SongAccess(models.Model):
 
 
 class Transaction(models.Model):
-    transaction_id = models.BigIntegerField(null=False, blank=False)
+    CREATED = 1
+    COMPLETED = 2
+    FAILED = 3
+
+    TRANSACTIONS_CHOICES = [
+        (CREATED, 'Created'),
+        (COMPLETED, 'Completed'),
+        (FAILED, 'Failed'),
+    ]
+
+    transaction_id = models.CharField(max_length=50, null=False, blank=False)
     transaction_date = models.DateTimeField(auto_now_add=True)
-    bank_code = models.CharField(max_length=20, null=False, blank=False)
     description = models.TextField(null=True, blank=True)
+    status = models.IntegerField(choices=TRANSACTIONS_CHOICES, default=CREATED)
+    payment_method = models.CharField(max_length=20, null=True, blank=True)
+    amount_in_vnd = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='purchases', default=1)
+    song = models.ForeignKey(Song, on_delete=models.CASCADE, related_name='purchases', default=11)
 
     def __str__(self):
-        return self.bank_code + str(self.transaction_id)
+        return f'{self.payment_method} - {str(self.transaction_id)}'
 
-
-class Purchase(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='purchases')
-    song = models.ForeignKey(Song, on_delete=models.CASCADE, related_name='purchases')
-    transaction = models.OneToOneField(Transaction, on_delete=models.CASCADE, related_name='purchase')
+    class Meta:
+        unique_together = ('user', 'song')
 
 
 class Follow(BaseModel):

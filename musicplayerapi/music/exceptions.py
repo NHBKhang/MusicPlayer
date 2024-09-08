@@ -11,3 +11,9 @@ class PurchaseRequiredException(APIException):
     status_code = 403
     default_detail = 'You need to purchase this song to download it.'
     default_code = 'purchase_required'
+
+
+class AnonymousException(APIException):
+    status_code = 401
+    default_detail = "Anonymous users are not allowed to perform this action."
+    default_code = "anonymous_error"
