@@ -25,7 +25,7 @@ import boto3
 def google_login(request):
     id_token_from_client = request.data.get('id_token')
     if not id_token_from_client:
-        return Response({'error': 'Mã xác thực không được cung cấp'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'detail': 'Mã xác thực không được cung cấp'}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
         idinfo = id_token.verify_oauth2_token(id_token_from_client, gg_requests.Request())
@@ -34,7 +34,7 @@ def google_login(request):
         user_name = idinfo.get('name')
         user_picture = idinfo.get('picture')
         if not user_email:
-            return Response({'error': 'Không tìm thấy email trong mã xác thực'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Không tìm thấy email trong mã xác thực'}, status=status.HTTP_400_BAD_REQUEST)
 
         user, created = User.objects.get_or_create(
             username=user_email,
@@ -61,14 +61,14 @@ def google_login(request):
         })
     except ValueError as e:
         print(e)
-        return Response({'error': 'Xác thực không thành công', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'detail': 'Xác thực không thành công', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
 def facebook_login(request):
     access_token = request.data.get('access_token')
     if not access_token:
-        return Response({'error': 'Access token not provided'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'detail': 'Access token not provided'}, status=status.HTTP_400_BAD_REQUEST)
 
     facebook_url = f'https://graph.facebook.com/me?access_token={access_token}&fields=id,name,email,picture'
 
@@ -82,7 +82,7 @@ def facebook_login(request):
     user_picture = user_info.get('picture', {}).get('data', {}).get('url')
 
     if not user_email:
-        return Response({'error': 'Email not found in access token'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'detail': 'Email not found in access token'}, status=status.HTTP_400_BAD_REQUEST)
 
     user, created = User.objects.get_or_create(
         username=user_email,
@@ -206,6 +206,11 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
     pagination_class = paginators.SongPaginator
     permission_classes = [perms.SongOwner]
     parser_classes = (MultiPartParser, FormParser, JSONParser)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
 
     def get_serializer_class(self):
         if self.action in ['retrieve', 'update', 'partial_update', 'create']:

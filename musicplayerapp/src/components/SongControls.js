@@ -118,7 +118,7 @@ const SongControls = () => {
 
     return (
         <div className={`song-control fixed-bottom bg-dark text-white d-flex align-items-center p-2${visible ? ' show' : ''}`}>
-            <PageTitle title={`${currentSong?.artists} - ${currentSong?.title}`} defaultTitle={false} />
+            {currentSong && <PageTitle title={`${currentSong?.artists} - ${currentSong?.title}`} defaultTitle={false} />}
             <div className="container d-flex justify-content-between align-items-center">
                 <div className="controls d-flex align-items-center">
                     <button className="me-2" onClick={handlePrevious}>

@@ -215,9 +215,6 @@ class Transaction(models.Model):
     def __str__(self):
         return f'{self.payment_method} - {str(self.transaction_id)}'
 
-    class Meta:
-        unique_together = ('user', 'song')
-
 
 class Follow(BaseModel):
     follower = models.ForeignKey(User, related_name='following', on_delete=models.CASCADE)

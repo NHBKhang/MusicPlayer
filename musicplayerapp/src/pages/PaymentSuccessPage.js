@@ -48,9 +48,11 @@ const PaymentSuccessPage = () => {
                 <h1>Thanh toán thành công</h1>
                 <p>{message}</p>
                 <div className='text-start payment-info'>
+                    <p>Tên bài hát: {song?.title}</p>
                     <p>Mã giao dịch: {song?.transaction_id}</p>
                     <p>Số tiền: {song?.amount} VNĐ</p>
                     <p>Ngày giao dịch: {song?.transaction_date}</p>
+                    <p>Phương thức giao dịch: {song?.method}</p>
                     <p>Phương thức giao dịch: {song?.method}</p>
                 </div>
                 <button onClick={() => navigate(`/download/?songId=${song?.id}`)}>

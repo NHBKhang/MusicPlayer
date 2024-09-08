@@ -22,8 +22,9 @@ const DownloadPage = () => {
     useEffect(() => {
         const loadSong = async () => {
             try {
-                const res = await API.get(endpoints.song(songId));
+                const res = await authAPI(await getAccessToken()).get(endpoints.song(songId));
                 setSong(res.data);
+                console.log(res.data)
             } catch (err) {
                 setError('Error loading song data');
             } finally {
@@ -32,7 +33,7 @@ const DownloadPage = () => {
         };
 
         loadSong();
-    }, [songId]);
+    }, [songId, getAccessToken]);
 
     const download = async () => {
         try {
@@ -91,6 +92,11 @@ const DownloadPage = () => {
     };
 
     const payWithPayPal = async () => {
+        if (!user) {
+            setDownloadError("Vui lòng đăng nhập để tiếp tục");
+            return;
+        }
+
         const amount = song.access?.price ? Math.round(song.access.price) : 0;
         if (amount <= 0) {
             setDownloadError('Invalid amount');
@@ -134,7 +140,7 @@ const DownloadPage = () => {
     return (
         <div className="background-wrapper">
             <div className="container-fluid header bg-dark">
-                <div className="navbar-brand cursor-pointer" onClick={() => navigate("/")}>
+                <div className="navbar-brand cursor-pointer" onClick={() => navigate('/')}>
                     <img src="/logo.png" height={40} className="me-2 ms-1" alt="logo" />
                     <strong>SoundScape</strong>
                 </div>
@@ -145,7 +151,7 @@ const DownloadPage = () => {
                         width={35}
                         className="rounded-circle" />
                 </div> : <div className="account">
-                    <a href="/login/" className="btn me-2 login" type="button">Đăng nhập</a>
+                    <a href={`/login/?next=${window.location.href}`} className="btn me-2 login" type="button">Đăng nhập</a>
                     <a href="/signup/" className="btn signin" type="button">Đăng ký</a>
                 </div>}
             </div>
@@ -172,20 +178,24 @@ const DownloadPage = () => {
                         Tải xuống {song.access?.is_free && 'miễn phí'}
                     </button>}
                 {downloadError && <p className='text-danger'>{downloadError}</p>}
-                {!song.access?.is_free && !song.has_purchased &&
+                {!song.access?.is_free &&
                     <div className="payment-options">
-                        <h6 className="price">Giá: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(song.access?.price)}</h6>
-                        <p className='text-dark mb-1'>Chọn phương thức thanh toán:</p>
-                        <ul className="payment-method-list cursor-pointer">
-                            <li onClick={payWithPayPal}>
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Paypal_2014_logo.png" alt="PayPal" className="payment-logo" />
-                                Thanh toán với PayPal
-                            </li>
-                            {/* <li onClick={payWithCreditCard}>
+                        {song.has_purchased ? <h6 className='text-success mt-2 mb-3'>
+                            Bạn đã thanh toán cho bài hát này
+                        </h6> : <>
+                            <h6 className="price">Giá: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(song.access?.price)}</h6>
+                            <p className='text-dark mb-1'>Chọn phương thức thanh toán:</p>
+                            <ul className="payment-method-list cursor-pointer">
+                                <li onClick={payWithPayPal}>
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Paypal_2014_logo.png" alt="PayPal" className="payment-logo" />
+                                    Thanh toán với PayPal
+                                </li>
+                                {/* <li onClick={payWithCreditCard}>
                                 <img src="/path/to/credit-card-logo.png" alt="Credit Card" className="payment-logo" />
                                 Thanh toán với Thẻ tín dụng
                             </li> */}
-                        </ul>
+                            </ul>
+                        </>}
                     </div>}
             </div>
         </div>

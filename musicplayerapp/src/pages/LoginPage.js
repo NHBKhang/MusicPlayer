@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import '../styles/LoginPage.css';
 import { useUser } from '../configs/UserContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { GoogleButton, FacebookButton } from '../components';
 import { usePageTitle } from '../components/PageTitle';
 
@@ -14,6 +14,8 @@ const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const { login, user } = useUser();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const next = searchParams.get('next') || '/';
 
     useEffect(() => {
         if (user)
@@ -26,7 +28,7 @@ const LoginPage = () => {
 
         try {
             await login(username, password);
-            navigate('/');
+            navigate(next);
         } catch (error) {
             setError(error.response?.data?.error_description);
             console.info(error);

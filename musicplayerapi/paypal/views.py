@@ -21,6 +21,12 @@ class CreatePayPalOrderView(APIView):
             cancel_url = data.get('cancel_url')
             txn_ref = data.get('txn_ref')
             order_info = data.get('order_info')
+            song_id = data.get('song_id')
+            user_id = data.get('user_id')
+
+            if Transaction.objects.filter(song_id=song_id, user_id=user_id, status=Transaction.COMPLETED).exists():
+                return Response({'detail': 'Transaction already completed for this song.'},
+                                status=status.HTTP_400_BAD_REQUEST)
 
             exchange_rate = 24000
             amount_usd = round(float(amount) / exchange_rate, 2)
@@ -61,8 +67,8 @@ class CreatePayPalOrderView(APIView):
                     description=order_info,
                     status=Transaction.CREATED,
                     amount_in_vnd=float(amount),
-                    song_id=data.get('song_id'),
-                    user_id=data.get('user_id')
+                    song_id=song_id,
+                    user_id=user_id
                 )
                 return Response({'approval_url': approval_url}, status=status.HTTP_200_OK)
             else:
@@ -79,6 +85,12 @@ class VerifyPayPalPaymentView(APIView):
             data = request.data
             payment_id = data.get('paymentId')
             payer_id = data.get('PayerID')
+
+            transaction = Transaction.objects.get(transaction_id=payment_id)
+
+            if transaction.status == Transaction.COMPLETED:
+                return Response({'detail': 'Transaction has already been completed.'},
+                                status=status.HTTP_400_BAD_REQUEST)
 
             payment = paypalrestsdk.Payment.find(payment_id)
             if payment.execute({"payer_id": payer_id}):
