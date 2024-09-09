@@ -1,139 +1,22 @@
-from rest_framework import viewsets, generics, status, parsers, permissions
+from rest_framework import viewsets, generics, status, permissions
 from rest_framework.response import Response
-from rest_framework.decorators import action, api_view
-from rest_framework import serializers as rest_serializers
+from rest_framework.decorators import action
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from music.models import *
-from music import serializers, paginators, perms, utils, exceptions
-from django.shortcuts import get_object_or_404
+from music import serializers, paginators, perms, exceptions
 from django.conf import settings
-from django.contrib.auth import update_session_auth_hash
 from django.db.models import Count, Max, Q, Prefetch
 from django.http import JsonResponse
-from google.oauth2 import id_token
-from google.auth.transport import requests as gg_requests
-from oauth2_provider.settings import oauth2_settings
 from botocore.exceptions import NoCredentialsError
-import requests
-from requests.auth import HTTPBasicAuth
 import boto3
-
-
-@api_view(['POST'])
-def google_login(request):
-    id_token_from_client = request.data.get('id_token')
-    if not id_token_from_client:
-        return Response({'detail': 'Mã xác thực không được cung cấp'}, status=status.HTTP_400_BAD_REQUEST)
-
-    try:
-        idinfo = id_token.verify_oauth2_token(id_token_from_client, gg_requests.Request())
-
-        user_email = idinfo.get('email')
-        user_name = idinfo.get('name')
-        user_picture = idinfo.get('picture')
-        if not user_email:
-            return Response({'detail': 'Không tìm thấy email trong mã xác thực'}, status=status.HTTP_400_BAD_REQUEST)
-
-        user, created = User.objects.get_or_create(
-            username=user_email,
-            defaults={'first_name': user_name, 'email': user_email,
-                      'avatar': utils.upload_image_from_url(user_picture)})
-
-        access_token, refresh_token = utils.create_user_token(user=user)
-
-        return Response({
-            'user': {
-                'id': user.id,
-                'username': user.username,
-                'email': user.email,
-                'name': user.first_name,
-            },
-            'created': created,
-            'token': {
-                'access_token': access_token.token,
-                'expires_in': oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS,
-                'refresh_token': refresh_token.token,
-                'token_type': 'Bearer',
-                'scope': access_token.scope,
-            }
-        })
-    except ValueError as e:
-        print(e)
-        return Response({'detail': 'Xác thực không thành công', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(['POST'])
-def facebook_login(request):
-    access_token = request.data.get('access_token')
-    if not access_token:
-        return Response({'detail': 'Access token not provided'}, status=status.HTTP_400_BAD_REQUEST)
-
-    facebook_url = f'https://graph.facebook.com/me?access_token={access_token}&fields=id,name,email,picture'
-
-    response = requests.get(facebook_url)
-    if response.status_code != 200:
-        return Response({'error': 'Invalid access token'}, status=status.HTTP_400_BAD_REQUEST)
-
-    user_info = response.json()
-    user_email = user_info.get('email')
-    user_name = user_info.get('name')
-    user_picture = user_info.get('picture', {}).get('data', {}).get('url')
-
-    if not user_email:
-        return Response({'detail': 'Email not found in access token'}, status=status.HTTP_400_BAD_REQUEST)
-
-    user, created = User.objects.get_or_create(
-        username=user_email,
-        defaults={'first_name': user_name, 'email': user_email, 'avatar': utils.upload_image_from_url(user_picture)})
-
-    access_token, refresh_token = utils.create_user_token(user=user)
-
-    return Response({
-        'user': {
-            'id': user.id,
-            'username': user.username,
-            'email': user.email,
-            'name': user.first_name,
-        },
-        'created': created,
-        'token': {
-            'access_token': access_token.token,
-            'expires_in': oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS,
-            'refresh_token': refresh_token.token,
-            'token_type': 'Bearer',
-            'scope': access_token.scope,
-        }
-    })
-
-
-class PasswordChangeSerializer(rest_serializers.Serializer):
-    new_password = rest_serializers.CharField(write_only=True)
-
-
-@api_view(['POST'])
-def set_password(request):
-    user = request.user
-
-    if not user.is_authenticated:
-        return Response({'error': 'Người dùng không được xác thực'}, status=status.HTTP_401_UNAUTHORIZED)
-
-    serializer = PasswordChangeSerializer(data=request.data)
-    if serializer.is_valid():
-        new_password = serializer.validated_data['new_password']
-        user.set_password(new_password)
-        user.save()
-        update_session_auth_hash(request, user)
-        return Response({'response': 'Mật khẩu đã được cập nhật'}, status=status.HTTP_200_OK)
-
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveAPIView):
     queryset = User.objects.filter(is_active=True).order_by('id')
     serializer_class = serializers.PublicUserSerializer
-    parser_classes = [parsers.MultiPartParser, ]
+    parser_classes = [MultiPartParser, ]
     pagination_class = paginators.UserPaginator
 
     def get_serializer_class(self):

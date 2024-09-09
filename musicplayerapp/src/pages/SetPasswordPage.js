@@ -11,10 +11,14 @@ const SetPasswordPage = () => {
     const { user } = location.state || {};
     const { getAccessToken } = useUser();
     const [password, setPassword] = useState('');
+    const [confirm, setConfirm] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
+    const [showPassword, setShowPassword] = useState({});
     const navigate = useNavigate();
+
+    const updateShowPassword = (field, value) =>
+        setShowPassword(prev => ({ ...prev, [field]: value }))
 
     useEffect(() => {
         if (user)
@@ -64,8 +68,23 @@ const SetPasswordPage = () => {
                                         required />
                                     <button
                                         className="form-icon" type='button'
-                                        onClick={() => setShowPassword(!showPassword)}>
-                                        {showPassword ? <i class="fa-solid fa-eye"></i> : <i class="fa-solid fa-eye-slash"></i>}
+                                        onClick={() => updateShowPassword('password', !showPassword?.password)}>
+                                        {showPassword?.password ? <i class="fa-solid fa-eye"></i> : <i class="fa-solid fa-eye-slash"></i>}
+                                    </button>
+                                </div>
+                                <div className="form-group mb-3">
+                                    <label htmlFor="confirm" className='input-label'>Nhập lại mật khẩu</label>
+                                    <input
+                                        type="confirm"
+                                        className="form-control"
+                                        id="confirm"
+                                        value={confirm}
+                                        onChange={(e) => setConfirm(e.target.value)}
+                                        required />
+                                    <button
+                                        className="form-icon" type='button'
+                                        onClick={() => updateShowPassword('confirm', !showPassword?.confirm)}>
+                                        {showPassword?.confirm ? <i class="fa-solid fa-eye"></i> : <i class="fa-solid fa-eye-slash"></i>}
                                     </button>
                                 </div>
                                 <div className="error-text">{error}</div>

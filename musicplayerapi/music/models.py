@@ -188,6 +188,16 @@ class SongAccess(models.Model):
     is_free = models.BooleanField(default=False)
     price = models.DecimalField(max_digits=10, decimal_places=0, null=True, blank=True, help_text="Price in VND")
 
+    def clean(self):
+        if self.is_free and self.price is not None:
+            raise ValidationError("Price must be null if the song is free.")
+        if not self.is_free and self.price is None:
+            raise ValidationError("Price is required if the song is not free.")
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"Access for {self.song.title}"
 

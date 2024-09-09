@@ -21,6 +21,7 @@ from oauth2_provider.views import AuthorizationView, TokenView, RevokeTokenView
 urlpatterns = [
     path('', include('music.urls')),
     path('admin/', admin_site.urls),
-    path('paypal/', include('paypal.urls')),
+    path('auth/', include('auth.urls')),
+    path('payment/', include('payment.urls')),
     path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 ]

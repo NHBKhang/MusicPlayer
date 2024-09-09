@@ -115,8 +115,8 @@ export const endpoints = {
     'comments': (songId) => `/songs/${songId}/comments/`,
     'add-comment': (songId) => `/songs/${songId}/comment/`,
     'mixed-search': '/search/',
-    'paypal-create-order': '/paypal/create-order/',
-    'paypal-payment-success': '/paypal/payment-success/',
+    'paypal-create-order': '/payment/paypal/create-order/',
+    'paypal-payment-success': '/payment/paypal/payment-success/',
 }
 
 export const authAPI = (accessToken) =>

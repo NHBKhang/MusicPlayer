@@ -64,7 +64,7 @@ export const UserProvider = ({ children }) => {
 
         if (token && token.refresh_token) {
             try {
-                const res = await API.post(endpoints.token, {
+                const res = await API.post(endpoints.login, {
                     "client_id": process.env.REACT_APP_CLIENT_ID,
                     "client_secret": process.env.REACT_APP_CLIENT_SECRET,
                     "grant_type": "refresh_token",

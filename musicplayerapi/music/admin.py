@@ -19,6 +19,7 @@ class MyAdminSite(admin.AdminSite):
         return [
             path('music_stats/', self.stats_view, name="music-stats"),
             path('stream_stats/', self.stream_stats_view, name="stream-stats"),
+            path('revenue_stats/', self.revenue_stats_view, name="revenue-stats"),
 
         ] + super().get_urls()
 
@@ -42,6 +43,25 @@ class MyAdminSite(admin.AdminSite):
         return TemplateResponse(request, 'admin/stream-stats.html', {
             'stats': stats,
             'title': 'Streams Statistics Overview',
+            'current_month': month if month else '',
+            'current_date': date if date else '',
+            'max_date': max_date,
+            'max_month': max_month,
+        })
+
+    def revenue_stats_view(self, request):
+        month = request.GET.get('month')
+        date = request.GET.get('date')
+
+        stats = utils.revenue_stats(month=month, date=date)
+
+        today = timezone.now().date()
+        max_date = today.strftime('%Y-%m-%d')
+        max_month = today.strftime('%Y-%m')
+
+        return TemplateResponse(request, 'admin/revenue-stats.html', {
+            'stats': stats,
+            'title': 'Revenue Statistics Overview',
             'current_month': month if month else '',
             'current_date': date if date else '',
             'max_date': max_date,

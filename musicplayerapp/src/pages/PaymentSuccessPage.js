@@ -53,7 +53,6 @@ const PaymentSuccessPage = () => {
                     <p>Số tiền: {song?.amount} VNĐ</p>
                     <p>Ngày giao dịch: {song?.transaction_date}</p>
                     <p>Phương thức giao dịch: {song?.method}</p>
-                    <p>Phương thức giao dịch: {song?.method}</p>
                 </div>
                 <button onClick={() => navigate(`/download/?songId=${song?.id}`)}>
                     Tải xuống {song?.title} ngay bây giờ

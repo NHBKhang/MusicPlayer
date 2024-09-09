@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.db.models import Max
+from django.core.exceptions import ValidationError
 from music.models import *
 import cloudinary
 
@@ -95,6 +96,17 @@ class SongAccessSerializer(serializers.ModelSerializer):
     class Meta:
         model = SongAccess
         fields = ['is_downloadable', 'is_free', 'price']
+
+    def validate(self, data):
+        is_free = data.get('is_free')
+        price = data.get('price')
+
+        if is_free and price is not None:
+            raise serializers.ValidationError("Price must be null if the song is free.")
+        if not is_free and price is None:
+            raise serializers.ValidationError("Price is required if the song is not free.")
+
+        return data
 
     def update(self, instance, validated_data):
         validated_data['price'] = None if validated_data['price'] == 0 or validated_data['is_free'] \

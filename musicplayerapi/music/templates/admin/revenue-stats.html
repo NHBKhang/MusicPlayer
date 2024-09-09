@@ -1,0 +1,187 @@
+{% extends 'admin/base_site.html' %}
+
+{% block content %}
+    <h1>THỐNG KÊ DOANH THU WEBSITE {% if current_date %}
+        THEO NGÀY
+    {% elif current_month %}
+        THEO THÁNG
+    {% endif %}
+    </h1>
+
+    <form method="get">
+        <div class="form-group">
+            <label for="filter-type">Filter By:</label>
+            <select id="filter-type" name="filter_type">
+                <option value="" {% if not current_date and not current_month %}selected{% endif %}>Chọn...</option>
+                <option value="date" {% if current_date %}selected{% endif %}>Theo ngày</option>
+                <option value="month" {% if current_month %}selected{% endif %}>Theo tháng</option>
+            </select>
+        </div>
+
+        <div id="date-input" class="{% if not current_date %}hidden{% endif %}">
+            <label for="date">Ngày:</label>
+            <input type="date" name="date" id="date" value="{{ current_date }}" max="{{ max_date }}"/>
+        </div>
+
+        <div id="month-input" class="{% if not current_month %}hidden{% endif %}">
+            <label for="month">Tháng:</label>
+            <input type="month" name="month" id="month" value="{{ current_month }}" max="{{ max_month }}"/>
+        </div>
+
+        <button type="submit">Lọc</button>
+    </form>
+
+    <ul>
+        {% for stat in stats %}
+            <li><strong>{{ stat.song__title }}</strong>: {{ stat.amount_in_vnd }} VNĐ</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Chart container -->
+    <div style="width: 75%; margin-top: 20px;">
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let labels = [];
+        let data = [];
+        {% for stat in stats %}
+            labels.push('{{ stat.song__title }}');
+            data.push({{ stat.amount_in_vnd }});
+        {% endfor %}
+
+        window.onload = function () {
+            const ctx = document.getElementById('myChart');
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '# VNĐ',
+                        data: data,
+                        backgroundColor: [
+                            'red',
+                            'green',
+                            'blue',
+                            'gold',
+                            'purple',
+                            'pink',
+                            'orange',
+                            'brown'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(199, 199, 199, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (tooltipItem) {
+                                    return tooltipItem.label + ': ' + tooltipItem.raw;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+
+    <script>
+        document.getElementById('filter-type').addEventListener('change', function () {
+            var filterType = this.value;
+            var dateInput = document.getElementById('date-input');
+            var monthInput = document.getElementById('month-input');
+
+            if (filterType === 'date') {
+                dateInput.classList.remove('hidden');
+                monthInput.classList.add('hidden');
+                document.getElementById('month').value = '';
+            } else if (filterType === 'month') {
+                monthInput.classList.remove('hidden');
+                dateInput.classList.add('hidden');
+                document.getElementById('date').value = '';
+            } else {
+                dateInput.classList.add('hidden');
+                monthInput.classList.add('hidden');
+                document.getElementById('date').value = '';
+                document.getElementById('month').value = '';
+            }
+        });
+
+        document.getElementById('filter-type').dispatchEvent(new Event('change'));
+    </script>
+
+    <style>
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        label {
+            font-weight: bold;
+            color: #333;
+            margin-right: 10px;
+        }
+
+        select {
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 0 8px;
+        }
+
+        input[type="date"], input[type="month"] {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 8px 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+{% endblock %}
