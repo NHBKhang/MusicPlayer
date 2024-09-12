@@ -3,7 +3,7 @@ import Page from ".";
 import { useUser } from "../configs/UserContext";
 import '../styles/ProfilePage.css';
 import { useParams } from "react-router-dom";
-import { LoginRequiredModal, PlaylistItem, SongItem, UserModal, VerifiedBadge } from "../components";
+import { LoginRequiredModal, PlaylistItem, SongItem, UserModal, VerifiedBadge, VideoItem } from "../components";
 import { authAPI, endpoints } from "../configs/API";
 import { useAudio } from "../configs/AudioContext";
 
@@ -122,8 +122,8 @@ const ProfilePage = () => {
 };
 
 const UserProfileTabs = ({ profile, getAccessToken, state }) => {
-    const tabs = ['Tất cả', 'Bài hát', 'Phổ biến', 'Albums', 'Playlists'];
-    const tabKeys = useMemo(() => ['all', 'songs', 'popular', 'albums', 'playlists'], []);
+    const tabs = ['Tất cả', 'Bài hát', 'Phổ biến', 'MV', 'Albums', 'Playlists'];
+    const tabKeys = useMemo(() => ['all', 'songs', 'popular', 'mv', 'albums', 'playlists'], []);
     const [activeTab, setActiveTab] = useState(0);
     const urls = useMemo(() => ({
         all: (userId, page) =>
@@ -132,6 +132,8 @@ const UserProfileTabs = ({ profile, getAccessToken, state }) => {
             `${endpoints.songs}?uploader=${userId}&page=${page}`,
         popular: (userId, page) =>
             `${endpoints.songs}?uploader=${userId}&page=${page}&cate=1`,
+        mv: (userId, page) =>
+            `${endpoints["music-videos"]}?uploader=${userId}&page=${page}`,
         albums: (userId, page) =>
             `${endpoints.playlists}?creator=${userId}&page=${page}`,
         playlists: (userId, page) =>
@@ -141,6 +143,7 @@ const UserProfileTabs = ({ profile, getAccessToken, state }) => {
         all: [],
         songs: [],
         popular: [],
+        mv: [],
         albums: [],
         playlists: []
     });
@@ -148,6 +151,7 @@ const UserProfileTabs = ({ profile, getAccessToken, state }) => {
         all: 1,
         songs: 1,
         popular: 1,
+        mv: 1,
         albums: 1,
         playlists: 1
     });
@@ -155,6 +159,7 @@ const UserProfileTabs = ({ profile, getAccessToken, state }) => {
         all: false,
         songs: false,
         popular: false,
+        mv: false,
         albums: false,
         playlists: false
     });
@@ -195,9 +200,9 @@ const UserProfileTabs = ({ profile, getAccessToken, state }) => {
     );
 
     useEffect(() => {
-        setData({ all: [], songs: [], popular: [], albums: [], playlists: [] });
-        setPage({ all: 1, songs: 1, popular: 1, albums: 1, playlists: 1 });
-        setLoading({ all: false, songs: false, popular: false, albums: false, playlists: false });
+        setData({ all: [], songs: [], popular: [], mv: [], albums: [], playlists: [] });
+        setPage({ all: 1, songs: 1, popular: 1, mv: 1, albums: 1, playlists: 1 });
+        setLoading({ all: false, songs: false, popular: false, mv: false, albums: false, playlists: false });
     }, [profile?.id]);
 
     useEffect(() => {
@@ -250,14 +255,17 @@ const UserProfileTabs = ({ profile, getAccessToken, state }) => {
                         <PlaylistItem
                             key={`playlist-${tabKeys[activeTab]}-${item.id}`}
                             playlist={item} state={state} />
-                    )) : (activeTab !== 3 && activeTab !== 4 ?
+                    )) : (activeTab !== 3 ? (activeTab !== 4 && activeTab !== 5 ?
                         <SongItem
                             key={`track-${tabKeys[activeTab]}-${item.id}`}
                             song={item} state={state} /> :
                         <PlaylistItem
                             key={`playlist-${tabKeys[activeTab]}-${item.id}`}
-                            playlist={item} />)
-                ))}
+                            playlist={item} />) : (
+                        <VideoItem key={`mv-${tabKeys[activeTab]}-${item.id}`}
+                            video={item} />
+                    )
+                    )))}
                 {page[tabKeys[activeTab]] > 0 && (
                     <div ref={el => loadMoreRefs.current[tabKeys[activeTab]] = el} className="load-more-container">
                         {loading[tabKeys[activeTab]] && <p>Loading...</p>}

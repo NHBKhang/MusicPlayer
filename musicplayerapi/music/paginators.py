@@ -34,3 +34,8 @@ class CombinedResultsPaginator(pagination.PageNumberPagination):
 
 class NotificationPagination(pagination.PageNumberPagination):
     page_size = 10
+
+
+
+class MusicVideoPaginator(pagination.PageNumberPagination):
+    page_size = 10

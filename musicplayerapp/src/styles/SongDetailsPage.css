@@ -76,7 +76,7 @@
     align-items: center;
 }
 
-.button-group button {
+.button-group button.button {
     background-color: whitesmoke;
     border-color: rgba(128, 128, 128, 0.5);
     border-radius: 5px;
@@ -101,9 +101,13 @@
     font-size: 1.5rem;
 }
 
-.liked {
+.button.liked {
     background-color: red !important;
     color: white;
+}
+
+.song-detail .track-button {
+   margin-right: 12px !important; 
 }
 
 pre {
@@ -205,3 +209,4 @@ pre {
     height: 25px;
     overflow-y: hidden;
 }
+

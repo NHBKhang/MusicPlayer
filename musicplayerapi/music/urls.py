@@ -7,6 +7,7 @@ r.register('users', views.UserViewSet, basename='users')
 r.register('genres', views.GenreViewSet, basename='genres')
 r.register('songs', views.SongViewSet, basename='songs')
 r.register('playlists', views.PlaylistViewSet, basename='playlists')
+r.register('music-videos', views.MusicVideoViewSet, basename='music-videos')
 r.register('notifications', views.NotificationViewSet, basename='notifications')
 
 urlpatterns = [

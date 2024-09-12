@@ -43,6 +43,7 @@ export { default as LoginPage } from './LoginPage';
 export { default as SignupPage } from './SignupPage';
 export { default as SongDetailsPage } from './SongDetailsPage';
 export { default as PlaylistDetailsPage } from './PlaylistDetailsPage';
+export { default as VideoDetailsPage } from './VideoDetailsPage';
 export { default as SetPasswordPage } from './SetPasswordPage';
 export { default as SearchPage } from './SearchPage';
 export { default as ProfilePage } from './ProfilePage';

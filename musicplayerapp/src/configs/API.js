@@ -4,7 +4,8 @@ import {
     LibraryPage,
     LoginPage, PaymentSuccessPage, PlaylistDetailsPage, ProfilePage, SearchPage, SetPasswordPage, SignupPage,
     SongDetailsPage,
-    UploadPage
+    UploadPage,
+    VideoDetailsPage
 } from "../pages";
 import axios from "axios";
 import PaymentCancelPage from "../pages/PaymentCancelPage";
@@ -40,6 +41,12 @@ export const routes = {
         component: PlaylistDetailsPage,
         required: false,
         controlShow: true
+    },
+    video: {
+        url: '/videos/:id/',
+        component: VideoDetailsPage,
+        required: false,
+        controlShow: false
     },
     setPassword: {
         url: '/set-password/',
@@ -110,6 +117,8 @@ export const endpoints = {
     'related-songs': (songId) => `/songs/${songId}/related/`,
     'playlists': '/playlists/',
     'playlist': (playlistId) => `/playlists/${playlistId}/`,
+    'music-videos': '/music-videos/',
+    'music-video': (videoId) => `/music-videos/${videoId}/`,
     'related-playlists': (playlistId) => `/playlists/${playlistId}/related/`,
     'like': (songId) => `/songs/${songId}/like/`,
     'stream': (songId) => `/songs/${songId}/stream/`,

@@ -1,0 +1,41 @@
+.video-details-page {
+    padding: 20px;
+    max-width: 1400px;
+}
+
+.video-container {
+    margin-bottom: 10px;
+}
+
+video {
+    width: 100%;
+    height: auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.description {
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+.metadata {
+    font-size: 14px;
+    color: #666;
+}
+
+.video-details-page .follow-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 35px;
+    gap: 7px;
+    margin: 0 7px;
+    border-radius: 5px;
+}
+
+.loading,
+.error {
+    text-align: center;
+    margin: 20px;
+}

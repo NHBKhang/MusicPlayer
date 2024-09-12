@@ -1,6 +1,7 @@
 .music-tab-headers {
     display: flex;
     border-bottom: 1px solid #4b4372;
+    overflow-y: auto;
 }
 
 .music-tab-button {
@@ -70,4 +71,10 @@
 #genre {
     top: 50px;
     left: 2.2rem;
+}
+
+@media (max-width: 576px) {
+    .music-tabview-fixed {
+        margin-left: 0;
+    }
 }

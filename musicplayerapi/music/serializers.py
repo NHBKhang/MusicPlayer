@@ -141,7 +141,7 @@ class SongSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Song
-        fields = ['id', 'title', 'uploader', 'image', 'artists', 'file', 'likes', 'streams', 'created_date',
+        fields = ['id', 'title', 'uploader', 'image', 'artists', 'file', 'likes', 'streams', 'created_date', 'mv',
                   'is_public', 'has_purchased', 'access']
 
 
@@ -388,3 +388,38 @@ class NotificationSerializer(serializers.ModelSerializer):
     #     model_class = content_type.model_class()
     #     serializer_class = serializers.get_serializer_class_for_model(model_class)
     #     return serializer_class(instance=obj.content_object).data
+
+
+class MusicVideoSerializer(serializers.ModelSerializer):
+    uploader = PublicUserSerializer(read_only=True)
+    image = serializers.SerializerMethodField()
+
+    def get_image(self, video):
+        if video.image:
+            return video.image.url
+        else:
+            return video.song.image.url
+
+    class Meta:
+        model = MusicVideo
+        fields = ['id', 'title', 'image', 'created_date', 'uploader', 'is_public', ]
+
+
+class DetailsMusicVideoSerializer(MusicVideoSerializer):
+    class Meta:
+        model = MusicVideoSerializer.Meta.model
+        fields = MusicVideoSerializer.Meta.fields + ['file', 'description', 'created_date']
+
+
+class AuthenticatedMusicVideoSerializer(DetailsMusicVideoSerializer):
+    followed = serializers.SerializerMethodField()
+
+    def get_followed(self, video):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return video.uploader.followers.filter(follower=request.user, active=True).exists()
+        return False
+
+    class Meta:
+        model = DetailsMusicVideoSerializer.Meta.model
+        fields = DetailsMusicVideoSerializer.Meta.fields + ['followed', ]

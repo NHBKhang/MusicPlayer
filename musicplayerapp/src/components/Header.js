@@ -54,10 +54,12 @@ const Header = () => {
                     </button>
                     <div className="collapse navbar-collapse w-100" id="mynavbar">
                         <ul class="navbar-nav d-sm-none d-inline cursor-pointer">
-                            <li class="nav-item">
+                            <li class="nav-item"
+                                onClick={() => navigate('/')}>
                                 <p class="nav-link active m-0">Trang chủ</p>
                             </li>
-                            <li class="nav-item">
+                            <li class="nav-item"
+                                onClick={() => navigate('/library/')}>
                                 <p class="nav-link active m-0">Thư viện</p>
                             </li>
                         </ul>

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Page from '.';
-import { ArtistItem, LoginRequiredModal, MusicTabView, PlaylistItem, SongItem } from '../components';
+import { ArtistItem, LoginRequiredModal, MusicTabView, PlaylistItem, SongItem, VideoItem } from '../components';
 import { useSearchParams } from 'react-router-dom';
 import { authAPI, endpoints } from '../configs/API';
 import '../styles/SearchPage.css';
@@ -12,7 +12,7 @@ const SearchPage = () => {
     const [query, setQuery] = useState(searchParams.get('q') || '');
     const [genreQuery, setGenreQuery] = useState(searchParams.get('genre') || '');
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const tabKeys = useMemo(() => ['all', 'songs', 'artists', 'albums', 'playlists'], []);
+    const tabKeys = useMemo(() => ['all', 'songs', 'artists', 'mv', 'albums', 'playlists'], []);
     const [activeTab, setActiveTab] = useState(0);
     const genreParam = !!searchParams.get('genre');
 
@@ -20,6 +20,7 @@ const SearchPage = () => {
         all: (query, page) => `${endpoints['mixed-search']}?q=${query}&page=${page}&type=0`,
         songs: (query, page, genre) => `${endpoints.songs}?q=${query}&page=${page}&genre=${genre}`,
         artists: (query, page) => `${endpoints.users}?q=${query}&page=${page}`,
+        mv: (query, page) => `${endpoints['music-videos']}?q=${query}&page=${page}`,
         albums: (query, page, genre) => `${endpoints.playlists}?q=${query}&page=${page}&genre=${genre}`,
         playlists: (query, page, genre) => `${endpoints.playlists}?q=${query}&page=${page}&type=4&genre=${genre}`
     }), []);
@@ -28,6 +29,7 @@ const SearchPage = () => {
         all: [],
         songs: [],
         artists: [],
+        mv: [],
         albums: [],
         playlists: []
     });
@@ -36,6 +38,7 @@ const SearchPage = () => {
         all: 1,
         songs: 1,
         artists: 1,
+        mv: 1,
         albums: 1,
         playlists: 1
     });
@@ -44,6 +47,7 @@ const SearchPage = () => {
         all: false,
         songs: false,
         artists: false,
+        mv: false,
         albums: false,
         playlists: false
     });
@@ -95,6 +99,7 @@ const SearchPage = () => {
             all: [],
             songs: [],
             artists: [],
+            mv: [],
             albums: [],
             playlists: []
         });
@@ -102,6 +107,7 @@ const SearchPage = () => {
             all: 1,
             songs: 1,
             artists: 1,
+            mv: 1,
             albums: 1,
             playlists: 1
         });
@@ -109,6 +115,7 @@ const SearchPage = () => {
             all: false,
             songs: false,
             artists: false,
+            mv: false,
             albums: false,
             playlists: false
         });
@@ -197,6 +204,21 @@ const SearchPage = () => {
                     {page.artists > 0 && (
                         <div ref={el => loadMoreRefs.current.artists = el} className="load-more-container">
                             {loading.artists && <p>Loading...</p>}
+                        </div>
+                    )}
+                </div>
+            ),
+        },
+        {
+            label: 'MV',
+            content: (
+                <div className='search-container'>
+                    {data.mv?.map(v => (
+                        <VideoItem key={v.id} video={v} state={{ isModalOpen, setIsModalOpen }} />
+                    ))}
+                    {page.mv > 0 && (
+                        <div ref={el => loadMoreRefs.current.mv = el} className="load-more-container">
+                            {loading.mv && <p>Loading...</p>}
                         </div>
                     )}
                 </div>

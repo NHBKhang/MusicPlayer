@@ -493,3 +493,36 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
         notification.save()
 
         return Response({'status': 'Notification marked as read'}, status=status.HTTP_200_OK)
+
+
+class MusicVideoViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
+    queryset = MusicVideo.objects.filter(active=True).all().order_by('-id')
+    serializer_class = serializers.MusicVideoSerializer
+    pagination_class = paginators.MusicVideoPaginator
+    # permission_classes = [perms.PlaylistOwner]
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
+
+    def get_serializer_class(self):
+        if self.action in ['update', 'partial_update', 'retrieve']:
+            if self.request.user.is_authenticated:
+                return serializers.AuthenticatedMusicVideoSerializer
+            return serializers.DetailsMusicVideoSerializer
+        return self.serializer_class
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
+    def get_queryset(self):
+        queryset = self.queryset
+
+        q = self.request.query_params.get('q')
+        if q:
+            queryset = queryset.filter(title__icontains=q)
+
+        uploader = self.request.query_params.get('uploader')
+        if uploader:
+            queryset = queryset.filter(uploader_id=int(uploader))
+
+        return queryset.distinct()

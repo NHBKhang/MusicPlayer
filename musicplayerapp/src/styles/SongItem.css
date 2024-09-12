@@ -35,14 +35,14 @@
     color: #bcbcbc;
 }
 
-.track-info button,
-.track-info button i {
+button.track-button,
+button.track-button i {
     font-size: 14px;
 }
 
-.track-info button {
-    margin-top: 7px;
+button.track-button {
     padding: 3px;
+    height: 35px;
 }
 
 .track-item .date {
@@ -54,11 +54,11 @@
     color: aqua;
 }
 
-.track-info .play-button {
+.track-item .track-info .play-button {
     color: rgba(245, 245, 245, 0.9);
     background-color: rgba(255, 85, 0, 0.9) !important;
     border-radius: 50% !important;
-    border: none;
+    border: none ;
     width: 50px;
     min-width: 50px;
     height: 50px !important;
@@ -66,7 +66,7 @@
     padding: 0;
 }
 
-.track-info .play-button i {
+.track-item .track-info .play-button i {
     font-size: 25px;
     text-align: center;
     vertical-align: middle;
@@ -74,10 +74,11 @@
 
 .options-dropdown {
     position: absolute;
-    top: 30px;
+    top: 32px;
     left: 0;
     background-color: whitesmoke;
-    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.75);
+    box-shadow: 0 1px 2px rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(150, 150, 150, 0.25);
     border-radius: 4px;
     padding: 7px;
     z-index: 1000;

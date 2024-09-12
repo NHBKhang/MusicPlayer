@@ -17,6 +17,7 @@ export { default as SongModal } from './SongModal';
 export { default as PlaylistModal } from './PlaylistModal';
 export { default as UserModal } from './UserModel';
 export { default as AddToPlaylistModal } from './AddToPlaylistModal';
-export { default as SongItem } from './SongItem';
+export { default as SongItem, Options } from './SongItem';
 export { default as PlaylistItem } from './PlaylistItem';
 export { default as ArtistItem } from './ArtistItem';
+export { default as VideoItem } from './VideoItem';

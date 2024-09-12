@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { Comments, LoginRequiredModal, Modal, SongModal, TabView, VerifiedBadge } from "../components";
+import { Comments, LoginRequiredModal, Options, TabView, VerifiedBadge } from "../components";
 import '../styles/SongDetailsPage.css';
 import { useEffect, useState } from "react";
 import { authAPI, endpoints } from "../configs/API";
@@ -78,20 +78,6 @@ const SongDetailsPage = () => {
             }
         } else {
             updateIsModalOpen('like', true);
-        }
-    };
-
-    const onDelete = async () => {
-        try {
-            let res = await authAPI(await getAccessToken()).delete(endpoints.song(song.id));
-
-            if (res.status === 204) {
-                navigate('/');
-            }
-        } catch (error) {
-            alert("Không thể xóa bài hát")
-        } finally {
-            updateIsModalOpen('delete', false);
         }
     };
 
@@ -183,7 +169,7 @@ const SongDetailsPage = () => {
                         <div className="divider"></div>
                         <div className="d-flex align-items-center mb-3">
                             <div className="button-group">
-                                <button type="button" onClick={play} className="me-4 play-button">
+                                <button type="button" onClick={play} className="me-4 play-button button">
                                     {isPlaying && currentSong?.id === song?.id ?
                                         <span><i class="fa-solid fa-pause me-1"></i> Tạm dừng</span> :
                                         <span><i class="fa-solid fa-play me-1"></i> Phát bài hát</span>}
@@ -191,7 +177,7 @@ const SongDetailsPage = () => {
                                 <button
                                     type="button"
                                     onClick={like}
-                                    className={`me-4 ${song?.liked ? 'liked' : ''}`}>
+                                    className={`me-4 button ${song?.liked ? 'liked' : ''}`}>
                                     <i class="fa-solid fa-heart me-1"></i> {song?.liked ? 'Bỏ thích' : 'Thích'}
                                 </button>
                                 <div className="mt-md-2">
@@ -204,17 +190,11 @@ const SongDetailsPage = () => {
                                 </div>
                             </div>
                         </div>
-                        {song?.is_owner &&
-                            <div className="d-flex align-items-center button-group" style={{ gap: '12px' }}>
-                                <button onClick={() => updateIsModalOpen('edit', true)}>
-                                    <i class="fa-solid fa-pen-to-square me-1"></i>
-                                    <p className="d-none d-md-inline fs-6 text-dark">Chỉnh sửa</p>
-                                </button>
-                                <button onClick={() => updateIsModalOpen('delete', true)}>
-                                    <i class="fa-solid fa-trash me-1"></i>
-                                    <p className="d-none d-md-inline fs-6 text-dark">Xóa bài hát</p>
-                                </button>
-                            </div>}
+                        <div className="text-start">
+                            <Options
+                                item={song} navigate={navigate}
+                                setItem={setSong} getAccessToken={getAccessToken} />
+                        </div>
                         <br />
                     </div>
                 </div>
@@ -258,16 +238,6 @@ const SongDetailsPage = () => {
             <LoginRequiredModal
                 visible={isModalOpen.like}
                 onClose={() => updateIsModalOpen('like', false)} />
-            <Modal
-                label={`Bạn có chắc muốn xóa bài hát ${song?.title} không?`}
-                visible={isModalOpen.delete}
-                onConfirm={onDelete}
-                onCancel={() => updateIsModalOpen('delete', false)} />
-            <SongModal
-                visible={isModalOpen.edit}
-                song={song}
-                onSaveChange={(song) => setSong(song)}
-                onClose={() => updateIsModalOpen('edit', false)} />
         </Page>
     )
 }

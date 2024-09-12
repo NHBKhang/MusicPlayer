@@ -7,7 +7,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.conf import settings
-from music.validate import validate_audio_file
+from music.validate import validate_audio_file, validate_video_file
 from datetime import datetime
 import imghdr
 
@@ -265,3 +265,26 @@ class Notification(models.Model):
 
     class Meta:
         ordering = ['-created_date']
+
+
+class Video(BaseModel, ImageBaseModel):
+    uploader = models.ForeignKey(User, on_delete=models.CASCADE, related_name='uploaded_videos')
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    is_public = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ['-created_at']
+        abstract = True
+
+
+class MusicVideo(Video):
+    file = models.FileField(upload_to='videos/', validators=[validate_video_file])
+    song = models.OneToOneField(Song, on_delete=models.CASCADE, related_name='mv')
+
+    class Meta:
+        verbose_name = 'Music Video'
+        verbose_name_plural = 'Music Videos'

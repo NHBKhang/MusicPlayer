@@ -15,17 +15,6 @@ const SongItem = ({ song, state }) => {
     const { isPlaying, currentSong, togglePlayPauseNewSong } = useAudio();
     const navigate = useNavigate();
     const [item, setItem] = useState(song);
-    const [showOptions, setShowOptions] = useState(false);
-    const [visible, setVisible] = useState({
-        delete: false,
-        edit: false,
-        add: false,
-    });
-    const optionsRef = useRef(null);
-
-    const updateVisible = (field, value) => {
-        setVisible(current => ({ ...current, [field]: value }));
-    };
 
     const like = async () => {
         if (user) {
@@ -41,34 +30,9 @@ const SongItem = ({ song, state }) => {
         }
     };
 
-    const onDelete = async () => {
-        try {
-            await authAPI(await getAccessToken()).delete(endpoints.song(item.id));
-        } catch (error) {
-            alert("Không thể xóa bài hát")
-        } finally {
-            updateVisible('delete', false);
-        }
-    };
-
-    const handleToggleOptions = () => setShowOptions(!showOptions)
-
     const goToDetails = () => navigate(`/songs/${item.id}/`)
 
     const goToArtist = () => navigate(`/profile/${item.uploader.id}/`)
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (optionsRef.current && !optionsRef.current.contains(event.target)) {
-                setShowOptions(false);
-            }
-        };
-
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, []);
 
     return (
         <div className="track-item cursor-pointer">
@@ -100,47 +64,15 @@ const SongItem = ({ song, state }) => {
                         <button
                             type="button"
                             onClick={like}
-                            className={`m-0 ${item.liked ? 'liked' : ''}`}>
+                            className={`m-0 button track-button ${item.liked ? 'liked' : ''}`}>
                             <i class="fa-solid fa-heart me-1"></i>
                             <span className={`d-none d-md-inline fs-7 p-0 ${item.liked ? '' : 'text-dark'}`}>
                                 {item.liked ? 'Bỏ thích' : 'Thích'}
                             </span>
                         </button>
-                        {item.is_owner && <>
-                            <button onClick={() => updateVisible('edit', true)} className="m-0">
-                                <i class="fa-solid fa-pen-to-square me-1"></i>
-                                <span className="d-none d-md-inline fs-7 text-dark p-0">Chỉnh sửa</span>
-                            </button>
-                            <button onClick={() => updateVisible('delete', true)} className="m-0">
-                                <i class="fa-solid fa-trash me-1"></i>
-                                <span className="d-none d-md-inline fs-7 text-dark p-0">Xóa bài hát</span>
-                            </button>
-                        </>}
-                        <button
-                            style={{ position: 'relative' }}
-                            className="m-0 px-md-2 p-1"
-                            onClick={handleToggleOptions}
-                            ref={optionsRef}>
-                            <i class="fa-solid fa-ellipsis"></i>
-                            {showOptions && (
-                                <div className="options-dropdown">
-                                    <ul>
-                                        <li onClick={() => updateVisible('add', true)}>
-                                            Thêm vào playlist</li>
-                                        {item.access?.is_downloadable &&
-                                            <li>
-                                                <a style={{color: 'inherit'}}
-                                                    href={`/download/?songId=${item.id}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer">
-                                                    Tải bài hát
-                                                </a>
-                                            </li>}
-                                        <li>Option 3</li>
-                                    </ul>
-                                </div>
-                            )}
-                        </button>
+                        <Options
+                            item={item} navigate={navigate}
+                            setItem={setItem} getAccessToken={getAccessToken} />
                     </div>
                     <div>
                         <span className="me-4">
@@ -152,6 +84,87 @@ const SongItem = ({ song, state }) => {
                     </div>
                 </div>
             </div>
+        </div>
+    )
+};
+
+export const Options = ({ item, navigate, setItem, getAccessToken }) => {
+    const [showOptions, setShowOptions] = useState(false);
+    const [visible, setVisible] = useState({
+        delete: false,
+        edit: false,
+        add: false,
+    });
+    const optionsRef = useRef(null);
+
+    const updateVisible = (field, value) => {
+        setVisible(current => ({ ...current, [field]: value }));
+    };
+
+    const onDelete = async () => {
+        try {
+            await authAPI(await getAccessToken()).delete(endpoints.song(item.id));
+        } catch (error) {
+            alert("Không thể xóa bài hát")
+        } finally {
+            updateVisible('delete', false);
+        }
+    };
+
+    const handleToggleOptions = () => setShowOptions(!showOptions)
+
+    const goToMV = () => navigate(`/videos/${item.mv}/`)
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (optionsRef.current && !optionsRef.current.contains(event.target)) {
+                setShowOptions(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
+    return (
+        <>
+            {item?.is_owner && <>
+                <button onClick={() => updateVisible('edit', true)} className="m-0 track-button">
+                    <i class="fa-solid fa-pen-to-square me-1"></i>
+                    <span className="d-none d-md-inline fs-7 text-dark p-0">Chỉnh sửa</span>
+                </button>
+                <button onClick={() => updateVisible('delete', true)} className="m-0 track-button">
+                    <i class="fa-solid fa-trash me-1"></i>
+                    <span className="d-none d-md-inline fs-7 text-dark p-0">Xóa bài hát</span>
+                </button>
+            </>}
+            <button
+                style={{ position: 'relative' }}
+                className="m-0 px-md-2 p-1 button"
+                onClick={handleToggleOptions}
+                ref={optionsRef}>
+                <i class="fa-solid fa-ellipsis"></i>
+                {showOptions && (
+                    <div className="options-dropdown">
+                        <ul>
+                            <li onClick={() => updateVisible('add', true)}>
+                                Thêm vào playlist</li>
+                            {item.access?.is_downloadable &&
+                                <li>
+                                    <a style={{ color: 'inherit' }}
+                                        href={`/download/?songId=${item.id}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer">
+                                        Tải bài hát
+                                    </a>
+                                </li>}
+                            {item.mv && <li onClick={goToMV}>Đi tới MV</li>}
+                        </ul>
+                    </div>
+                )}
+            </button>
             <Modal
                 label={`Bạn có chắc muốn xóa bài hát ${item?.title} không?`}
                 visible={visible.delete}
@@ -166,8 +179,8 @@ const SongItem = ({ song, state }) => {
                 visible={visible.add}
                 song={item}
                 onClose={() => updateVisible('add', false)} />
-        </div>
+        </>
     )
-};
+}
 
 export default SongItem;
