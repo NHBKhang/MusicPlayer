@@ -18,6 +18,10 @@
     height: 300px;
 }
 
+.related-song {
+    cursor: pointer;
+}
+
 .song-info {
     flex: 1;
 }

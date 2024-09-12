@@ -30,3 +30,7 @@ class CombinedResultsPaginator(pagination.PageNumberPagination):
             'previous': self.get_previous_link(),
             'results': data,
         })
+
+
+class NotificationPagination(pagination.PageNumberPagination):
+    page_size = 10

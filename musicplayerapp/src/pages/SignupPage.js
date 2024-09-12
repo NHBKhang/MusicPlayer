@@ -52,7 +52,11 @@ const SignupPage = () => {
                     navigate("/login/");
                 }
             } catch (error) {
-                setError(error);
+                console.info(error);
+                if (error.response?.data?.detail)
+                    setError(error.response?.data?.detail);
+                else
+                    setError(error.message);
             } finally {
                 setLoading(false);
             }

@@ -113,10 +113,19 @@ export const UserProvider = ({ children }) => {
 
     };
 
-
+    const saveUser = (user) => {
+        setUser(user);
+        localStorage.setItem('user', JSON.stringify(user));
+    }
 
     return (
-        <UserContext.Provider value={{ user, login, loginWithToken, logout, getAccessToken }}>
+        <UserContext.Provider value={{
+            user,
+            login, loginWithToken,
+            logout,
+            getAccessToken,
+            saveUser
+        }}>
             {children}
         </UserContext.Provider>
     );

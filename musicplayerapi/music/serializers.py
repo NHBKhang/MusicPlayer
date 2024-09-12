@@ -8,12 +8,15 @@ import cloudinary
 class UserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserInfo
-        fields = ['bio', 'verified']
+        fields = ['display_name', 'bio', 'verified']
+        extra_kwargs = {
+            'display_name': {'write_only': True}
+        }
 
 
 class PublicUserSerializer(serializers.ModelSerializer):
-    name = serializers.SerializerMethodField()
-    info = UserInfoSerializer()
+    name = serializers.SerializerMethodField(read_only=True)
+    info = UserInfoSerializer(read_only=True)
     followers = serializers.SerializerMethodField()
     following = serializers.SerializerMethodField()
     songs = serializers.SerializerMethodField()
@@ -26,15 +29,7 @@ class PublicUserSerializer(serializers.ModelSerializer):
         return rep
 
     def get_name(self, user):
-        if user.info and user.info.display_name:
-            return user.info.display_name
-        if user.first_name:
-            if user.last_name:
-                return f'{user.last_name} {user.first_name}'
-            else:
-                return user.first_name
-
-        return user.username
+        return user.get_name()
 
     def get_followers(self, user):
         return user.followers.filter(active=True).count()
@@ -379,3 +374,17 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ['id', 'user', 'song', 'content', 'created_date', ]
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    # content_object = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Notification
+        fields = ['id', 'message', 'is_read', 'created_date']
+
+    # def get_content_object(self, obj):
+    #     content_type = ContentType.objects.get_for_model(obj.content_object)
+    #     model_class = content_type.model_class()
+    #     serializer_class = serializers.get_serializer_class_for_model(model_class)
+    #     return serializer_class(instance=obj.content_object).data

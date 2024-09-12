@@ -3,7 +3,7 @@ import Page from ".";
 import { useUser } from "../configs/UserContext";
 import '../styles/ProfilePage.css';
 import { useParams } from "react-router-dom";
-import { LoginRequiredModal, PlaylistItem,  SongItem, VerifiedBadge } from "../components";
+import { LoginRequiredModal, PlaylistItem, SongItem, UserModal, VerifiedBadge } from "../components";
 import { authAPI, endpoints } from "../configs/API";
 import { useAudio } from "../configs/AudioContext";
 
@@ -13,6 +13,7 @@ const ProfilePage = () => {
     const { user, getAccessToken } = useUser();
     const { currentSong } = useAudio();
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [visible, setVisible] = useState(false);
 
     useEffect(() => {
         if (parseInt(user?.id) === parseInt(id)) {
@@ -71,6 +72,7 @@ const ProfilePage = () => {
                             {`${profile?.first_name ?? ''} ${profile?.last_name ?? ''}`}
                         </p>
                     </div>
+                    {profile?.info?.bio && <div className="profile-bio"><p>{profile?.info?.bio}</p></div>}
                 </div>
                 <div className="info-container">
                     <div className="info-item">
@@ -86,17 +88,24 @@ const ProfilePage = () => {
                         <span>{profile?.songs}</span>
                     </div>
                 </div>
-                {user?.id !== profile?.id && <button
-                    className={`mt-1 mb-2 follow-button ${profile?.followed ? 'followed' : ''}`}
-                    onClick={follow}>
-                    {profile?.followed ? (<>
-                        <i class="fa-solid fa-user-check"></i>
-                        <p className='d-none d-sm-inline text-black'> Đã theo dõi</p>
-                    </>) : (<>
-                        <i class="fa-solid fa-user-plus"></i>
-                        <p className='d-none d-sm-inline text-black p-1'> Theo dõi</p>
-                    </>)}
-                </button>}
+                {user?.id === profile?.id ?
+                    <button
+                        className={`mt-1 mb-2 follow-button ${profile?.followed ? 'followed' : ''}`}
+                        onClick={() => setVisible(true)}>
+                        <i class="fa-solid fa-user-pen"></i>
+                        <p className='d-none d-sm-inline text-black'> Chỉnh sửa</p>
+                    </button> : <button
+                        className={`mt-1 mb-2 follow-button ${profile?.followed ? 'followed' : ''}`}
+                        onClick={follow}>
+                        {profile?.followed ? (<>
+                            <i class="fa-solid fa-user-check"></i>
+                            <p className='d-none d-sm-inline text-black'> Đã theo dõi</p>
+                        </>) : (<>
+                            <i class="fa-solid fa-user-plus"></i>
+                            <p className='d-none d-sm-inline text-black p-1'> Theo dõi</p>
+                        </>)}
+                    </button>
+                }
             </div>
             <UserProfileTabs
                 profile={profile}
@@ -105,6 +114,9 @@ const ProfilePage = () => {
             <LoginRequiredModal
                 visible={isModalOpen}
                 onClose={() => setIsModalOpen(false)} />
+            <UserModal
+                visible={visible}
+                onClose={() => setVisible(false)} />
         </Page>
     );
 };

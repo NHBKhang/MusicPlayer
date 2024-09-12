@@ -77,7 +77,7 @@ class UserInfoInline(admin.TabularInline):
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ['id', 'username']
+    list_display = ['id', 'username', 'get_name']
     search_fields = ['id', 'username']
     inlines = [UserInfoInline]
 
@@ -131,6 +131,7 @@ admin_site.register(Playlist, PlaylistAdmin)
 admin_site.register(PlaylistDetails)
 admin_site.register(Follow)
 admin_site.register(Transaction)
+admin_site.register(Notification)
 admin_site.register(Application)
 admin_site.register(AccessToken)
 admin_site.register(RefreshToken)

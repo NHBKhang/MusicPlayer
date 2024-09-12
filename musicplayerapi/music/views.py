@@ -16,14 +16,14 @@ import boto3
 class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveAPIView):
     queryset = User.objects.filter(is_active=True).order_by('id')
     serializer_class = serializers.PublicUserSerializer
-    parser_classes = [MultiPartParser, ]
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
     pagination_class = paginators.UserPaginator
 
     def get_serializer_class(self):
         if self.request.user.is_authenticated:
             return serializers.AuthenticatedUserSerializer
 
-        return serializers.UserSerializer
+        return self.serializer_class
 
     def get_queryset(self):
         queries = self.queryset
@@ -38,6 +38,10 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
                                      Q(username__icontains=q) |
                                      Q(info__display_name__icontains=q))
 
+        cate = self.request.query_params.get('cate')
+        if cate == '1':
+            queries = queries.annotate(num_songs=Count('songs')).order_by('-num_songs')
+
         follower = self.request.query_params.get('follower')
         if follower:
             queries = queries.filter(followers__follower_id=int(follower))
@@ -45,7 +49,7 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
         return queries.distinct()
 
     def get_permissions(self):
-        if self.action in ['get_current_user', 'patch_current_user', 'list']:
+        if self.action in ['get_current_user', 'patch_current_user']:
             return [permissions.IsAuthenticated()]
 
         return [permissions.AllowAny()]
@@ -53,15 +57,27 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
     @action(methods=['get', 'patch'], url_path='current-user', detail=False)
     def get_current_user(self, request):
         user = request.user
-        if request.method.__eq__('PATCH'):
+        try:
+            info = UserInfo.objects.get(user=user)
+        except UserInfo.DoesNotExist:
+            return Response({"detail": "User info not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if request.method == 'GET':
+            return Response(serializers.UserSerializer(user).data)
+
+        if request.method == 'PATCH':
             for k, v in request.data.items():
                 if k == 'password':
                     user.set_password(v)
+                elif k == 'bio' or k == 'display_name':
+                    setattr(info, k, v)
                 else:
                     setattr(user, k, v)
             user.save()
+            info.save()
 
-        return Response(serializers.UserSerializer(user).data)
+            return Response(serializers.UserSerializer(user).data)
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     @action(methods=['post'], url_path='follow', detail=True)
     def follow(self, request, pk=None):
@@ -108,7 +124,7 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
                 return self.serializer_class
 
     def get_permissions(self):
-        if self.action in ['like', 'add-comment', 'stream']:
+        if self.action in ['like', 'add_comment', 'stream']:
             return [permissions.IsAuthenticated(), ]
 
         return [permission() for permission in self.permission_classes]
@@ -301,14 +317,21 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
     @action(methods=['post', 'patch'], url_path='access', detail=True)
     def song_access(self, request, pk=None):
-        song = self.get_object()
-        access, created = SongAccess.objects.get_or_create(song=song, defaults=request.data)
+        if not request.data:
+            return Response({'detail': 'Nothing here'}, status=status.HTTP_204_NO_CONTENT)
 
-        serializer = serializers.SongAccessSerializer(access, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        song = self.get_object()
+        try:
+            access, created = SongAccess.objects.get_or_create(song=song, defaults=request.data)
+
+            serializer = serializers.SongAccessSerializer(access, data=request.data, partial=True)
+
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['get'], url_path='download')
     def download(self, request, pk=None):
@@ -342,17 +365,9 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
             return Response({"detail": "Invalid AWS credentials"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Song.DoesNotExist:
             return Response({"detail": "Song not found."}, status=status.HTTP_404_NOT_FOUND)
-        except exceptions.NotDownloadableException:
-            return Response({"detail": "This song is not available for download."},
-                            status=status.HTTP_403_FORBIDDEN)
-        except exceptions.AnonymousException:
-            return Response({"detail": "You must be logged in to download songs."},
-                            status=status.HTTP_403_FORBIDDEN)
-        except exceptions.PurchaseRequiredException:
-            return Response({"detail": "You need to purchase this song to download it."},
-                            status=status.HTTP_402_PAYMENT_REQUIRED)
         except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"detail": e.default_detail if e.default_detail else str(e)},
+                            status=e.status_code if e.status_code else status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class PlaylistViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
@@ -402,6 +417,23 @@ class PlaylistViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Ret
         context['song_id'] = self.request.headers.get('Song-ID')
         return context
 
+    @action(methods=['get'], url_path='related', detail=True)
+    def related(self, request, pk=None):
+        try:
+            playlist = Playlist.objects.get(pk=pk)
+            user = self.request.user
+        except Playlist.DoesNotExist:
+            return Response({'detail': 'Playlist not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        related_playlists = Playlist.objects.none()
+
+        if user.is_authenticated:
+            related_playlists = Playlist.objects.filter(creator=user).exclude(id=playlist.id)[:3]
+
+        serializer = serializers.PlaylistSerializer(related_playlists, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class MixedSearchView(APIView):
     def get(self, request, *args, **kwargs):
@@ -442,3 +474,22 @@ class MixedSearchView(APIView):
         paginated_results = paginator.paginate_queryset(combined_results, request)
 
         return Response(paginator.get_paginated_response(paginated_results).data)
+
+
+class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Notification.objects.all()
+    serializer_class = serializers.NotificationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = paginators.NotificationPagination
+
+    def get_queryset(self):
+        user = self.request.user
+        return Notification.objects.filter(user=user)
+
+    @action(detail=True, methods=['patch'])
+    def mark_as_read(self, request, pk=None):
+        notification = self.get_object()
+        notification.is_read = request.data.get('is_read', notification.is_read)
+        notification.save()
+
+        return Response({'status': 'Notification marked as read'}, status=status.HTTP_200_OK)

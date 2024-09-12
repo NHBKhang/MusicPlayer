@@ -1,24 +1,40 @@
 import { Footer, Header, Sidebar } from '../components';
 import PageTitle from '../components/PageTitle';
+import { useUser } from '../configs/UserContext';
 
 const Page = ({ children, title }) => {
-    return (
-        <div className='d-flex' style={{ flexDirection: 'row' }}>
-            {title && <PageTitle title={title} />}
-            <Header />
-            <div className='sidebar'>
-                <Sidebar />
-            </div>
-            <div className='content w-100'>
-                <div className='mb-5 music-content'>
-                    <div className='content-container'>
-                        {children}
-                    </div>
+    const { user } = useUser();
+
+    if (user) {
+        return (
+            <div className='d-flex' style={{ flexDirection: 'row' }}>
+                {title && <PageTitle title={title} />}
+                <Header />
+                <div className='sidebar d-none d-sm-inline'>
+                    <Sidebar />
                 </div>
-                <Footer />
+                <div className='content w-100'>
+                    <div className='mb-5 music-content'>
+                        <div className='content-container'>
+                            {children}
+                        </div>
+                    </div>
+                    <Footer />
+                </div>
             </div>
-        </div>
-    )
+        )
+    } else {
+        return (
+            <div className='d-flex'>
+                {title && <PageTitle title={title} />}
+                <Header />
+                <div className='content w-100'>
+                    {children}
+                    <Footer />
+                </div>
+            </div>
+        )
+    }
 }
 
 export default Page;

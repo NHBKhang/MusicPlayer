@@ -1,0 +1,67 @@
+.upload-progress-container {
+    margin: 10px 0 0;
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.progress-bar-container {
+    position: relative;
+    width: 95%;
+    height: 25px;
+    border-radius: 5px;
+    background-color: #f3f3f3;
+    overflow: hidden;
+    box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 100%;
+    border: none;
+    appearance: none;
+    background-color: transparent;
+}
+
+.progress-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background-color: #4caf50;
+    transition: width 0.3s ease-in-out;
+}
+
+.percentage-display {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: bold;
+    color: #333;
+}
+
+.upload-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 5px;
+}
+
+.cancel-button-container,
+.spinner-container {
+    width: 3%;
+}
+
+.cancel-button {
+    width: 100%;
+    cursor: pointer;
+    color: red;
+    font-size: 25px;
+    transition: color 0.3s ease;
+}
+
+.cancel-button:hover {
+    color: #d9534f;
+}

@@ -4,10 +4,6 @@ import { useDropzone } from 'react-dropzone';
 const ImageUpload = ({ src, onDrop }) => {
     const [imageSrc, setImageSrc] = useState(src);
 
-    useEffect(() => {
-        setImageSrc(src);
-    }, [src]);
-
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         accept: 'image/*',
         onDrop,
@@ -15,6 +11,7 @@ const ImageUpload = ({ src, onDrop }) => {
     });
 
     useEffect(() => {
+        console.info(src);
         if (src instanceof File) {
             const objectUrl = URL.createObjectURL(src);
             setImageSrc(objectUrl);

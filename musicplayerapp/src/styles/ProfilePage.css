@@ -1,15 +1,10 @@
 .profile-container {
     border: 1px solid rgba(211, 211, 211, 0.5);
     margin: -10px 0 20px;
-    height: 300px;
-    background: linear-gradient(to right, #2c3e50, #4c5c68);
+    min-height: 300px;
+    padding-bottom: 40px;
+    background: linear-gradient(to right, #4c4c4c, #787878);
     position: relative;
-}
-
-@media (max-width: 615px) {
-    .profile-container {
-        height: 375px;
-    }
 }
 
 .profile-detail {
@@ -25,6 +20,19 @@
     width: 180px;
     height: 180px;
     margin-left: 1rem;
+    margin-bottom: 10px;
+}
+
+.profile-bio p {
+    text-align: justify;
+    color: aliceblue;
+    font-size: 16px;
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 16px;
+    line-height: 1.6;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    margin: 10px auto;
 }
 
 .profile-name,

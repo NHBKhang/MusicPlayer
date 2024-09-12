@@ -60,7 +60,7 @@
     margin-right: 20px !important;
 }
 
-.carousel-item .play-button:hover {
+.carousel-item:hover .play-button {
     opacity: 1;
     transition-delay: 0s;
 }
@@ -104,5 +104,26 @@
 .song-title {
     display: inline-block;
     animation: slideText 7s linear infinite;
+    padding: 0 5px;
+}
+
+.carousel-item .artist-cover {
+    width: 100%;
+    height: 165px;
+    margin: 0;
+    margin-bottom: 5px;
+    padding: 0;
+    border-radius: 50%;
+    object-fit: fill;
+}
+
+.artist-title-wrapper {
+    overflow: hidden;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.artist-title {
+    display: inline-block;
     padding: 0 5px;
 }

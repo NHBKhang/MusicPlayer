@@ -8,9 +8,11 @@ const Carousel = ({ label, items, type = 'song' }) => {
     const sliderRef = useRef(null);
 
     useEffect(() => {
-        setTimeout(() => {
-            sliderRef.current.slickGoTo(0);
-        }, 200);
+        if (sliderRef.current) {
+            setTimeout(() => {
+                sliderRef.current?.slickGoTo(0);
+            }, 200);
+        }
     }, []);
 
     const settings = {
@@ -79,8 +81,8 @@ const Carousel = ({ label, items, type = 'song' }) => {
         <div className="carousel-container">
             {label && <h3 className='carousel-label'>{label}</h3>}
             <Slider ref={sliderRef} {...settings}>
-                {type === 'song' &&
-                    items.map((song) => <div
+                {type === 'song' ? items.map((song) =>
+                    <div
                         key={song.id}
                         className="carousel-item rounded" >
                         <img
@@ -106,7 +108,26 @@ const Carousel = ({ label, items, type = 'song' }) => {
                                     <i class="fa-solid fa-play"></i>}
                             </button>
                         </div>
-                    </div>)}
+                    </div>) : items.map((artist) =>
+                        <div
+                            key={artist.id}
+                            className="carousel-item rounded"
+                            onClick={() => goToArtist(artist.id)} >
+                            <img
+                                src={artist.avatar}
+                                alt={artist.name}
+                                className='artist-cover' />
+                            <div className="artist-title-wrapper">
+                                <h6
+                                    className='artist-title'>
+                                    {artist.name}
+                                </h6>
+                            </div>
+                            <div className='text-center m-0 p-0'>
+                                <p>{artist.songs} bài hát</p>
+                            </div>
+                        </div>)
+                }
             </Slider>
         </div>
     );

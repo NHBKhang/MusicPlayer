@@ -2,6 +2,7 @@ import { memo, useState } from "react";
 import '../styles/Header.css';
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../configs/UserContext";
+import NotificationDropdown from "./NotificationDropdown";
 
 const Header = () => {
     const [query, setQuery] = useState('');
@@ -52,6 +53,14 @@ const Header = () => {
                         <span className="navbar-toggler-icon"></span>
                     </button>
                     <div className="collapse navbar-collapse w-100" id="mynavbar">
+                        <ul class="navbar-nav d-sm-none d-inline cursor-pointer">
+                            <li class="nav-item">
+                                <p class="nav-link active m-0">Trang chủ</p>
+                            </li>
+                            <li class="nav-item">
+                                <p class="nav-link active m-0">Thư viện</p>
+                            </li>
+                        </ul>
                         <div className="search-bar">
                             <input className="query form-control"
                                 type="text"
@@ -64,9 +73,10 @@ const Header = () => {
                             </button>
                         </div>
                         {user ? <div className="account">
+                            <NotificationDropdown />
                             <div className="dropdown">
                                 <button
-                                    className="dropdown-toggle bg-dark"
+                                    className="dropdown-toggle bg-dark no-caret"
                                     id="dropdownMenuButton"
                                     data-bs-toggle="dropdown"
                                     aria-expanded="false" >

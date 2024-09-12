@@ -110,6 +110,7 @@ export const endpoints = {
     'related-songs': (songId) => `/songs/${songId}/related/`,
     'playlists': '/playlists/',
     'playlist': (playlistId) => `/playlists/${playlistId}/`,
+    'related-playlists': (playlistId) => `/playlists/${playlistId}/related/`,
     'like': (songId) => `/songs/${songId}/like/`,
     'stream': (songId) => `/songs/${songId}/stream/`,
     'comments': (songId) => `/songs/${songId}/comments/`,
@@ -117,6 +118,8 @@ export const endpoints = {
     'mixed-search': '/search/',
     'paypal-create-order': '/payment/paypal/create-order/',
     'paypal-payment-success': '/payment/paypal/payment-success/',
+    'notifications': '/notifications/',
+    'notification': (notificationId) => `/notifications/${notificationId}/mark_as_read/`,
 }
 
 export const authAPI = (accessToken) =>

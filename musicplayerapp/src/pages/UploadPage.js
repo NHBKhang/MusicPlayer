@@ -6,6 +6,7 @@ import { normalizeFileName } from '../configs/Utils';
 import { useUser } from '../configs/UserContext';
 import ReactSelect from 'react-select';
 import { ImageUpload, LoginRequiredModal, SongItem } from '../components';
+import '../styles/UploadPage.css';
 
 const UploadPage = () => (
     <Page>
@@ -48,6 +49,8 @@ const Upload = () => {
     const [songs, setSongs] = useState([]);
     const [uploadStatus, setUploadStatus] = useState('');
     const [genres, setGenres] = useState([]);
+    const [progresses, setProgresses] = useState({});
+    const [uploadControllers, setUploadControllers] = useState({});
 
     useEffect(() => {
         const loadGenres = async () => {
@@ -70,16 +73,26 @@ const Upload = () => {
             artists: '',
             genres: [],
             lyrics: '',
-            description: ''
+            description: '',
+            isPublic: false,
+            isUpload: false
         }));
         setSongs((prevSongs) => [...prevSongs, ...newSongs]);
     }, []);
 
-    const handleUpload = async (song) => {
+    const handleUpload = async (song, index) => {
+        if (song.isUpload) return;
         if (!user || !user.id) {
             setUploadStatus('Người dùng không hợp lệ.');
             return;
         }
+
+        setSongs(prevSongs =>
+            prevSongs.map((s, i) => i === index ? { ...s, isUpload: true } : s)
+        );
+
+        const controller = new AbortController();
+        setUploadControllers(prev => ({ ...prev, [index]: controller }));
 
         const formData = new FormData();
         formData.append('image', song.image);
@@ -92,6 +105,7 @@ const Upload = () => {
         formData.append('lyrics', song.lyrics);
         formData.append('description', song.description);
         formData.append('uploader_id', String(user.id));
+        formData.append('is_public', song.isPublic);
 
         try {
             const res = await authAPI(await getAccessToken())
@@ -99,23 +113,53 @@ const Upload = () => {
                     headers: {
                         "Content-Type": "multipart/form-data"
                     },
-                    timeout: 0
+                    timeout: 0,
+                    signal: controller.signal,
+                    onUploadProgress: (progressEvent) => {
+                        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                        setProgresses((prev) => ({ ...prev, [index]: percentCompleted }));
+                    }
                 });
 
             if (res.status === 201) {
                 setUploadStatus('Upload thành công!');
-                setSongs((prevSongs) => prevSongs.filter(s => s !== song));
+                setSongs((prevSongs) => prevSongs.filter((_, i) => i !== index));
             } else {
-                setUploadStatus('Upload thất bại.');
+                setUploadStatus('Upload thất bại!');
             }
         } catch (error) {
             console.error(error);
-            setUploadStatus('Có lỗi xảy ra khi upload.');
+            if (error.name === 'AbortError')
+                setUploadStatus('Download cancelled');
+            else
+                setUploadStatus('Có lỗi xảy ra khi upload.');
+        } finally {
+            setUploadControllers(prev => {
+                const newControllers = { ...prev };
+                delete newControllers[index];
+                return newControllers;
+            });
+            setSongs(prevSongs =>
+                prevSongs.map((s, i) => i === index ? { ...s, isUpload: false } : s)
+            );
         }
     };
 
     const handleCancel = (index) => {
         setSongs((prevSongs) => prevSongs.filter((_, i) => i !== index));
+    };
+
+    const handleCancelUpload = (index) => {
+        const controller = uploadControllers[index];
+        if (controller) {
+            controller.abort();
+            setProgresses(prev => ({ ...prev, [index]: 0 }));
+            setSongs(prevSongs => {
+                const updatedSongs = [...prevSongs];
+                updatedSongs[index].isUpload = false;
+                return updatedSongs;
+            });
+        }
     };
 
     const updateSong = (index, field, value) => {
@@ -127,9 +171,12 @@ const Upload = () => {
     };
 
     const handleInputChange = (index, e) => {
-        const { name, value, options } = e.target;
+        const { name, value, options, type, checked } = e.target;
 
-        if (name === "genres") {
+        if (type === 'checkbox') {
+            updateSong(index, name, checked);
+        }
+        else if (name === "genres") {
             const selectedOptions = Array.from(options)
                 .filter(option => option.selected)
                 .map(option => option.value);
@@ -179,22 +226,22 @@ const Upload = () => {
             </div>
 
             {songs.length > 0 && (
-                <div style={{ marginTop: '20px', display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+                <div style={{ margin: '20px', display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
                     {songs.map((song, index) => (
                         <div key={index} style={{
                             border: '1px solid #ddd',
                             borderRadius: '8px',
-                            padding: '10px',
-                            width: '500px',
+                            padding: '15px 25px',
+                            width: '100%',
                             backgroundColor: 'rgba(50, 50, 50, 0.4)',
                             boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)'
                         }}>
                             <h5>Bài hát {index + 1}</h5>
                             <p className='mb-2'>{song.file.name}</p>
                             <div style={{
-                                gap: '25px'
+                                gap: '30px'
                             }} className='d-flex flex-wrap justify-content-center'>
-                                <div style={{ width: '150px', height: '150px' }}>
+                                <div style={{ width: '200px', height: '200px' }}>
                                     <label>Ảnh bìa</label>
                                     <ImageUpload src={song.image}
                                         onDrop={(files) => {
@@ -204,7 +251,7 @@ const Upload = () => {
                                             }
                                         }} />
                                 </div>
-                                <div>
+                                <div style={{ flexGrow: 1 }}>
                                     <div style={{ textAlign: 'start', marginBottom: '10px' }}>
                                         <label>Tên bài hát</label>
                                         <input
@@ -250,10 +297,59 @@ const Upload = () => {
                                             onChange={(e) => handleInputChange(index, e)}
                                             style={{ width: '100%', padding: '5px', margin: '5px 0' }} />
                                     </div>
-                                    <button onClick={() => handleUpload(song)} style={{ marginTop: '10px', marginRight: '10px' }}>Upload</button>
-                                    <button onClick={() => handleCancel(index)} style={{ marginTop: '10px', backgroundColor: 'red', color: 'white' }}>Cancel</button>
+                                    <div style={{ textAlign: 'start', marginBottom: '10px' }}>
+                                        <label>
+                                            <input
+                                                type="checkbox"
+                                                name="isPublic"
+                                                checked={song.isPublic}
+                                                onChange={(e) => handleInputChange(index, e)}
+                                                className='me-2'
+                                                size='large' />
+                                            Công khai
+                                        </label>
+                                    </div>
+
+                                    {!song.isUpload && <div className='d-flex justify-content-center mt-2'>
+                                        <button
+                                            onClick={() => handleUpload(song, index)}
+                                            style={{ marginRight: '10px' }}>
+                                            Upload
+                                        </button>
+                                        <button
+                                            onClick={() => handleCancel(index)}
+                                            style={{ backgroundColor: 'red', color: 'white' }}>
+                                            Cancel
+                                        </button>
+                                    </div>}
                                 </div>
                             </div>
+
+                            {song.isUpload && (
+                                <div className="upload-progress-container">
+                                    <div className="progress-bar-container">
+                                        <progress
+                                            value={progresses[index] || 0}
+                                            max="100"
+                                            className="progress-bar" />
+                                        <div
+                                            className="progress-fill"
+                                            style={{ width: `${progresses[index] || 0}%` }} />
+                                        <div className="percentage-display">
+                                            {progresses[index] || 0}%
+                                        </div>
+                                    </div>
+                                    {progresses[index] === 100
+                                        ? <div className="spinner-container">
+                                            <i className="fa-solid fa-spinner fa-spin spinner" />
+                                        </div>
+                                        : <div className="cancel-button-container">
+                                            <i className="fa-solid fa-xmark cancel-button"
+                                                onClick={() => handleCancelUpload(index)} />
+                                        </div>
+                                    }
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>

@@ -157,7 +157,7 @@ const PlaylistModal = ({ visible, playlist, onSaveChange, onClose }) => {
                                 <Form.Label className='text-dark'>Ảnh bìa</Form.Label>
                                 <ImageUpload
                                     src={image}
-                                    onDrop={(f) => setImage(f.file[0])} />
+                                    onDrop={(f) => setImage(f[0])} />
                             </Form.Group>
                             <Form.Group style={{ width: '600px' }}>
                                 <Form.Group>

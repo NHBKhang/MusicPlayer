@@ -78,7 +78,7 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
         const newErrors = {};
         if (!title) newErrors.title = 'Tên bài hát là bắt buộc.';
         if (genres.length === 0) newErrors.genres = 'Bạn phải chọn ít nhất một thể loại.';
-        if (!access?.is_free && !access?.price) newErrors.price = 'Bạn phải nhập giá tiền cho bài hát này.'
+        if (access?.is_downloadable && !access?.is_free && !access?.price) newErrors.price = 'Bạn phải nhập giá tiền cho bài hát này.'
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -89,7 +89,7 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
         let formData = new FormData();
         if (image !== song.image) formData.append('image', image);
         if (title !== song.title) formData.append('title', title);
-        if (artists !== song.artists) formData.append('artirts', artists);
+        if (artists !== song.artists) formData.append('artists', artists);
         const genreIds = genres.map(genre => genre.value);
         const originalGenreIds = availableGenres.map(genre => genre.id);
         if (genreIds.length !== originalGenreIds.length || !genreIds.every(id => originalGenreIds.includes(id)))
@@ -103,8 +103,8 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
 
         try {
             let accessData = new FormData();
-            if (access?.is_free !== song.access?.is_free) accessData.append('is_free', access?.is_free);
             if (access?.is_downloadable !== song.access?.is_downloadable) accessData.append('is_downloadable', access?.is_downloadable);
+            if (access?.is_free !== song.access?.is_free) accessData.append('is_free', access?.is_free);
             if (access?.is_free)
                 accessData.append('price', 0);
             else {
@@ -161,7 +161,7 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
                                 <Form.Label className='text-dark'>Ảnh bìa</Form.Label>
                                 <ImageUpload
                                     src={image}
-                                    onDrop={(f) => setImage(f.file[0])} />
+                                    onDrop={(f) => setImage(f[0])} />
                             </Form.Group>
                             <Form.Group style={{ maxWidth: '600px', width: '100%' }}>
                                 <Form.Group controlId="formTitle">

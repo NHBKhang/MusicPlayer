@@ -16,6 +16,7 @@ const PlaylistDetailsPage = () => {
     const navigate = useNavigate();
     const [playlist, setPlaylist] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [relatedPlaylists, setRelatedPlaylist] = useState([]);
     const [visible, setVisible] = useState({
         edit: false,
         delete: false
@@ -33,7 +34,17 @@ const PlaylistDetailsPage = () => {
             }
         };
 
+        const loadRelatedPlaylists = async () => {
+            try {
+                let res = await authAPI(await getAccessToken()).get(endpoints["related-playlists"](id));
+                setRelatedPlaylist(res.data);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
         loadPlaylist();
+        loadRelatedPlaylists();
     }, [id, getAccessToken]);
 
     const searchByGenre = (e, genreId) => {
@@ -97,6 +108,8 @@ const PlaylistDetailsPage = () => {
             console.error(error)
         }
     }
+
+    const goToDetails = (playlistId) => navigate(`/playlists/${playlistId}/`)
 
     return (
         <Page title={`${playlist?.title}`}>
@@ -187,33 +200,23 @@ const PlaylistDetailsPage = () => {
                 <div className="col-md-4 text-start mt-2">
                     <h5>Các playlist khác từ {playlist?.creator?.name}</h5>
                     <hr />
-                    {/* {relatedSongs.map(r =>
-                    <div key={r.id}
-                        className="related-song d-flex ms-lg-1">
-                        <img
-                            src={r.image} alt={r.title} width={75} height={75}
-                            onClick={() => goToDetails(r.id)} />
-                        <div className="ms-3" onClick={() => goToDetails(r.id)}>
-                            <h5 className="mb-0">{r.title}</h5>
-                            <p style={{ marginTop: 2, marginBottom: 3 }}>{r.artists}</p>
-                            <div>
-                                <span className="me-4">
-                                    <i class="fa-solid fa-heart me-1"></i> {r.likes}
-                                </span>
-                                <span>
-                                    <i class="fa-solid fa-play me-1"></i> {r.streams}
-                                </span>
+                    {relatedPlaylists.map(r =>
+                        <div key={r.id}
+                            className="related-playlist d-flex ms-lg-1">
+                            <img
+                                src={r.image ? r.image : r.details[0].song.image}
+                                alt={r.title} width={75} height={75}
+                                onClick={() => goToDetails(r.id)} />
+                            <div className="ms-3" onClick={() => goToDetails(r.id)}>
+                                <h5 className="mb-0">{r.title}</h5>
+                                <p style={{ marginTop: 2, marginBottom: 3 }}>{r.type}</p>
+                                <div>
+                                    <span className="me-4">
+                                        {r.details.length} bài hát
+                                    </span>
+                                </div>
                             </div>
-                        </div>
-                        <button
-                            className="play-button"
-                            title="Phát bài hát"
-                            onClick={() => playNewSong(r)}>
-                            {isPlaying && currentSong?.id === r.id ?
-                                <i class="fa-solid fa-pause"></i> :
-                                <i class="fa-solid fa-play"></i>}
-                        </button>
-                    </div>)} */}
+                        </div>)}
                 </div>
             </div>
             <LoginRequiredModal

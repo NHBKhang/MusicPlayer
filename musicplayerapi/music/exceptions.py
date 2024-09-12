@@ -8,7 +8,7 @@ class NotDownloadableException(APIException):
 
 
 class PurchaseRequiredException(APIException):
-    status_code = 403
+    status_code = 402
     default_detail = 'You need to purchase this song to download it.'
     default_code = 'purchase_required'
 

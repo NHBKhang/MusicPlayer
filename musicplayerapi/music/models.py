@@ -3,6 +3,8 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import TemporaryUploadedFile
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.conf import settings
 from music.validate import validate_audio_file
@@ -28,8 +30,7 @@ class User(AbstractUser):
     avatar = CloudinaryField(null=True, blank=True, resource_type='image')
 
     def __str__(self):
-        if self.username:
-            return self.username
+        return self.get_name()
 
     def clean(self):
         super().clean()
@@ -40,6 +41,15 @@ class User(AbstractUser):
 
     def has_purchased(self, song):
         return Transaction.objects.filter(user=self, song=song, status=Transaction.COMPLETED).exists()
+
+    def get_name(self):
+        if self.info and self.info.display_name:
+            return self.info.display_name
+        if self.first_name:
+            if self.last_name:
+                return f'{self.last_name} {self.first_name}'
+            else:
+                return self.first_name
 
     # def save(self, *args, **kwargs):
     #     if self.password:
@@ -189,10 +199,11 @@ class SongAccess(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=0, null=True, blank=True, help_text="Price in VND")
 
     def clean(self):
-        if self.is_free and self.price is not None:
-            raise ValidationError("Price must be null if the song is free.")
-        if not self.is_free and self.price is None:
-            raise ValidationError("Price is required if the song is not free.")
+        if self.is_downloadable:
+            if self.is_free and self.price is not None:
+                raise ValidationError("Price must be null if the song is free.")
+            if not self.is_free and self.price is None:
+                raise ValidationError("Price is required if the song is not free.")
 
     def save(self, *args, **kwargs):
         self.clean()
@@ -237,3 +248,20 @@ class Follow(BaseModel):
 
     def __str__(self):
         return f"{self.follower} theo dõi {self.followed}"
+
+
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_date = models.DateTimeField(auto_now_add=True)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+    verb = models.CharField(max_length=10, default='default')
+
+    def __str__(self):
+        return f"Notification for {self.user.username} - {self.message[:20]}"
+
+    class Meta:
+        ordering = ['-created_date']
