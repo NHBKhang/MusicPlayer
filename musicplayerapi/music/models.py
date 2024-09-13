@@ -92,6 +92,16 @@ class Genre(BaseModel):
 
 
 class Song(ImageBaseModel, BaseModel):
+    PRIVATE = 1
+    PUBLIC = 2
+    SCHEDULED = 3
+
+    IS_PUBLIC_CHOICES = [
+        (PRIVATE, 'Private'),
+        (PUBLIC, 'Public'),
+        (SCHEDULED, 'Scheduled'),
+    ]
+
     title = models.CharField(max_length=255, null=False, blank=False)
     uploader = models.ForeignKey(User, related_name='songs', on_delete=models.CASCADE, null=False, blank=False)
     file = models.FileField(upload_to='songs/', validators=[validate_audio_file])
@@ -99,7 +109,8 @@ class Song(ImageBaseModel, BaseModel):
     genres = models.ManyToManyField(Genre, related_name='songs', null=True, blank=True)
     lyrics = models.TextField(null=True, blank=True)
     description = models.TextField(blank=True, null=True)
-    is_public = models.BooleanField(default=True)
+    is_public = models.IntegerField(choices=IS_PUBLIC_CHOICES, default=PUBLIC)
+    release_date = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return self.title
@@ -107,8 +118,21 @@ class Song(ImageBaseModel, BaseModel):
     def save(self, *args, **kwargs):
         if self.artists is None or self.artists.strip() == '':
             self.artists = 'Various artists'
+        if self.is_public == self.SCHEDULED:
+            if not self.release_date:
+                raise ValidationError("Release date must be provided when the song is scheduled.")
+        else:
+            self.release_date = None
 
         super().save(*args, **kwargs)
+
+    def clean(self):
+        if self.is_public == self.SCHEDULED and not self.release_date:
+            raise ValidationError("Release date is required when the song is scheduled.")
+        if self.is_public != self.SCHEDULED and self.release_date:
+            self.release_date = None
+
+        super().clean()
 
     def has_purchased(self, user):
         return Transaction.objects.filter(user=user, song=self, status=Transaction.COMPLETED).exists()
@@ -268,13 +292,41 @@ class Notification(models.Model):
 
 
 class Video(BaseModel, ImageBaseModel):
+    PRIVATE = 1
+    PUBLIC = 2
+    SCHEDULED = 3
+
+    IS_PUBLIC_CHOICES = [
+        (PRIVATE, 'Private'),
+        (PUBLIC, 'Public'),
+        (SCHEDULED, 'Scheduled'),
+    ]
+
     uploader = models.ForeignKey(User, on_delete=models.CASCADE, related_name='uploaded_videos')
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
-    is_public = models.BooleanField(default=True)
+    is_public = models.IntegerField(choices=IS_PUBLIC_CHOICES, default=PUBLIC)
+    release_date = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        if self.is_public == self.SCHEDULED:
+            if not self.release_date:
+                raise ValidationError("Release date must be provided when the song is scheduled.")
+        else:
+            self.release_date = None
+
+        super().save(*args, **kwargs)
+
+    def clean(self):
+        if self.is_public == self.SCHEDULED and not self.release_date:
+            raise ValidationError("Release date is required when the song is scheduled.")
+        if self.is_public != self.SCHEDULED and self.release_date:
+            self.release_date = None
+
+        super().clean()
 
     class Meta:
         ordering = ['-created_at']

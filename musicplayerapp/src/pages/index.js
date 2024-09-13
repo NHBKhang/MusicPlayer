@@ -52,3 +52,4 @@ export { default as UploadPage } from './UploadPage';
 export { default as DownloadPage } from './DownloadPage';
 export { default as PaymentSuccessPage } from './PaymentSuccessPage';
 export { default as PaymentCancelPage } from './PaymentCancelPage';
+export { default as LivePage } from './LivePage';

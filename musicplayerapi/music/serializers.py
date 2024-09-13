@@ -205,7 +205,7 @@ class SongDetailsSerializer(SongSerializer):
     class Meta:
         model = SongSerializer.Meta.model
         fields = SongSerializer.Meta.fields + ['genres', 'genre_ids', 'comments', 'lyrics', 'description',
-                                               'uploader_id']
+                                               'uploader_id', 'release_date', ]
 
 
 class AuthenticatedSongDetailsSerializer(SongDetailsSerializer, AuthenticatedSongSerializer):
@@ -392,7 +392,12 @@ class NotificationSerializer(serializers.ModelSerializer):
 
 class MusicVideoSerializer(serializers.ModelSerializer):
     uploader = PublicUserSerializer(read_only=True)
+    uploader_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), source='uploader', write_only=True, required=False)
     image = serializers.SerializerMethodField()
+    is_owner = serializers.SerializerMethodField()
+    song_id = serializers.PrimaryKeyRelatedField(
+        queryset=Song.objects.all(), source='song', required=False)
 
     def get_image(self, video):
         if video.image:
@@ -400,15 +405,30 @@ class MusicVideoSerializer(serializers.ModelSerializer):
         else:
             return video.song.image.url
 
+    def get_is_owner(self, video):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return video.uploader == request.user
+        return False
+
     class Meta:
         model = MusicVideo
-        fields = ['id', 'title', 'image', 'created_date', 'uploader', 'is_public', ]
+        fields = ['id', 'title', 'image', 'created_date', 'uploader', 'uploader_id', 'is_public', 'is_owner', 'song_id']
+
+    def create(self, validated_data):
+        print(validated_data)
+        uploader_id = validated_data.pop('uploader_id', None)
+        if uploader_id:
+            validated_data['uploader'] = uploader_id
+        video = super().create(validated_data)
+
+        return video
 
 
 class DetailsMusicVideoSerializer(MusicVideoSerializer):
     class Meta:
         model = MusicVideoSerializer.Meta.model
-        fields = MusicVideoSerializer.Meta.fields + ['file', 'description', 'created_date']
+        fields = MusicVideoSerializer.Meta.fields + ['file', 'description', 'created_date', 'release_date', ]
 
 
 class AuthenticatedMusicVideoSerializer(DetailsMusicVideoSerializer):
@@ -423,3 +443,9 @@ class AuthenticatedMusicVideoSerializer(DetailsMusicVideoSerializer):
     class Meta:
         model = DetailsMusicVideoSerializer.Meta.model
         fields = DetailsMusicVideoSerializer.Meta.fields + ['followed', ]
+
+
+class ReadOnlySongSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Song
+        fields = ['id', 'title']

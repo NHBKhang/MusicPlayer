@@ -118,3 +118,11 @@
 .playlist-item .view-more-button:hover {
     text-decoration: underline;
 }
+
+.playlist-item:hover .cover-wrapper {
+    opacity: 1;
+}
+
+.playlist-item:hover .cover-container i {
+    opacity: 1;
+}

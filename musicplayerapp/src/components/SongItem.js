@@ -37,7 +37,11 @@ const SongItem = ({ song, state }) => {
     return (
         <div className="track-item cursor-pointer">
             <span className="date">{moment(item.created_date).fromNow()}</span>
-            <img src={item.image} alt={item.title} className="track-cover" onClick={goToDetails} />
+            <div className="cover-container">
+                <img src={item.image} alt={item.title} className="track-cover" onClick={goToDetails} />
+                <div className="cover-wrapper"></div>
+                <i class="fa-solid fa-music"></i>
+            </div>
             <div className="track-info w-100">
                 <div className="d-flex" style={{ gap: 12 }}>
                     <button
@@ -52,7 +56,7 @@ const SongItem = ({ song, state }) => {
                         <p className="p-0 m-0" onClick={goToArtist}>{item?.uploader?.name}</p>
                         <h5 onClick={goToDetails}>
                             {item.artists} - {item.title}
-                            {!item?.is_public &&
+                            {item?.is_public !== 2 &&
                                 <span className="privacy m-2" style={{ fontSize: '12px' }}>
                                     <i className="fa-solid fa-lock"></i>
                                 </span>}

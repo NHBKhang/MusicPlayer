@@ -14,6 +14,8 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
     const [description, setDescription] = useState('');
     const [availableGenres, setAvailableGenres] = useState([]);
     const [isPublic, setIsPublic] = useState(true);
+    const [releaseDate, setReleaseDate] = useState('');
+    const [releaseTime, setReleaseTime] = useState('');
     const [access, setAccess] = useState(null);
     const [errors, setErrors] = useState({});
     const { getAccessToken } = useUser();
@@ -38,6 +40,14 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
                         })) || []);
                         setLyrics(data.lyrics || '');
                         setDescription(data.description || '');
+                        if (data.release_date) {
+                            const releaseDateTime = new Date(data.release_date);
+                            const releaseDate = releaseDateTime.toISOString().split('T')[0];
+                            const releaseTime = releaseDateTime.toISOString().split('T')[1].slice(0, 5);
+                            setReleaseDate(releaseDate);
+                            setReleaseTime(releaseTime);
+                        }
+                        
                     } else {
                         setGenres(song.genres?.map(genre => ({
                             value: genre.id,
@@ -45,6 +55,13 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
                         })) || []);
                         setLyrics(song.lyrics || '');
                         setDescription(song.description || '');
+                        if (song.release_date) {
+                            const releaseDateTime = new Date(song.release_date);
+                            const releaseDate = releaseDateTime.toISOString().split('T')[0];
+                            const releaseTime = releaseDateTime.toISOString().split('T')[1].slice(0, 5);
+                            setReleaseDate(releaseDate);
+                            setReleaseTime(releaseTime);
+                        }
                     }
                 } catch (error) {
                     console.error(error);
@@ -78,7 +95,8 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
         const newErrors = {};
         if (!title) newErrors.title = 'Tên bài hát là bắt buộc.';
         if (genres.length === 0) newErrors.genres = 'Bạn phải chọn ít nhất một thể loại.';
-        if (access?.is_downloadable && !access?.is_free && !access?.price) newErrors.price = 'Bạn phải nhập giá tiền cho bài hát này.'
+        if (!releaseDate || !releaseTime) newErrors.releaseDateTime = 'Thời gian phát trực tiếp là bắt buộc';
+        if (access?.is_downloadable && !access?.is_free && !access?.price) newErrors.price = 'Bạn phải nhập giá tiền cho bài hát này.';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -99,7 +117,7 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
         if (lyrics !== song.lyrics) formData.append('lyrics', lyrics);
         if (description !== song.description) formData.append('description', description);
         if (isPublic !== song.is_public) formData.append('is_public', isPublic);
-
+        formData.append('release_date', `${releaseDate}T${releaseTime}:00`);
 
         try {
             let accessData = new FormData();
@@ -146,6 +164,10 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
 
     const handleGenresChange = (selectedOptions) => {
         setGenres(selectedOptions || []);
+    };
+
+    const handleIsPublicChange = (e) => {
+        setIsPublic(Number(e.target.value));
     };
 
     return (
@@ -208,16 +230,45 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
                                         value={description}
                                         onChange={(e) => setDescription(e.target.value)} />
                                 </Form.Group>
-                                <Form.Group className='d-flex' style={{ gap: '50px' }}>
-                                    <Form.Group>
+                                <Form.Group>
+                                    <div className="my-2 d-flex" style={{ gap: '50px' }}>
                                         <Form.Check
-                                            className='mt-2'
-                                            type="checkbox"
+                                            type="radio"
+                                            label="Riêng tư"
+                                            name="visibility"
+                                            value="1"
+                                            checked={isPublic === 1}
+                                            onChange={handleIsPublicChange} />
+                                        <Form.Check
+                                            type="radio"
                                             label="Công khai"
-                                            checked={isPublic}
-                                            onChange={(e) => setIsPublic(e.target.checked)} />
-                                    </Form.Group>
+                                            name="visibility"
+                                            value="2"
+                                            checked={isPublic === 2}
+                                            onChange={handleIsPublicChange} />
+                                        <Form.Check
+                                            type="radio"
+                                            label="Theo lịch trình"
+                                            name="visibility"
+                                            value="3"
+                                            checked={isPublic === 3}
+                                            onChange={handleIsPublicChange} />
+                                    </div>
                                 </Form.Group>
+                                {isPublic === 3 && <Form.Group controlId="formReleaseDateTime">
+                                    <Form.Label className='text-dark mt-2'>Thời gian phát trực tiếp</Form.Label>
+                                    <Form.Group className="d-flex" style={{ gap: '20px' }}>
+                                        <Form.Control
+                                            type="date"
+                                            value={releaseDate}
+                                            onChange={(e) => setReleaseDate(e.target.value)} />
+                                        <Form.Control
+                                            type="time"
+                                            value={releaseTime}
+                                            onChange={(e) => setReleaseTime(e.target.value)} />
+                                    </Form.Group>
+                                    {errors.releaseDateTime && <Form.Text className="text-danger">{errors.releaseDateTime}</Form.Text>}
+                                </Form.Group>}
                             </Form.Group>
                         </Form>
                     </Tab>

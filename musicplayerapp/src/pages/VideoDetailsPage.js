@@ -4,13 +4,19 @@ import { authAPI, endpoints } from '../configs/API';
 import '../styles/VideoDetailsPage.css';
 import { useUser } from '../configs/UserContext';
 import Page from '.';
+import { useAudio } from '../configs/AudioContext';
 
 const VideoDetailsPage = () => {
     const { id } = useParams();
     const [video, setVideo] = useState(null);
     const [loading, setLoading] = useState(true);
-    const { getAccessToken } = useUser();
+    const { getAccessToken, user } = useUser();
+    const { isPlaying, pauseSong } = useAudio();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (isPlaying) pauseSong()
+    }, [isPlaying, pauseSong]);
 
     useEffect(() => {
         const loadVideo = async () => {
@@ -75,15 +81,16 @@ const VideoDetailsPage = () => {
                             <h6 className='m-0'>{video.uploader.name}</h6>
                             <p className='m-0'>{video.uploader.followers} người theo dõi</p>
                         </div>
-                        <button className={`follow-button ${video.followed && 'followed'}`} onClick={follow}>
-                            {video?.followed ? (<>
-                                <i class="fa-solid fa-user-check"></i>
-                                <p className='text-black m-0'> Đã theo dõi</p>
-                            </>) : (<>
-                                <i class="fa-solid fa-user-plus"></i>
-                                <p className='text-black m-0'> Theo dõi</p>
-                            </>)}
-                        </button>
+                        {user.id !== video.uploader.id &&
+                            <button className={`follow-button ${video.followed && 'followed'}`} onClick={follow}>
+                                {video?.followed ? (<>
+                                    <i class="fa-solid fa-user-check"></i>
+                                    <p className='text-black m-0'> Đã theo dõi</p>
+                                </>) : (<>
+                                    <i class="fa-solid fa-user-plus"></i>
+                                    <p className='text-black m-0'> Theo dõi</p>
+                                </>)}
+                            </button>}
                     </div>
                     <p>{video.description}</p>
                 </div>

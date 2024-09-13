@@ -1,6 +1,6 @@
 export { default as Header } from './Header';
 export { default as Footer } from './Footer';
-export { default as Sidebar } from './Sidebar';
+export { default as Sidebar, sidebarContents } from './Sidebar';
 export { default as SongControls } from './SongControls';
 export { default as Carousel } from './Carousel';
 export { default as GoogleButton } from './GoogleButton';
@@ -17,6 +17,7 @@ export { default as SongModal } from './SongModal';
 export { default as PlaylistModal } from './PlaylistModal';
 export { default as UserModal } from './UserModel';
 export { default as AddToPlaylistModal } from './AddToPlaylistModal';
+export { default as VideoModal } from './VideoModal';
 export { default as SongItem, Options } from './SongItem';
 export { default as PlaylistItem } from './PlaylistItem';
 export { default as ArtistItem } from './ArtistItem';

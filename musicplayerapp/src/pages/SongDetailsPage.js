@@ -136,7 +136,7 @@ const SongDetailsPage = () => {
                     <div className="song-info col-xxl-9 col-xl-8 col-lg-8 col-md-6">
                         <h1 className="mt-2 mb-2">
                             {song?.title}
-                            {!song?.is_public &&
+                            {song?.is_public !== 2 &&
                                 <span className="privacy fs-4 m-2">
                                     <i className="fa-solid fa-lock"></i>
                                 </span>}

@@ -246,26 +246,47 @@ const UserProfileTabs = ({ profile, getAccessToken, state }) => {
                 ))}
             </div>
             <div className="tracks-container">
-                {data[tabKeys[activeTab]].map(item => (
-                    activeTab === 0 ? (item.type === 'song' ? (
-                        <SongItem
-                            key={`track-${tabKeys[activeTab]}-${item.id}`}
-                            song={item} state={state} />
-                    ) : (
-                        <PlaylistItem
-                            key={`playlist-${tabKeys[activeTab]}-${item.id}`}
-                            playlist={item} state={state} />
-                    )) : (activeTab !== 3 ? (activeTab !== 4 && activeTab !== 5 ?
-                        <SongItem
-                            key={`track-${tabKeys[activeTab]}-${item.id}`}
-                            song={item} state={state} /> :
-                        <PlaylistItem
-                            key={`playlist-${tabKeys[activeTab]}-${item.id}`}
-                            playlist={item} />) : (
-                        <VideoItem key={`mv-${tabKeys[activeTab]}-${item.id}`}
-                            video={item} />
-                    )
-                    )))}
+                {data[tabKeys[activeTab]].map(item => {
+                    if (activeTab === 0) {
+                        return item.type === 'song' ? (
+                            <SongItem
+                                key={`track-${tabKeys[activeTab]}-${item.id}`}
+                                song={item}
+                                state={state} />
+                        ) : (
+                            <PlaylistItem
+                                key={`playlist-${tabKeys[activeTab]}-${item.id}`}
+                                playlist={item}
+                                state={state} />
+                        );
+                    }
+
+                    if (activeTab === 1 || activeTab === 2) {
+                        return (
+                            <SongItem
+                                key={`track-${tabKeys[activeTab]}-${item.id}`}
+                                song={item}
+                                state={state} />
+                        );
+                    }
+
+                    if (activeTab === 3) {
+                        return (
+                            <VideoItem
+                                key={`mv-${tabKeys[activeTab]}-${item.id}`}
+                                video={item} />
+                        );
+                    }
+
+                    if (activeTab === 4 || activeTab === 5) {
+                        return (
+                            <PlaylistItem
+                                key={`playlist-${tabKeys[activeTab]}-${item.id}`}
+                                playlist={item} />
+                        );
+                    }
+                })}
+
                 {page[tabKeys[activeTab]] > 0 && (
                     <div ref={el => loadMoreRefs.current[tabKeys[activeTab]] = el} className="load-more-container">
                         {loading[tabKeys[activeTab]] && <p>Loading...</p>}

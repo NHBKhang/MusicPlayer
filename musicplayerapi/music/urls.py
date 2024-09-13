@@ -9,6 +9,7 @@ r.register('songs', views.SongViewSet, basename='songs')
 r.register('playlists', views.PlaylistViewSet, basename='playlists')
 r.register('music-videos', views.MusicVideoViewSet, basename='music-videos')
 r.register('notifications', views.NotificationViewSet, basename='notifications')
+r.register('readonly-songs', views.ReadOnlySongViewSet, basename='readonly-songs')
 
 urlpatterns = [
     path('', include(r.urls)),

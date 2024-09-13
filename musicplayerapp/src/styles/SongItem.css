@@ -15,10 +15,49 @@
 }
 
 .track-cover {
-    width: 120px;
-    height: 120px;
+    width: 100%;
+    height: 100%;
     border-radius: 4px;
     object-fit: cover;
+}
+
+.cover-container {
+    width: 125px;
+    height: 125px;
+    border-radius: 4px;
+    position: relative;
+}
+
+.cover-wrapper {
+    background-color: rgba(211, 211, 211, 0.9);
+    position: absolute;
+    top: 50%;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    opacity: 0;
+}
+
+.cover-container i {
+    position: absolute;
+    top: calc(50% - 10px);
+    left: calc(50% - 10px);
+    width: 25px;
+    height: 25px;
+    display: flex;
+    background-color: #bcbcbc;
+    justify-content: center;
+    align-items: center;
+    border-radius: 3px;
+    opacity: 0;
+}
+
+.track-item:hover .cover-wrapper {
+    opacity: 1;
+}
+
+.track-item:hover .cover-container i {
+    opacity: 1;
 }
 
 .track-info h5 {
@@ -58,7 +97,7 @@ button.track-button {
     color: rgba(245, 245, 245, 0.9);
     background-color: rgba(255, 85, 0, 0.9) !important;
     border-radius: 50% !important;
-    border: none ;
+    border: none;
     width: 50px;
     min-width: 50px;
     height: 50px !important;

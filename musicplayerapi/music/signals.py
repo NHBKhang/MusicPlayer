@@ -2,7 +2,7 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from .models import UserInfo, User, Song, Playlist, Like, Follow, Comment, Notification
+from .models import UserInfo, User, Song, Playlist, Like, Follow, Comment, Notification, MusicVideo
 import cloudinary
 import cloudinary.uploader
 import boto3
@@ -39,7 +39,16 @@ def delete_cloudinary_avatar(sender, instance, **kwargs):
 
 
 @receiver(post_delete, sender=Song)
-def delete_s3_file(sender, instance, **kwargs):
+def delete_song_s3_file(sender, instance, **kwargs):
+    if instance.file:
+        s3 = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                          aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                          region_name=settings.AWS_S3_REGION_NAME)
+        s3.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=instance.file.name)
+
+
+@receiver(post_delete, sender=MusicVideo)
+def delete_video_s3_file(sender, instance, **kwargs):
     if instance.file:
         s3 = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
                           aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,

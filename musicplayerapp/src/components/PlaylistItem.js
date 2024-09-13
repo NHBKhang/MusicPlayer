@@ -59,11 +59,15 @@ const PlaylistItem = ({ playlist }) => {
 
     return (
         <div className="playlist-item cursor-pointer">
-            <img
-                src={item?.image ?? (item?.details && item.details[0]?.song?.image)}
-                alt={item?.title}
-                className="track-cover"
-                onClick={goToDetails} />
+            <div className="cover-container">
+                <img
+                    src={item?.image ?? (item?.details && item.details[0]?.song?.image)}
+                    alt={item?.title}
+                    className="track-cover"
+                    onClick={goToDetails} />
+                <div className="cover-wrapper"></div>
+                <i class="fa-solid fa-list"></i>
+            </div>
             <div className="w-100">
                 <div className="d-flex" style={{ gap: 12 }}>
                     <button
@@ -112,12 +116,12 @@ const PlaylistItem = ({ playlist }) => {
                 </div>
                 <div className="button-group">
                     {item?.is_owner &&
-                        <div className="d-flex align-items-center button-group" style={{ gap: '12px' }}>
-                            <button onClick={() => updateVisible('edit', true)}>
+                        <div className="d-flex align-items-center button-group" style={{ gap: '4px' }}>
+                            <button onClick={() => updateVisible('edit', true)} className="track-button">
                                 <i class="fa-solid fa-pen-to-square me-1"></i>
                                 <p className="d-none d-md-inline fs-6 text-dark">Chỉnh sửa</p>
                             </button>
-                            <button onClick={() => updateVisible('delete', true)}>
+                            <button onClick={() => updateVisible('delete', true)} className="track-button">
                                 <i class="fa-solid fa-trash me-1"></i>
                                 <p className="d-none d-md-inline fs-6 text-dark">Xóa playlist</p>
                             </button>

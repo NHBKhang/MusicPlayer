@@ -2,6 +2,7 @@ import {
     DownloadPage,
     HomePage,
     LibraryPage,
+    LivePage,
     LoginPage, PaymentSuccessPage, PlaylistDetailsPage, ProfilePage, SearchPage, SetPasswordPage, SignupPage,
     SongDetailsPage,
     UploadPage,
@@ -95,6 +96,12 @@ export const routes = {
         component: PaymentCancelPage,
         require: true,
         controlShow: false
+    }, 
+    live: {
+        url: '/live/',
+        component: LivePage,
+        require: false,
+        controlShow: false
     }
 }
 
@@ -129,6 +136,7 @@ export const endpoints = {
     'paypal-payment-success': '/payment/paypal/payment-success/',
     'notifications': '/notifications/',
     'notification': (notificationId) => `/notifications/${notificationId}/mark_as_read/`,
+    'readonly-songs': '/readonly-songs/',
 }
 
 export const authAPI = (accessToken) =>

@@ -496,10 +496,10 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class MusicVideoViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
-    queryset = MusicVideo.objects.filter(active=True).all().order_by('-id')
+    queryset = MusicVideo.objects.filter(active=True, is_public=MusicVideo.PUBLIC).order_by('-id').all()
     serializer_class = serializers.MusicVideoSerializer
     pagination_class = paginators.MusicVideoPaginator
-    # permission_classes = [perms.PlaylistOwner]
+    permission_classes = [perms.MusicVideoOwner]
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     def get_serializer_class(self):
@@ -520,6 +520,27 @@ class MusicVideoViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.R
         q = self.request.query_params.get('q')
         if q:
             queryset = queryset.filter(title__icontains=q)
+
+        uploader = self.request.query_params.get('uploader')
+        if uploader:
+            queryset = queryset.filter(uploader_id=int(uploader))
+
+        if self.request.user.is_authenticated:
+            private_queryset = MusicVideo.objects.filter(
+                Q(is_public=MusicVideo.SCHEDULED) |
+                Q(is_public=MusicVideo.PRIVATE)
+            ).filter(uploader=self.request.user)
+            queryset = queryset | private_queryset
+
+        return queryset.distinct()
+
+
+class ReadOnlySongViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Song.objects.filter(active=True).order_by('-id').all()
+    serializer_class = serializers.ReadOnlySongSerializer
+
+    def get_queryset(self):
+        queryset = self.queryset
 
         uploader = self.request.query_params.get('uploader')
         if uploader:

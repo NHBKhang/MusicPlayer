@@ -3,6 +3,7 @@ import '../styles/Header.css';
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../configs/UserContext";
 import NotificationDropdown from "./NotificationDropdown";
+import { sidebarContents } from "./Sidebar";
 
 const Header = () => {
     const [query, setQuery] = useState('');
@@ -54,14 +55,13 @@ const Header = () => {
                     </button>
                     <div className="collapse navbar-collapse w-100" id="mynavbar">
                         <ul class="navbar-nav d-sm-none d-inline cursor-pointer">
-                            <li class="nav-item"
-                                onClick={() => navigate('/')}>
-                                <p class="nav-link active m-0">Trang chủ</p>
-                            </li>
-                            <li class="nav-item"
-                                onClick={() => navigate('/library/')}>
-                                <p class="nav-link active m-0">Thư viện</p>
-                            </li>
+                            {sidebarContents.map(c =>
+                                <li class="nav-item"
+                                    onClick={() => navigate(c.href)}>
+                                    <p class="nav-link active m-0">
+                                        {c.icon} {c.label}
+                                    </p>
+                                </li>)}
                         </ul>
                         <div className="search-bar">
                             <input className="query form-control"

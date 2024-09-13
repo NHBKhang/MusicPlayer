@@ -240,6 +240,13 @@
     color: #000000 !important;
 }
 
-.nav-item {
+.navbar .nav-item {
     color: whitesmoke;
+    text-align: start;
+    width: 80%;
+    margin: auto;
+}
+
+.navbar .nav-item i {
+    margin-right: 7px;
 }

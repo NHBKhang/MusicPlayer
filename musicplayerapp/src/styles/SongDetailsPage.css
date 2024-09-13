@@ -106,7 +106,7 @@
     color: white;
 }
 
-.song-detail .track-button {
+.song-container>.song-detail>.song-info .track-button {
    margin-right: 12px !important; 
 }
 
