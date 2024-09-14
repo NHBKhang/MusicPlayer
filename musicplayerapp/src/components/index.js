@@ -22,3 +22,4 @@ export { default as SongItem, Options } from './SongItem';
 export { default as PlaylistItem } from './PlaylistItem';
 export { default as ArtistItem } from './ArtistItem';
 export { default as VideoItem } from './VideoItem';
+export { default as VideoPlayer } from './VideoPlayer';

@@ -3,6 +3,7 @@ import {
     HomePage,
     LibraryPage,
     LivePage,
+    LiveVideoPage,
     LoginPage, PaymentSuccessPage, PlaylistDetailsPage, ProfilePage, SearchPage, SetPasswordPage, SignupPage,
     SongDetailsPage,
     UploadPage,
@@ -78,28 +79,34 @@ export const routes = {
         component: UploadPage,
         required: true,
         controlShow: true
-    }, 
+    },
     download: {
         url: '/download/',
         component: DownloadPage,
         require: false,
         controlShow: false
-    }, 
+    },
     paymentSuccess: {
         url: '/payment-success/',
         component: PaymentSuccessPage,
         require: true,
         controlShow: false
-    }, 
+    },
     paymentCancel: {
         url: '/payment-cancel/',
         component: PaymentCancelPage,
         require: true,
         controlShow: false
-    }, 
+    },
     live: {
         url: '/live/',
         component: LivePage,
+        require: false,
+        controlShow: false
+    },
+    liveVideo: {
+        url: '/live/:id/',
+        component: LiveVideoPage,
         require: false,
         controlShow: false
     }
@@ -126,6 +133,8 @@ export const endpoints = {
     'playlist': (playlistId) => `/playlists/${playlistId}/`,
     'music-videos': '/music-videos/',
     'music-video': (videoId) => `/music-videos/${videoId}/`,
+    'live-video': (videoId) => `/music-videos/${videoId}/live/`,
+    'live-videos': '/music-videos/live-videos/',
     'related-playlists': (playlistId) => `/playlists/${playlistId}/related/`,
     'like': (songId) => `/songs/${songId}/like/`,
     'stream': (songId) => `/songs/${songId}/stream/`,

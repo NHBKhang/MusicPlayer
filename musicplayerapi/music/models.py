@@ -103,10 +103,10 @@ class Song(ImageBaseModel, BaseModel):
     ]
 
     title = models.CharField(max_length=255, null=False, blank=False)
-    uploader = models.ForeignKey(User, related_name='songs', on_delete=models.CASCADE, null=False, blank=False)
+    uploader = models.ForeignKey(User, related_name='songs', on_delete=models.CASCADE, blank=False)
     file = models.FileField(upload_to='songs/', validators=[validate_audio_file])
     artists = models.CharField(max_length=100, null=True, blank=True)
-    genres = models.ManyToManyField(Genre, related_name='songs', null=True, blank=True)
+    genres = models.ManyToManyField(Genre, related_name='songs', blank=True)
     lyrics = models.TextField(null=True, blank=True)
     description = models.TextField(blank=True, null=True)
     is_public = models.IntegerField(choices=IS_PUBLIC_CHOICES, default=PUBLIC)

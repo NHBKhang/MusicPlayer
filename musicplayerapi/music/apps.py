@@ -1,4 +1,5 @@
 from django.apps import AppConfig
+import os
 
 
 class MusicConfig(AppConfig):
@@ -7,3 +8,7 @@ class MusicConfig(AppConfig):
 
     def ready(self):
         import music.signals
+        if os.environ.get('RUN_MAIN', None) != 'true':
+            return
+        from music.scheduler import start_scheduler
+        start_scheduler()

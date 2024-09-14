@@ -53,3 +53,4 @@ export { default as DownloadPage } from './DownloadPage';
 export { default as PaymentSuccessPage } from './PaymentSuccessPage';
 export { default as PaymentCancelPage } from './PaymentCancelPage';
 export { default as LivePage } from './LivePage';
+export { default as LiveVideoPage } from './LiveVideoPage';

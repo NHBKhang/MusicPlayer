@@ -179,14 +179,16 @@ STORAGES = {
         },
     },
 }
+# URL cho cả tệp tĩnh và media
+S3_BASE_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/'
 
-# Static files (CSS, JavaScript, images)
-STATIC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'music/static')]
+# Cấu hình storage cho các tệp media
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+MEDIA_URL = S3_BASE_URL + 'media/'
 
-# Media files (uploaded files)
-MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/media/'
+# Cấu hình storage cho các tệp tĩnh
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+STATIC_URL = S3_BASE_URL + 'static/'
 
 # Admin URL configuration
 ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'

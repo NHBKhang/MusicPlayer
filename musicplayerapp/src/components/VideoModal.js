@@ -74,7 +74,7 @@ const VideoModal = ({ visible, video, onSaveChange, onClose }) => {
     const validateForm = () => {
         const newErrors = {};
         if (!title) newErrors.title = 'Tên bài hát là bắt buộc.';
-        if (!releaseDate || !releaseTime) newErrors.releaseDateTime = 'Thời gian phát trực tiếp là bắt buộc';
+        if (isPublic === 3 && (!releaseDate || !releaseTime)) newErrors.releaseDateTime = 'Thời gian phát trực tiếp là bắt buộc';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -87,7 +87,7 @@ const VideoModal = ({ visible, video, onSaveChange, onClose }) => {
         if (title !== video.title) formData.append('title', title);
         if (description !== video.description) formData.append('description', description);
         if (isPublic !== video.is_public) formData.append('is_public', isPublic);
-        formData.append('release_date', `${releaseDate}T${releaseTime}:00`);
+        if (isPublic === 3) formData.append('release_date', `${releaseDate}T${releaseTime}:00`);
 
 
         try {

@@ -1,37 +1,36 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import { authAPI, endpoints } from '../configs/API';
-import '../styles/VideoDetailsPage.css';
 import { useUser } from '../configs/UserContext';
-import Page from '.';
-import { useAudio } from '../configs/AudioContext';
 import { VideoPlayer } from '../components';
+import { useNavigate, useParams } from 'react-router-dom';
+import Page from '.';
 
-const VideoDetailsPage = () => {
+const LiveVideoPage = () => {
     const { id } = useParams();
     const [video, setVideo] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [status, setStatus] = useState('');
     const { getAccessToken, user } = useUser();
-    const { isPlaying, pauseSong } = useAudio();
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (isPlaying) pauseSong()
-    }, [isPlaying, pauseSong]);
-
-    useEffect(() => {
-        const loadVideo = async () => {
+        const loadVideoStatus = async () => {
             try {
-                const res = await authAPI(await getAccessToken()).get(endpoints['music-video'](id));
-                setVideo(res.data);
-                setLoading(false);
-            } catch (error) {
-                console.error('Failed to fetch video:', error);
-                setLoading(false);
+                const res = await authAPI(await getAccessToken())
+                    .get(endpoints['live-video'](id))
+                setVideo(res.data.video);
+                if (res.data.video.is_public === 2)
+                    navigate(`/videos/${video.id}/`);
+                setStatus(res.data.status);
+            } catch (err) {
+                setError("Error fetching video status");
             }
         };
 
-        loadVideo();
+        loadVideoStatus();
+
+        const interval = setInterval(loadVideoStatus, 60000);
+        return () => clearInterval(interval);
     }, [id, getAccessToken]);
 
     const follow = async () => {
@@ -50,20 +49,22 @@ const VideoDetailsPage = () => {
 
     const goToArtist = () => navigate(`/profile/${video.uploader.id}/`);
 
-    if (loading) {
-        return <div className="loading">Loading...</div>;
-    }
+    if (error) return <p>{error}</p>;
 
-    if (!video) {
-        return <div className="error">Video not found</div>;
-    }
+    if (!video) return <p>Loading...</p>;
 
     return (
-        <Page title={`${video.title}`}>
+        <Page title={`Trực tuyến`}>
             <div className="video-details-page row">
                 <div className='col-lg-9 text-start'>
                     <div className="video-container">
-                        <VideoPlayer src={video.file} />
+                        {status === "live" ? (
+                            <VideoPlayer
+                                src={video.stream_url} live={status === "live"}
+                                releaseDate={video.release_date} />
+                        ) : (
+                            <p>Video will be live on: {new Date(video.release_date).toLocaleString()}</p>
+                        )}
                     </div>
                     <h4>{video.title}</h4>
                     <p className="description">{video.description}</p>
@@ -100,4 +101,4 @@ const VideoDetailsPage = () => {
     );
 };
 
-export default VideoDetailsPage;
+export default LiveVideoPage;

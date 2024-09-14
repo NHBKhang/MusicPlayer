@@ -416,7 +416,6 @@ class MusicVideoSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'image', 'created_date', 'uploader', 'uploader_id', 'is_public', 'is_owner', 'song_id']
 
     def create(self, validated_data):
-        print(validated_data)
         uploader_id = validated_data.pop('uploader_id', None)
         if uploader_id:
             validated_data['uploader'] = uploader_id

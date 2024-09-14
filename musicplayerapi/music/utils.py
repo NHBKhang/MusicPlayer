@@ -1,5 +1,10 @@
 from django.db.models import Count, Q
 from music.models import Genre, Stream, Transaction, Notification
+import boto3
+import os
+import subprocess
+from django.conf import settings
+from botocore.exceptions import NoCredentialsError, ClientError
 
 
 def stats():
@@ -49,9 +54,3 @@ def revenue_stats(month=None, date=None):
     transactions = Transaction.objects.filter(filter_conditions, status=Transaction.COMPLETED)
 
     return transactions.values('song__title', 'amount_in_vnd').order_by('-amount_in_vnd')[:20]
-
-
-def create_notification(user, message):
-    notification, created = Notification(user=user, message=message)
-
-    return notification, created

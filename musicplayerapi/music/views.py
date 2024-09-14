@@ -5,10 +5,11 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from music.models import *
-from music import serializers, paginators, perms, exceptions
+from music import serializers, paginators, perms, exceptions, utils
 from django.conf import settings
 from django.db.models import Count, Max, Q, Prefetch
 from django.http import JsonResponse
+from django.utils import timezone
 from botocore.exceptions import NoCredentialsError
 import boto3
 
@@ -533,6 +534,36 @@ class MusicVideoViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.R
             queryset = queryset | private_queryset
 
         return queryset.distinct()
+
+    @action(detail=True, methods=['get'])
+    def live(self, request, pk=None):
+        try:
+            from django.utils import timezone
+            video = self.get_object()
+            now = timezone.now()
+            if video.is_public == MusicVideo.SCHEDULED:
+                video.is_public = MusicVideo.PUBLIC
+                video.save()
+                return Response({
+                    "status": "live",
+                    "video": serializers.DetailsMusicVideoSerializer(video).data
+                })
+
+            return Response({
+                "status": "pending",
+                "video": serializers.DetailsMusicVideoSerializer(video).data
+            })
+        except MusicVideo.DoesNotExist:
+            return Response({"detail": "Video not found"}, status=404)
+
+    @action(detail=False, methods=['get'], url_path='live-videos')
+    def live_videos(self, request):
+        now = timezone.now()
+        live_videos = MusicVideo.objects.filter(
+            is_public=MusicVideo.SCHEDULED, release_date__lte=now
+        )
+        serializer = serializers.DetailsMusicVideoSerializer(live_videos, many=True)
+        return Response(serializer.data)
 
 
 class ReadOnlySongViewSet(viewsets.ReadOnlyModelViewSet):
