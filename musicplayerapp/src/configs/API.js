@@ -1,11 +1,10 @@
 import {
     DownloadPage,
     HomePage,
-    LibraryPage,
-    LivePage,
-    LiveVideoPage,
-    LoginPage, PaymentSuccessPage, PlaylistDetailsPage, ProfilePage, SearchPage, SetPasswordPage, SignupPage,
-    SongDetailsPage,
+    LibraryPage, LivePage, LiveStreamPage, LiveVideoPage, LiveViewerPage, LoginPage,
+    PageNotFound,
+    PaymentSuccessPage, PlaylistDetailsPage, ProfilePage,
+    SearchPage, SetPasswordPage, SignupPage, SongDetailsPage,
     UploadPage,
     VideoDetailsPage
 } from "../pages";
@@ -14,6 +13,12 @@ import PaymentCancelPage from "../pages/PaymentCancelPage";
 
 
 export const routes = {
+    pageNotFound: {
+        url: '*',
+        component: PageNotFound,
+        required: false,
+        controlShow: false
+    },
     home: {
         url: '/',
         component: HomePage,
@@ -109,7 +114,19 @@ export const routes = {
         component: LiveVideoPage,
         require: false,
         controlShow: false
-    }
+    },
+    liveStream: {
+        url: '/live-stream/',
+        component: LiveStreamPage,
+        require: false,
+        controlShow: false
+    },
+    liveStreamViewer: {
+        url: '/live-stream/:id/',
+        component: LiveViewerPage,
+        require: false,
+        controlShow: false
+    },
 }
 
 export const endpoints = {
@@ -146,6 +163,8 @@ export const endpoints = {
     'notifications': '/notifications/',
     'notification': (notificationId) => `/notifications/${notificationId}/mark_as_read/`,
     'readonly-songs': '/readonly-songs/',
+    'live-streams': '/live-streams/',
+    'live-stream': (streamId) => `/live-streams/${streamId}/`,
 }
 
 export const authAPI = (accessToken) =>

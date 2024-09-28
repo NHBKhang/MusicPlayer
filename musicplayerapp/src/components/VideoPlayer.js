@@ -1,6 +1,6 @@
 import { memo, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import VideoJS from 'video.js';
+import videojs from 'video.js';
 import 'video.js/dist/video-js.css';
 
 const VideoPlayer = memo(({ src, live = false, releaseDate = null }) => {
@@ -9,22 +9,26 @@ const VideoPlayer = memo(({ src, live = false, releaseDate = null }) => {
     const [startTime, setStartTime] = useState(0);
 
     useEffect(() => {
-        const videoPlayer = VideoJS('video-player', {
+        const videoPlayer = videojs('video-player', {
             controls: true,
             autoplay: false,
             preload: 'auto',
-            liveui: true,
-            sources: [{
-                src: src,
-                type: 'video/mp4'
-            }],
+            liveui: live,
+            sources: [
+                {
+                    src: src,
+                    type: 'video/mp4',
+                },
+            ],
         });
 
         setPlayer(videoPlayer);
 
-        if (live)
+        if (live) {
             videoPlayer.on('loadedmetadata', () => {
-                setStartTime(new Date(releaseDate));
+                if (releaseDate) {
+                    setStartTime(new Date(releaseDate).getTime());
+                }
                 setSeekableEnd(0);
 
                 return () => {
@@ -33,34 +37,33 @@ const VideoPlayer = memo(({ src, live = false, releaseDate = null }) => {
                     }
                 };
             });
-    }, [src]);
+        }
+    }, [src, live, releaseDate]);
 
     useEffect(() => {
-        if (!player) return;
+        if (!player || !live) return;
 
-        if (live) {
-            const updateSeekableEnd = () => {
-                const elapsed = (Date.now() - startTime) / 1000;
-                setSeekableEnd(elapsed);
-            };
+        const updateSeekableEnd = () => {
+            const elapsed = (Date.now() - startTime) / 1000;
+            setSeekableEnd(elapsed);
+        };
 
-            const updateInterval = setInterval(updateSeekableEnd, 1000);
+        const updateInterval = setInterval(updateSeekableEnd, 1000);
 
-            player.on('seeking', () => {
-                const currentTime = player.currentTime();
-                if (currentTime > seekableEnd) {
-                    player.currentTime(seekableEnd);
-                }
-            });
+        player.on('seeking', () => {
+            const currentTime = player.currentTime();
+            if (currentTime > seekableEnd) {
+                player.currentTime(seekableEnd);
+            }
+        });
 
-            return () => {
-                clearInterval(updateInterval);
-                if (player) {
-                    player.off('seeking');
-                }
-            };
-        }
-    }, [player, seekableEnd, startTime]);
+        return () => {
+            clearInterval(updateInterval);
+            if (player) {
+                player.off('seeking');
+            }
+        };
+    }, [player, seekableEnd, startTime, live]);
 
     return (
         <div>
@@ -71,6 +74,8 @@ const VideoPlayer = memo(({ src, live = false, releaseDate = null }) => {
 
 VideoPlayer.propTypes = {
     src: PropTypes.string.isRequired,
+    live: PropTypes.bool,
+    releaseDate: PropTypes.string,
 };
 
 export default VideoPlayer;

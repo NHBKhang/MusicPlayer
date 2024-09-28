@@ -38,6 +38,7 @@ const Page = ({ children, title }) => {
 }
 
 export default Page;
+export { default as PageNotFound } from './PageNotFound';
 export { default as HomePage } from './HomePage';
 export { default as LoginPage } from './LoginPage';
 export { default as SignupPage } from './SignupPage';
@@ -54,3 +55,5 @@ export { default as PaymentSuccessPage } from './PaymentSuccessPage';
 export { default as PaymentCancelPage } from './PaymentCancelPage';
 export { default as LivePage } from './LivePage';
 export { default as LiveVideoPage } from './LiveVideoPage';
+export { default as LiveStreamPage } from './LiveStreamPage';
+export { default as LiveViewerPage } from './LiveViewerPage';

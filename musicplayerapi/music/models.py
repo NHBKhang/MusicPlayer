@@ -50,6 +50,7 @@ class User(AbstractUser):
                 return f'{self.last_name} {self.first_name}'
             else:
                 return self.first_name
+        return self.username
 
     # def save(self, *args, **kwargs):
     #     if self.password:
@@ -340,3 +341,15 @@ class MusicVideo(Video):
     class Meta:
         verbose_name = 'Music Video'
         verbose_name_plural = 'Music Videos'
+
+
+class LiveStream(models.Model):
+    session_id = models.CharField(max_length=50, unique=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    file = models.FileField(upload_to='live_streams/', null=True, blank=True)
+    start_time = models.DateTimeField(auto_now_add=True)
+    end_time = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"Live Stream {self.session_id} by {self.user.username}"

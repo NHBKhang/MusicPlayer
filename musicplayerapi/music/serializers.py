@@ -448,3 +448,17 @@ class ReadOnlySongSerializer(serializers.ModelSerializer):
     class Meta:
         model = Song
         fields = ['id', 'title']
+
+
+class LiveStreamSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LiveStream
+        fields = ['id', 'session_id']
+
+
+class LiveStreamDetailsSerializer(LiveStreamSerializer):
+    user = PublicUserSerializer(read_only=True)
+
+    class Meta:
+        model = LiveStreamSerializer.Meta.model
+        fields = LiveStreamSerializer.Meta.fields + ['user', 'file']

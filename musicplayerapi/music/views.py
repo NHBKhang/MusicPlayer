@@ -541,7 +541,7 @@ class MusicVideoViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.R
             from django.utils import timezone
             video = self.get_object()
             now = timezone.now()
-            if video.is_public == MusicVideo.SCHEDULED:
+            if video.is_public == MusicVideo.SCHEDULED and video.release_date <= now:
                 video.is_public = MusicVideo.PUBLIC
                 video.save()
                 return Response({
@@ -578,3 +578,15 @@ class ReadOnlySongViewSet(viewsets.ReadOnlyModelViewSet):
             queryset = queryset.filter(uploader_id=int(uploader))
 
         return queryset.distinct()
+
+
+class LiveStreamViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
+    queryset = LiveStream.objects.filter(is_active=True).order_by('-id').all()
+    serializer_class = serializers.LiveStreamSerializer
+    lookup_field = 'session_id'
+
+    def get_serializer_class(self):
+        if self.action in ['retrieve']:
+            return serializers.LiveStreamDetailsSerializer
+
+        return self.serializer_class

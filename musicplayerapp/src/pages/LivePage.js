@@ -1,16 +1,18 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Page from "."
 import { authAPI, endpoints } from "../configs/API";
 import { useUser } from "../configs/UserContext";
 import { VideoItem } from "../components";
+import { useNavigate } from "react-router-dom";
 
 const LivePage = () => {
     const contentRef = useRef(null);
     const [activeTab, setActiveTab] = useState(0);
     const [data, setData] = useState([[], []]);
     const [page, setPage] = useState([1, 1]);
-    const urls = [endpoints, endpoints["live-videos"]];
+    const urls = useMemo(() => [endpoints["live-streams"], endpoints["live-videos"]], []);
     const { getAccessToken } = useUser();
+    const navigate = useNavigate();
 
     const updateData = (index, data) => {
         setData(prevData => {
@@ -42,14 +44,16 @@ const LivePage = () => {
         }
 
         loadData();
-    }, [activeTab]);
+    }, [activeTab, getAccessToken, urls]);
 
     const tabs = [
         {
             label: 'Đang trực tiếp',
             content: (
                 <div>
-
+                    {data[activeTab].map(d => <div>
+                        <VideoItem video={d} />
+                    </div>)}
                 </div>
             ),
         }, {

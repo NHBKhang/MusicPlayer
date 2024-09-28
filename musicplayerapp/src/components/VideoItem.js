@@ -45,7 +45,12 @@ const VideoItem = ({ video, state }) => {
         }
     };
 
-    const goToDetails = () => navigate(`/videos/${item.id}/`)
+    const goToDetails = () => {
+        if (item.session_id)
+            navigate(`/live-stream/${item.session_id}/`);
+        else
+            navigate(`/videos/${item.id}/`);
+    }
 
     const goToArtist = () => navigate(`/profile/${item.uploader.id}/`)
 
@@ -53,7 +58,9 @@ const VideoItem = ({ video, state }) => {
         <div className="track-item cursor-pointer">
             <span className="date">{moment(item.created_date).fromNow()}</span>
             <div className="cover-container">
-                <img src={item.image} alt={item.title} className="track-cover" onClick={goToDetails} />
+                <img src={item.session_id ?
+                    'https://img.freepik.com/vektoren-premium/live-stream-symbol-und-videouebertragung-streaming-von-online-uebertragungen_212474-689.jpg' :
+                    item.image} alt={item.title} className="track-cover" onClick={goToDetails} />
                 <div className="cover-wrapper"></div>
                 <i class="fa-solid fa-video"></i>
             </div>
@@ -63,7 +70,7 @@ const VideoItem = ({ video, state }) => {
                         <p className="p-0 m-0" onClick={goToArtist}>{item?.uploader?.name}</p>
                         <h5 onClick={goToDetails}>
                             {item.title}
-                            {!item?.is_public &&
+                            {!item?.is_public && !item.session_id &&
                                 <span className="privacy m-2" style={{ fontSize: '12px' }}>
                                     <i className="fa-solid fa-lock"></i>
                                 </span>}

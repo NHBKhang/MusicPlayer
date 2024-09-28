@@ -1,0 +1,119 @@
+.camera-container {
+    height: 500px;
+    width: 90%;
+    margin: auto;
+}
+
+button.live-button {
+    font-size: 20px;
+    color: whitesmoke;
+    border: 1px solid whitesmoke;
+    border-radius: 4px;
+    padding: 5px 12px;
+    background-color: inherit;
+    z-index: 100;
+    cursor: pointer;
+    margin-top: 12px;
+}
+
+.camera-container video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.music-tabview-fixed>button {
+    position: absolute;
+    font-size: 17px;
+    color: whitesmoke;
+    border: 1px solid whitesmoke;
+    border-radius: 5px;
+    padding: 5px 10px;
+    background-color: inherit;
+    top: 10%;
+    right: 20px;
+    z-index: 100;
+}
+
+.session-id-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 7px;
+}
+
+.copy-icon {
+    transition: color 0.3s;
+    cursor: pointer;
+    margin: 0;
+    padding: 0;
+}
+
+.copy-icon:hover {
+    color: #007bff;
+}
+
+.comments-section {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.comments-box {
+    min-height: 250px;
+    max-height: 300px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    margin-bottom: 15px;
+    padding: 7px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #ffffffcc;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.comment {
+    margin-bottom: 10px;
+    padding: 5px;
+    border-radius: 5px;
+    background-color: #f1f1f1;
+}
+
+.comment strong {
+    display: block;
+    color: #333;
+}
+
+.comment small {
+    color: #888;
+}
+
+.comments-section .comment-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.comments-section .comment-input input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    width: calc(88% - 10px);
+}
+
+.comments-section .comment-input button {
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.comments-section .comment-input button:hover {
+    background-color: #0056b3;
+}

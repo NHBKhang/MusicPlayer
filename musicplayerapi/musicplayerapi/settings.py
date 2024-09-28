@@ -32,9 +32,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1']
 
-
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -47,6 +45,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'oauth2_provider',
     'music',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -229,3 +228,16 @@ PAYPAL_CLIENT_ID = os.environ.get('PAYPAL_CLIENT_ID')
 PAYPAL_CLIENT_SECRET = os.environ.get('PAYPAL_CLIENT_SECRET')
 PAYPAL_URL = 'https://api-m.sandbox.paypal.com'
 PAYPAL_MODE = 'sandbox'
+
+# Define ASGI application for channels
+ASGI_APPLICATION = 'musicplayerapi.asgi:application'
+
+# Optionally, if using Redis for Channels:
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}

@@ -131,6 +131,29 @@ label {
   text-align: right;
 }
 
+.page-not-found {
+  display: flex;
+  flex-direction: column;
+}
+
+.page-not-found h1 {
+  margin-bottom: 20px;
+}
+
+.page-not-found p {
+  margin-bottom: 30px;
+}
+
+.page-not-found a {
+  text-decoration: none;
+  color: white;
+}
+
+.page-not-found a:hover {
+  text-decoration: underline !important;
+  color: #3498db !important;
+}
+
 .custom-dropdown {
   width: 100%;
   margin: 5px 0;
@@ -149,7 +172,6 @@ label {
 .modal-dialog {
   max-width: 1000px;
 }
-
 
 .add-modal .modal-dialog {
   max-width: 550px !important;

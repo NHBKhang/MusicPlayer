@@ -13,7 +13,7 @@ export const sidebarContents = [{
 }, {
     href: '/live/',
     icon: <i class="fa-solid fa-tower-broadcast"></i>,
-    label: 'Phát trực tiếp'
+    label: 'Trực tiếp'
 }];
 
 const Sidebar = () => {
@@ -23,9 +23,9 @@ const Sidebar = () => {
     return (
         <div className="sidebar bg-dark">
             <ul className='sidebar-content'>
-                {sidebarContents.map(c =>
+                {sidebarContents.map((c, index) =>
                     <li className={`cursor-pointer ${c.href === location.pathname && 'selected'}`}
-                        onClick={() => navigate(c.href)} >
+                        onClick={() => navigate(c.href)} key={index} >
                         <span>
                             {c.icon}
                             <p>{c.label}</p>

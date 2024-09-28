@@ -90,7 +90,7 @@ const Upload = () => {
             genres: [],
             lyrics: '',
             description: '',
-            isPublic: false,
+            isPublic: 1,
             isUpload: false
         }));
         const newVideos = acceptedFiles.filter(file => file.type.includes('video')).map(file => ({
@@ -99,7 +99,7 @@ const Upload = () => {
             title: normalizeFileName(file.name),
             description: '',
             song: 0,
-            isPublic: false,
+            isPublic: 1,
             isUpload: false
         }));
         setSongs((prevSongs) => [...prevSongs, ...newSongs]);
@@ -128,6 +128,7 @@ const Upload = () => {
         formData.append('description', media.description);
         formData.append('uploader_id', String(user.id));
         formData.append('is_public', media.isPublic);
+        if (media.isPublic === 3) formData.append('release_date', `${media.date}T${media.time}:00`);
         if (!isVideo) {
             formData.append('artists', media.artists);
             media.genres.forEach(id => {
@@ -208,6 +209,8 @@ const Upload = () => {
         const { name, value, options, type, checked } = e.target;
         if (type === 'checkbox') {
             updateMedia(index, name, checked, isVideo);
+        } else if (type === 'radio') {
+            updateMedia(index, name.split('_')[0], parseInt(value), isVideo);
         } else if (name === "genres" && !isVideo) {
             const selectedOptions = Array.from(options)
                 .filter(option => option.selected)
@@ -331,15 +334,57 @@ const Upload = () => {
                                     <div style={{ textAlign: 'start', marginBottom: '10px' }}>
                                         <label>
                                             <input
-                                                type="checkbox"
-                                                name="isPublic"
-                                                checked={song.isPublic}
+                                                type="radio"
+                                                name={`isPublic_s${index}`}
+                                                value={1}
+                                                checked={song.isPublic === 1}
+                                                onChange={(e) => handleInputChange(index, e)}
+                                                className='me-2'
+                                                size='large' />
+                                            Riêng tư
+                                        </label>
+                                        <label className='ms-4'>
+                                            <input
+                                                type="radio"
+                                                name={`isPublic_s${index}`}
+                                                value={2}
+                                                checked={song.isPublic === 2}
                                                 onChange={(e) => handleInputChange(index, e)}
                                                 className='me-2'
                                                 size='large' />
                                             Công khai
                                         </label>
+                                        <label className='ms-4'>
+                                            <input
+                                                type="radio"
+                                                name={`isPublic_s${index}`}
+                                                value={3}
+                                                checked={song.isPublic === 3}
+                                                onChange={(e) => handleInputChange(index, e)}
+                                                className='me-2'
+                                                size='large' />
+                                            Lên lịch
+                                        </label>
                                     </div>
+                                    {song.isPublic === 3 &&
+                                        <div style={{ textAlign: 'start', marginBottom: '10px' }}>
+                                            <label style={{ display: 'block', marginBottom: '5px' }}>Thời gian</label>
+                                            <div style={{ display: 'flex', gap: '10px' }}>
+                                                <input
+                                                    type="date"
+                                                    name="date"
+                                                    value={song.date}
+                                                    onChange={(e) => handleInputChange(index, e)}
+                                                    style={{ width: '50%', padding: '5px' }} />
+
+                                                <input
+                                                    type="time"
+                                                    name="time"
+                                                    value={song.time}
+                                                    onChange={(e) => handleInputChange(index, e)}
+                                                    style={{ width: '50%', padding: '5px' }} />
+                                            </div>
+                                        </div>}
 
                                     {!song.isUpload && <div className='d-flex justify-content-center mt-2'>
                                         <button
@@ -441,15 +486,57 @@ const Upload = () => {
                                     <div style={{ textAlign: 'start', marginBottom: '10px' }}>
                                         <label>
                                             <input
-                                                type="checkbox"
-                                                name="isPublic"
-                                                checked={video.isPublic}
+                                                type="radio"
+                                                name={`isPublic_v${index}`}
+                                                value={1}
+                                                checked={video.isPublic === 1}
+                                                onChange={(e) => handleInputChange(index, e, true)}
+                                                className='me-2'
+                                                size='large' />
+                                            Riêng tư
+                                        </label>
+                                        <label className='ms-4'>
+                                            <input
+                                                type="radio"
+                                                name={`isPublic_v${index}`}
+                                                value={2}
+                                                checked={video.isPublic === 2}
                                                 onChange={(e) => handleInputChange(index, e, true)}
                                                 className='me-2'
                                                 size='large' />
                                             Công khai
                                         </label>
+                                        <label className='ms-4'>
+                                            <input
+                                                type="radio"
+                                                name={`isPublic_v${index}`}
+                                                value={3}
+                                                checked={video.isPublic === 3}
+                                                onChange={(e) => handleInputChange(index, e, true)}
+                                                className='me-2'
+                                                size='large' />
+                                            Lên lịch
+                                        </label>
                                     </div>
+                                    {video.isPublic === 3 &&
+                                        <div style={{ textAlign: 'start', marginBottom: '10px' }}>
+                                            <label style={{ display: 'block', marginBottom: '5px' }}>Thời gian</label>
+                                            <div style={{ display: 'flex', gap: '10px' }}>
+                                                <input
+                                                    type="date"
+                                                    name="date"
+                                                    value={video.date}
+                                                    onChange={(e) => handleInputChange(index, e, true)}
+                                                    style={{ width: '50%', padding: '5px' }} />
+
+                                                <input
+                                                    type="time"
+                                                    name="time"
+                                                    value={video.time}
+                                                    onChange={(e) => handleInputChange(index, e, true)}
+                                                    style={{ width: '50%', padding: '5px' }} />
+                                            </div>
+                                        </div>}
 
                                     {!video.isUpload && <div className='d-flex justify-content-center mt-2'>
                                         <button

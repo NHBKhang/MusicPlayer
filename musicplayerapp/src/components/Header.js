@@ -43,6 +43,11 @@ const Header = () => {
         navigate('/upload/');
     }
 
+    const onLiveStreamClick = (e) => {
+        e.preventDefault();
+        navigate('/live-stream/');
+    }
+
     return (
         <div>
             <nav className="navbar navbar-expand-sm navbar-dark bg-dark">
@@ -55,8 +60,8 @@ const Header = () => {
                     </button>
                     <div className="collapse navbar-collapse w-100" id="mynavbar">
                         <ul class="navbar-nav d-sm-none d-inline cursor-pointer">
-                            {sidebarContents.map(c =>
-                                <li class="nav-item"
+                            {sidebarContents.map((c, index) =>
+                                <li class="nav-item" key={index}
                                     onClick={() => navigate(c.href)}>
                                     <p class="nav-link active m-0">
                                         {c.icon} {c.label}
@@ -102,6 +107,11 @@ const Header = () => {
                                     <li onClick={onUploadClick}>
                                         <a className="dropdown-item" href="/upload/">
                                             <i class="fa-solid fa-upload"></i> Tải lên
+                                        </a>
+                                    </li>
+                                    <li onClick={onLiveStreamClick}>
+                                        <a className="dropdown-item" href="/live-stream/">
+                                            <i class="fa-solid fa-camera-retro"></i> Phát trực tiếp
                                         </a>
                                     </li>
                                     <li><hr className="dropdown-divider" /></li>
