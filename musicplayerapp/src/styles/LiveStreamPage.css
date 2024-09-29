@@ -117,3 +117,17 @@ button.live-button {
 .comments-section .comment-input button:hover {
     background-color: #0056b3;
 }
+
+.video-container {
+    position: relative;
+}
+
+.video-container .views {
+    position: absolute;
+    left: 12px;
+    border: 1px solid whitesmoke;
+    border-radius: 5px;
+    padding: 5px;
+    min-width: 75px;
+    background-color: rgba(211, 211, 211, 0.8);
+}

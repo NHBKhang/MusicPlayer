@@ -1,6 +1,6 @@
 import './App.css';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { routes } from './configs/API';
+import { routes } from './configs/Routes';
 import { SongControls } from './components';
 import { useUser } from './configs/UserContext';
 

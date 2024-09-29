@@ -2,6 +2,8 @@ import React, { useRef, useEffect, useState } from 'react';
 import videojs from 'video.js';
 import Page from '.';
 import { useParams } from 'react-router-dom';
+import { useUser } from '../configs/UserContext';
+import createWebSocket from '../configs/WebSocket';
 
 const LiveViewerPage = () => {
   const videoRef = useRef(null);
@@ -13,11 +15,13 @@ const LiveViewerPage = () => {
   const [isSourceBufferReady, setIsSourceBufferReady] = useState(false);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
+  const [views, setViews] = useState(0);
   const { id } = useParams();
+  const { user } = useUser();
 
   useEffect(() => {
-    const createWebSocket = () => {
-      const socket = new WebSocket(`ws://127.0.0.1:8000/ws/live/${id}/`);
+    const createNewWebSocket = () => {
+      const socket = createWebSocket('live', { viewer: user.id }, id);
 
       socket.onopen = () => {
         console.log('WebSocket connection established.');
@@ -27,7 +31,6 @@ const LiveViewerPage = () => {
       socket.onmessage = (event) => {
         if (event.data instanceof Blob) {
           const blob = new Blob([event.data], { type: 'video/webm' });
-          console.info(blob)
 
           if (isSourceBufferReady && sourceBufferRef.current && !sourceBufferRef.current.updating) {
             const reader = new FileReader();
@@ -49,7 +52,10 @@ const LiveViewerPage = () => {
             reader.readAsArrayBuffer(blob);
           }
         } else {
-          console.warn('Received non-blob data');
+          const data = JSON.parse(event.data);
+          if (data.viewers_count !== undefined) {
+            setViews(data.viewers_count);
+          }
         }
       };
 
@@ -57,10 +63,9 @@ const LiveViewerPage = () => {
         console.log('WebSocket connection closed.');
         setIsConnected(false);
 
-        // Tự động kết nối lại sau 5 giây
         setTimeout(() => {
-          createWebSocket();
-        }, 5000);
+          createNewWebSocket();
+        }, 1000);
       };
 
       socket.onerror = (error) => {
@@ -70,14 +75,14 @@ const LiveViewerPage = () => {
       return socket;
     };
 
-    socketRef.current = createWebSocket();
+    socketRef.current = createNewWebSocket();
 
     return () => {
       if (socketRef.current) {
         socketRef.current.close();
       }
     };
-  }, [isSourceBufferReady, id]);
+  }, [isSourceBufferReady, id, user.id]);
 
   useEffect(() => {
     playerRef.current = videojs(videoRef.current, {
@@ -130,6 +135,7 @@ const LiveViewerPage = () => {
       <div className='row'>
         <div className="video-container col-md-8">
           <video ref={videoRef} className="video-js vjs-default-skin" controls preload="auto" />
+          <span className='views'><i class="fa-solid fa-eye"></i> {views}</span>
           <p>Status: {isConnected ? 'Connected' : 'Disconnected'}</p>
         </div>
         <div className='col-md-4'>

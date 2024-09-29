@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import Page from ".";
 import '../styles/LiveStreamPage.css';
 import { useUser } from "../configs/UserContext";
+import createWebSocket from "../configs/WebSocket";
 
 const LiveStreamPage = () => {
     const videoRef = useRef(null);
@@ -28,7 +29,8 @@ const LiveStreamPage = () => {
 
             const id = generateSessionId();
             setSessionId(id);
-            socket.current = new WebSocket(`ws://127.0.0.1:8000/ws/live/${id}/?user_id=${user.id}`);
+            socket.current = createWebSocket('live', { user_id: user.id }, id);
+
             socket.current.onopen = () => {
                 console.info("WebSocket connection established.");
             };
