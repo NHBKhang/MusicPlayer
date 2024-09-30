@@ -14,7 +14,6 @@ export const createWebSocket = (endpointKey, params = {}, ...args) => {
     }
 
     const endpoint = wsEndpoints[endpointKey](...args);
-    console.info(createWebSocketURL(endpoint, params))
     return new WebSocket(createWebSocketURL(endpoint, params));
 };
 

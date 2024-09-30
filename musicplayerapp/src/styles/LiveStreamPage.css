@@ -65,7 +65,7 @@ button.live-button {
     overflow-y: auto;
     scrollbar-width: none;
     margin-bottom: 15px;
-    padding: 7px;
+    padding: 5px;
     border: 1px solid #ccc;
     border-radius: 5px;
     background-color: #ffffffcc;
@@ -73,19 +73,40 @@ button.live-button {
 }
 
 .comment {
-    margin-bottom: 10px;
-    padding: 5px;
+    margin-bottom: 8px;
+    padding: 7px;
     border-radius: 5px;
     background-color: #f1f1f1;
+    display: flex;
+    flex-direction: column;
+}
+
+.comment-header {
+    display: flex;
+    align-items: center;
+}
+
+.comment-avatar {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    margin-right: 10px;
+    object-fit: cover;
 }
 
 .comment strong {
-    display: block;
     color: #333;
 }
 
 .comment small {
     color: #888;
+    font-size: 12px;
+}
+
+.comment p {
+    margin: 5px 0;
+    color: #333;
+    line-height: 1.5;
 }
 
 .comments-section .comment-input {

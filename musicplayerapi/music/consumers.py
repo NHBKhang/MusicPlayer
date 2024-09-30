@@ -34,6 +34,7 @@ class LiveStreamConsumer(AsyncWebsocketConsumer):
 
                 await self.send_existing_stream()
                 await self.update_viewers_count()
+                await self.send_streamer_info()
 
     async def disconnect(self, close_code):
         if self.user_id:
@@ -54,15 +55,17 @@ class LiveStreamConsumer(AsyncWebsocketConsumer):
             message_type = message_data.get('type')
 
             if message_type == 'chat_message':
-                message = message_data.get('message')
-                username = message_data.get('username')
+                content = message_data.get('content')
+                user_info = json.loads(message_data.get('user'))
+                timestamp = message_data.get('timestamp')
 
                 await self.channel_layer.group_send(
                     self.group_name,
                     {
                         'type': 'chat_data',
-                        'message': message,
-                        'username': username,
+                        'content': content,
+                        'user': user_info,
+                        'timestamp': timestamp
                     }
                 )
         if bytes_data:
@@ -84,10 +87,24 @@ class LiveStreamConsumer(AsyncWebsocketConsumer):
             'viewers_count': len(viewers)
         })
 
+    async def send_streamer_info(self):
+        user_id = await self.get_streamer_id()
+
+        if user_id:
+            await self.channel_layer.group_send(self.group_name, {
+                'type': 'streamer_info',
+                'user_id': user_id
+            })
+
+    @database_sync_to_async
+    def get_streamer_id(self):
+        from music.models import LiveStream
+        live_stream = LiveStream.objects.get(session_id=self.session_id)
+        return live_stream.user.id
+
     @database_sync_to_async
     def start_live_stream(self):
         from music.models import LiveStream
-
         LiveStream.objects.create(session_id=self.session_id, user_id=self.user_id)
 
         if self.session_id not in stream_buffers:
@@ -117,12 +134,19 @@ class LiveStreamConsumer(AsyncWebsocketConsumer):
 
     async def chat_data(self, event):
         try:
-            message = event['message']
-            username = event['username']
+            content = event['content']
+            user = event['user']
+            timestamp = event['timestamp']
+
             await self.send(text_data=json.dumps({
                 'type': 'chat_message',
-                'message': message,
-                'username': username
+                'content': content,
+                'user': {
+                    'id': user['id'],
+                    'name': user['name'],
+                    'avatar': user['avatar']
+                },
+                'timestamp': timestamp
             }))
         except Exception as e:
             print(f"Error sending chat data: {e}")
@@ -133,3 +157,13 @@ class LiveStreamConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps({'viewers_count': viewers_count}))
         except Exception as e:
             print(f"Error sending viewers count: {e}")
+
+    async def streamer_info(self, event):
+        try:
+            user_id = event['user_id']
+            await self.send(text_data=json.dumps({
+                'type': 'streamer_info',
+                'user_id': user_id
+            }))
+        except Exception as e:
+            print(f"Error sending streamer info: {e}")

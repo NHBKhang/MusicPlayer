@@ -29,7 +29,8 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
     def get_queryset(self):
         queries = self.queryset
 
-        if self.request.user.is_authenticated:
+        if self.request.user.is_authenticated and self.action in ['list']:
+            print("cc")
             queries = queries.exclude(id=self.request.user.id)
 
         q = self.request.query_params.get('q')
