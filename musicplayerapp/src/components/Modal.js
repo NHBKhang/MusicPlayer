@@ -1,16 +1,25 @@
 import React from 'react';
 import '../styles/Modal.css';
 
-const Modal = ({ label, visible, onConfirm, onCancel }) => {
+const Modal = ({
+    label,
+    visible,
+    onConfirm,
+    onCancel,
+    confirmText = "Yes",
+    cancelText = "No",
+    title = null
+}) => {
     if (!visible) return null;
 
     return (
         <div className="modal-overlay">
             <div className="modal-content">
+                {title && <h5 className='text-dark'>{title}</h5>}
                 <p>{label}</p>
                 <div className="modal-buttons">
-                    <button onClick={onConfirm}>Yes</button>
-                    <button onClick={onCancel}>No</button>
+                    <button onClick={onConfirm}>{confirmText}</button>
+                    <button onClick={onCancel}>{cancelText}</button>
                 </div>
             </div>
         </div>

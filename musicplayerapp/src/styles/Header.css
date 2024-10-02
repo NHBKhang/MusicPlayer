@@ -135,12 +135,13 @@
 .dropdown-menu {
     background-color: #292c2f;
     border: 1px solid rgba(224, 255, 255, 0.25);
-    width: 175px;
+    width: 200px;
 }
 
 .dropdown-item {
     font-size: 1.05rem;
     margin: 2px;
+    align-items: center;
 }
 
 .dropdown-item:hover {

@@ -137,6 +137,7 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
         q = self.request.query_params.get('q')
         if q:
+            # enhanced_query = utils.enhance_search_query(q)
             queryset = queryset.filter(Q(title__icontains=q) |
                                        Q(artists__icontains=q))
 
@@ -368,8 +369,10 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
         except Song.DoesNotExist:
             return Response({"detail": "Song not found."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            return Response({"detail": e.default_detail if e.default_detail else str(e)},
-                            status=e.status_code if e.status_code else status.HTTP_500_INTERNAL_SERVER_ERROR)
+            print(e)
+            error_message = e.default_detail if hasattr(e, 'default_detail') else str(e)
+            error_status = e.status_code if hasattr(e, 'status_code') else status.HTTP_500_INTERNAL_SERVER_ERROR
+            return Response({"detail": error_message}, status=error_status)
 
 
 class PlaylistViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):

@@ -65,3 +65,44 @@
 .cancel-button:hover {
     color: #d9534f;
 }
+
+.upload-notification {
+    width: 80%;
+    padding: 10px;
+    text-align: center;
+    color: #333;
+    font-weight: bold;
+    margin: 0 auto 20px;
+    background-color: #fff8e110;
+    border: 1px solid #ffe082a5;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.2s ease-in-out;
+}
+
+.upload-notification:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.premium-button {
+    background-color: transparent;
+    color: #ff5722;
+    padding: 7px 14px;
+    border-radius: 5px;
+    border: 2px solid #ff5722;
+    font-weight: 500;
+    cursor: pointer;
+    background-color: whitesmoke;
+    margin-top: 10px;
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out, border-color 0.3s ease-in-out;
+}
+
+.premium-button:hover {
+    background-color: #ff5722;
+    color: white;
+    border-color: #ff5722;
+}
+
+.premium-button:active {
+    transform: scale(0.98);
+}

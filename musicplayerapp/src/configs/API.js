@@ -31,6 +31,8 @@ export const endpoints = {
     'mixed-search': '/search/',
     'paypal-create-order': '/payment/paypal/create-order/',
     'paypal-payment-success': '/payment/paypal/payment-success/',
+    'paypal-subscribe-premium': '/payment/paypal/subscribe-premium/',
+    'paypal-premium-payment-success': '/payment/paypal/premium-payment-success/',
     'notifications': '/notifications/',
     'notification': (notificationId) => `/notifications/${notificationId}/mark_as_read/`,
     'readonly-songs': '/readonly-songs/',

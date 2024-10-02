@@ -4,9 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../configs/UserContext";
 import NotificationDropdown from "./NotificationDropdown";
 import { sidebarContents } from "./Sidebar";
+import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
+import Modal from "./Modal";
 
 const Header = () => {
     const [query, setQuery] = useState('');
+    const [visible, setVisible] = useState(false);
     const { user, logout } = useUser();
     const navigate = useNavigate();
 
@@ -45,7 +48,16 @@ const Header = () => {
 
     const onLiveStreamClick = (e) => {
         e.preventDefault();
-        navigate('/live-stream/');
+        if (user.is_premium) {
+            navigate('/live-stream/');
+        } else {
+            setVisible(true);
+        }
+    }
+
+    const onSettingsClick = (e) => {
+        e.preventDefault();
+        navigate('/settings/');
     }
 
     return (
@@ -99,7 +111,7 @@ const Header = () => {
                                             <i class="fa-regular fa-user"></i> Hồ sơ
                                         </a>
                                     </li>
-                                    <li>
+                                    <li onClick={onSettingsClick}>
                                         <a className="dropdown-item" href="#/settings">
                                             <i class="fa-solid fa-gear"></i> Cài đặt
                                         </a>
@@ -110,8 +122,9 @@ const Header = () => {
                                         </a>
                                     </li>
                                     <li onClick={onLiveStreamClick}>
-                                        <a className="dropdown-item" href="/live-stream/">
-                                            <i class="fa-solid fa-camera-retro"></i> Phát trực tiếp
+                                        <a className="dropdown-item d-flex justify-content-between" href="/live-stream/">
+                                            <><i class="fa-solid fa-camera-retro"></i> Phát trực tiếp</>
+                                            <WorkspacePremiumIcon style={{ color: 'gold' }} />
                                         </a>
                                     </li>
                                     <li><hr className="dropdown-divider" /></li>
@@ -129,6 +142,23 @@ const Header = () => {
                     </div>
                 </div>
             </nav>
+            <Modal
+                title={"Chức năng Premium"}
+                label={(
+                    <>
+                        Bạn phải đăng ký premium để sử dụng chức năng này. Bạn có muốn đăng ký Premium
+                        <WorkspacePremiumIcon style={{ color: 'gold', margin: '0 5px' }} />
+                        ngay bây giờ không?
+                    </>
+                )}
+                visible={visible}
+                onConfirm={() => {
+                    setVisible(false);
+                    navigate('/premium/');
+                }}
+                onCancel={() => setVisible(false)}
+                confirmText="Đăng ký ngay"
+                cancelText="Thoát" />
         </div>
     )
 }

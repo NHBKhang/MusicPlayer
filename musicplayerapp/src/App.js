@@ -12,7 +12,7 @@ const App = () => {
       <Router>
         <Routes>
           {Object.values(routes).map((route, index) =>
-            (user || !route.required) && (
+            (user || !route.required) && (user.is_premium || !route.premium) && (
               <Route
                 key={index}
                 path={route.url}

@@ -4,8 +4,8 @@ import {
     LibraryPage, LivePage, LiveStreamPage, LiveVideoPage, LiveViewerPage, LoginPage,
     PageNotFound,
     PaymentCancelPage,
-    PaymentSuccessPage, PlaylistDetailsPage, ProfilePage,
-    SearchPage, SetPasswordPage, SignupPage, SongDetailsPage,
+    PaymentSuccessPage, PlaylistDetailsPage, PremiumSubscriptionPage, ProfilePage,
+    SearchPage, SetPasswordPage, SettingsPage, SignupPage, SongDetailsPage,
     UploadPage,
     VideoDetailsPage
 } from "../pages";
@@ -117,7 +117,8 @@ export const routes = {
         url: '/live-stream/',
         component: LiveStreamPage,
         require: true,
-        controlShow: false
+        controlShow: false,
+        premium: true
     },
     liveStreamViewer: {
         url: '/live-stream/:id/',
@@ -125,4 +126,16 @@ export const routes = {
         require: true,
         controlShow: false
     },
+    settings: {
+        url: '/settings/',
+        component: SettingsPage,
+        require: true,
+        controlShow: false
+    },
+    PremiumSubscription: {
+        url: '/premium/',
+        component: PremiumSubscriptionPage,
+        require: true,
+        controlShow: false
+    }
 }

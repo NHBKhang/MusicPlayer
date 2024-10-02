@@ -7,6 +7,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 from music.validate import validate_audio_file, validate_video_file
 from datetime import datetime
 import imghdr
@@ -40,7 +41,7 @@ class User(AbstractUser):
                 raise ValidationError("File uploaded must be an image (JPEG, PNG, or GIF).")
 
     def has_purchased(self, song):
-        return Transaction.objects.filter(user=self, song=song, status=Transaction.COMPLETED).exists()
+        return SongTransaction.objects.filter(user=self, song=song, status=Transaction.COMPLETED).exists()
 
     def get_name(self):
         if self.info and self.info.display_name:
@@ -136,7 +137,7 @@ class Song(ImageBaseModel, BaseModel):
         super().clean()
 
     def has_purchased(self, user):
-        return Transaction.objects.filter(user=user, song=self, status=Transaction.COMPLETED).exists()
+        return SongTransaction.objects.filter(user=user, song=self, status=Transaction.COMPLETED).exists()
 
 
 class Playlist(BaseModel, ImageBaseModel):
@@ -255,11 +256,17 @@ class Transaction(models.Model):
     status = models.IntegerField(choices=TRANSACTIONS_CHOICES, default=CREATED)
     payment_method = models.CharField(max_length=20, null=True, blank=True)
     amount_in_vnd = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='purchases', default=1)
-    song = models.ForeignKey(Song, on_delete=models.CASCADE, related_name='purchases', default=11)
+
+    class Meta:
+        abstract = True
+
+
+class SongTransaction(Transaction):
+    song = models.ForeignKey(Song, on_delete=models.CASCADE, related_name='transactions', default=11)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
 
     def __str__(self):
-        return f'{self.payment_method} - {str(self.transaction_id)}'
+        return f'{self.payment_method} - {str(self.transaction_id)} - {self.song.title}'
 
 
 class Follow(BaseModel):
@@ -346,6 +353,7 @@ class MusicVideo(Video):
 class LiveStream(models.Model):
     session_id = models.CharField(max_length=50, unique=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=100, null=True, blank=True)
     file = models.FileField(upload_to='live_streams/', null=True, blank=True)
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(null=True, blank=True)
@@ -353,3 +361,66 @@ class LiveStream(models.Model):
 
     def __str__(self):
         return f"Live Stream {self.session_id} by {self.user.username}"
+
+    def save(self, *args, **kwargs):
+        if not self.title:
+            self.title = self.__str__()
+        super().save(*args, **kwargs)
+
+
+class LiveStreamChat(models.Model):
+    content = models.CharField(max_length=512)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='live_stream_chats')
+    live_stream = models.ForeignKey(LiveStream, on_delete=models.CASCADE, related_name='live_stream_chats')
+
+    def __str__(self):
+        return f"{self.user.get_name()} chat in {self.live_stream.session_id}"
+
+
+class PremiumSubscription(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='premium_subscription')
+    start_date = models.DateTimeField(auto_now_add=True)
+    end_date = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.user.get_name()} - Premium Subscription"
+
+    def check_is_active(self):
+        if self.end_date and self.end_date < timezone.now():
+            self.is_active = False
+            self.save()
+        return self.is_active
+
+    def extend_subscription(self, subscription_type):
+        if subscription_type == 'daily':
+            duration_days = 1
+        elif subscription_type == 'monthly':
+            duration_days = 30
+        elif subscription_type == 'yearly':
+            duration_days = 365
+        else:
+            raise ValueError("Invalid subscription type. Must be 'daily', 'monthly', or 'yearly'.")
+
+        if self.end_date:
+            self.end_date += timezone.timedelta(days=duration_days)
+        else:
+            self.end_date = timezone.now() + timezone.timedelta(days=duration_days)
+
+        self.is_active = True
+        self.save()
+
+    def get_remaining_days(self):
+        if self.end_date:
+            return max((self.end_date - timezone.now()).days, 0)
+        return 0
+
+
+class PremiumTransaction(Transaction):
+    premium_subscription = models.ForeignKey(PremiumSubscription, on_delete=models.CASCADE, related_name='transactions',
+                                             null=True, blank=True)
+    type = models.CharField(max_length=10, null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.payment_method} - {str(self.transaction_id)} - Premium Subscription'

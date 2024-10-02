@@ -7,6 +7,7 @@ import { useUser } from '../configs/UserContext';
 import ReactSelect from 'react-select';
 import { ImageUpload, LoginRequiredModal, SongItem, VideoItem } from '../components';
 import '../styles/UploadPage.css';
+import { usePageTitle } from '../components/PageTitle';
 
 const UploadPage = () => (
     <Page>
@@ -47,6 +48,7 @@ const TabView = () => {
 };
 
 const Upload = () => {
+    usePageTitle("Upload");
     const { getAccessToken, user } = useUser();
     const [songs, setSongs] = useState([]);
     const [videos, setVideos] = useState([]);
@@ -82,32 +84,44 @@ const Upload = () => {
     }, [user.id]);
 
     const handleDrop = useCallback((acceptedFiles) => {
-        const newSongs = acceptedFiles.filter(file => file.type.includes('audio')).map(file => ({
-            file,
-            image: '',
-            title: normalizeFileName(file.name),
-            artists: '',
-            genres: [],
-            lyrics: '',
-            description: '',
-            isPublic: 1,
-            isUpload: false
-        }));
-        const newVideos = acceptedFiles.filter(file => file.type.includes('video')).map(file => ({
-            file,
-            image: '',
-            title: normalizeFileName(file.name),
-            description: '',
-            song: 0,
-            isPublic: 1,
-            isUpload: false
-        }));
+        const maxMB = 30;
+        const maxSize = maxMB * 1024 * 1024;
+        const maxSizeError = `Dung lượng file vượt quá giới hạn ${maxMB}MB`;
+
+        const newSongs = acceptedFiles
+            .filter(file => file.type.includes('audio'))
+            .map(file => ({
+                file,
+                image: '',
+                title: normalizeFileName(file.name),
+                artists: '',
+                genres: [],
+                lyrics: '',
+                description: '',
+                isPublic: 1,
+                isUpload: false,
+                error: user.is_premium || file.size <= maxSize ? null : maxSizeError
+            }));
+
+        const newVideos = acceptedFiles
+            .filter(file => file.type.includes('video'))
+            .map(file => ({
+                file,
+                image: '',
+                title: normalizeFileName(file.name),
+                description: '',
+                song: 0,
+                isPublic: 1,
+                isUpload: false,
+                error: user.is_premium || file.size <= maxSize ? null : maxSizeError
+            }));
+
         setSongs((prevSongs) => [...prevSongs, ...newSongs]);
         setVideos((prevVideos) => [...prevVideos, ...newVideos]);
-    }, []);
+    }, [user.is_premium]);
 
     const handleUpload = async (media, index, isVideo = false) => {
-        if (media.isUpload) return;
+        if (media.isUpload || media.error) return;
         if (!user || !user.id) {
             setUploadStatus('Người dùng không hợp lệ.');
             return;
@@ -236,6 +250,12 @@ const Upload = () => {
     return (
         <div>
             <h3 className='my-4'>Upload nhạc</h3>
+            <div className="upload-notification">
+                <p className='m-0'>Dung lượng tối đa cho mỗi file là 30MB. Nâng cấp lên Premium để tải lên tệp lớn hơn.</p>
+                <button className="premium-button" onClick={() => window.open('/premium/', '_blank')}>
+                    Đăng ký Premium
+                </button>
+            </div>
             <div
                 {...getRootProps()}
                 style={{
@@ -385,7 +405,7 @@ const Upload = () => {
                                                     style={{ width: '50%', padding: '5px' }} />
                                             </div>
                                         </div>}
-
+                                    {song.error && <p className='text-danger'>{song.error}</p>}
                                     {!song.isUpload && <div className='d-flex justify-content-center mt-2'>
                                         <button
                                             onClick={() => handleUpload(song, index)}
@@ -537,7 +557,7 @@ const Upload = () => {
                                                     style={{ width: '50%', padding: '5px' }} />
                                             </div>
                                         </div>}
-
+                                    {video.error && <p className='text-danger'>{video.error}</p>}
                                     {!video.isUpload && <div className='d-flex justify-content-center mt-2'>
                                         <button
                                             onClick={() => handleUpload(video, index, true)}
@@ -588,6 +608,7 @@ const Upload = () => {
 };
 
 const MySong = () => {
+    usePageTitle("My Song");
     const [songs, setSongs] = useState([]);
     const [page, setPage] = useState(1);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -626,6 +647,7 @@ const MySong = () => {
 };
 
 const MyVideo = () => {
+    usePageTitle("My Video");
     const [videos, setVideos] = useState([]);
     const [page, setPage] = useState(1);
     const [isModalOpen, setIsModalOpen] = useState(false);

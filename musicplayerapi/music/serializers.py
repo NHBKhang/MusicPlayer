@@ -69,6 +69,7 @@ class UserSerializer(PublicUserSerializer):
 
 class AuthenticatedUserSerializer(PublicUserSerializer):
     followed = serializers.SerializerMethodField()
+    is_premium = serializers.SerializerMethodField()
 
     def get_followed(self, user):
         request = self.context.get('request')
@@ -76,9 +77,15 @@ class AuthenticatedUserSerializer(PublicUserSerializer):
             return user.followers.filter(follower=request.user, active=True).exists()
         return False
 
+    def get_is_premium(self, user):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return user.premium_subscription.check_is_active()
+        return False
+
     class Meta:
         model = PublicUserSerializer.Meta.model
-        fields = PublicUserSerializer.Meta.fields + ['followed']
+        fields = PublicUserSerializer.Meta.fields + ['followed', 'is_premium']
 
 
 class GenreSerializer(serializers.ModelSerializer):
