@@ -57,7 +57,7 @@ const SettingsPage = () => {
                         <ListItemText primary="Giới thiệu ứng dụng" primaryTypographyProps={{ style: { color: '#fff' } }} />
                     </ListItem>
                     <Divider style={{ backgroundColor: '#444' }} />
-                    <ListItem button>
+                    <ListItem button onClick={() => window.open('/premium/', '_blank')}>
                         <IconButton edge="start" style={{ color: '#fff' }}>
                             <WorkspacePremiumIcon style={{ color: 'gold' }} />
                         </IconButton>

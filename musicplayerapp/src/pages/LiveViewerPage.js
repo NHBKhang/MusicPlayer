@@ -4,7 +4,7 @@ import Page from '.';
 import { useParams } from 'react-router-dom';
 import { useUser } from '../configs/UserContext';
 import createWebSocket from '../configs/WebSocket';
-import { authAPI, endpoints } from '../configs/API';
+import API, { authAPI, endpoints } from '../configs/API';
 
 const LiveViewerPage = () => {
   const videoRef = useRef(null);
@@ -17,6 +17,7 @@ const LiveViewerPage = () => {
   const [newComment, setNewComment] = useState('');
   const [views, setViews] = useState(0);
   const [streamer, setStreamer] = useState(null);
+  const [liveStream, setLiveStream] = useState(null);
   const { id } = useParams();
   const { user, getAccessToken } = useUser();
 
@@ -78,7 +79,7 @@ const LiveViewerPage = () => {
     const handleWebSocketMessage = async (data) => {
       if (data.type === 'chat_message') {
         addNewComment(data);
-      } else if (data.type === 'streamer_info') {
+      } else if (data.type === 'stream_info') {
         await fetchStreamerInfo(Number(data.user_id));
       } else if (data.viewers_count !== undefined) {
         setViews(data.viewers_count);
@@ -161,6 +162,19 @@ const LiveViewerPage = () => {
       }
     };
   }, []);
+
+  useEffect(() => {
+    const loadLiveStream = async () => {
+      try {
+        let res = await API.get(endpoints['live-stream'](id));
+        setLiveStream(res.data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    loadLiveStream();
+  }, [id]);
 
   const handleCommentSubmit = () => {
     if (newComment.trim() && socketRef.current) {

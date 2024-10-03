@@ -460,7 +460,7 @@ class ReadOnlySongSerializer(serializers.ModelSerializer):
 class LiveStreamSerializer(serializers.ModelSerializer):
     class Meta:
         model = LiveStream
-        fields = ['id', 'session_id']
+        fields = ['id', 'session_id', 'title']
 
 
 class LiveStreamDetailsSerializer(LiveStreamSerializer):
