@@ -9,9 +9,10 @@ import VideoModal from "./VideoModal";
 
 const VideoItem = ({ video, state }) => {
     const setIsModalOpen = state?.setIsModalOpen;
-    const { getAccessToken, user } = useUser();
+    const { getAccessToken, user: currentUser } = useUser();
     const navigate = useNavigate();
     const [item, setItem] = useState(video);
+    const [user, ] = useState(video.uploader || video.user)
     const [visible, setVisible] = useState({
         delete: false,
         edit: false
@@ -21,19 +22,19 @@ const VideoItem = ({ video, state }) => {
         setVisible(current => ({ ...current, [field]: value }));
     };
 
-    const like = async () => {
-        if (user) {
-            try {
-                let res = await authAPI(await getAccessToken())
-                    .post(endpoints.like(item.id));
-                setItem(res.data);
-            } catch (error) {
-                alert(error);
-            }
-        } else {
-            setIsModalOpen(true);
-        }
-    };
+    // const like = async () => {
+    //     if (currentUser) {
+    //         try {
+    //             let res = await authAPI(await getAccessToken())
+    //                 .post(endpoints.like(item.id));
+    //             setItem(res.data);
+    //         } catch (error) {
+    //             alert(error);
+    //         }
+    //     } else {
+    //         setIsModalOpen(true);
+    //     }
+    // };
 
     const onDelete = async () => {
         try {
@@ -52,7 +53,7 @@ const VideoItem = ({ video, state }) => {
             navigate(`/videos/${item.id}/`);
     }
 
-    const goToArtist = () => navigate(`/profile/${item.uploader.id}/`)
+    const goToArtist = () => navigate(`/profile/${user.id}/`)
 
     return (
         <div className="track-item cursor-pointer">
@@ -67,7 +68,7 @@ const VideoItem = ({ video, state }) => {
             <div className="track-info w-100">
                 <div className="d-flex" style={{ gap: 12 }}>
                     <div className="w-100">
-                        <p className="p-0 m-0" onClick={goToArtist}>{item?.uploader?.name}</p>
+                        <p className="p-0 m-0" onClick={goToArtist}>{user?.name}</p>
                         <h5 onClick={goToDetails}>
                             {item.title}
                             {!item?.is_public && !item.session_id &&

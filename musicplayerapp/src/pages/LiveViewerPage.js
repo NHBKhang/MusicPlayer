@@ -1,10 +1,11 @@
 import React, { useRef, useEffect, useState } from 'react';
 import videojs from 'video.js';
 import Page from '.';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useUser } from '../configs/UserContext';
 import createWebSocket from '../configs/WebSocket';
-import API, { authAPI, endpoints } from '../configs/API';
+import { authAPI, endpoints } from '../configs/API';
+import { CommentSection } from '../components';
 
 const LiveViewerPage = () => {
   const videoRef = useRef(null);
@@ -14,12 +15,11 @@ const LiveViewerPage = () => {
   const sourceBufferRef = useRef(null);
   const [isSourceBufferReady, setIsSourceBufferReady] = useState(false);
   const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState('');
   const [views, setViews] = useState(0);
-  const [streamer, setStreamer] = useState(null);
-  const [liveStream, setLiveStream] = useState(null);
+  const [liveStream, setLiveStream] = useState();
   const { id } = useParams();
   const { user, getAccessToken } = useUser();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const createNewWebSocket = () => {
@@ -31,16 +31,57 @@ const LiveViewerPage = () => {
 
       socket.onmessage = async (event) => {
         if (event.data instanceof Blob) {
-          handleVideoStream(event.data);
+          const videoBlob = new Blob([event.data], { type: 'video/webm' });
+
+          if (isSourceBufferReady && sourceBufferRef.current && !sourceBufferRef.current.updating) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const arrayBuffer = reader.result;
+              try {
+                sourceBufferRef.current.appendBuffer(new Uint8Array(arrayBuffer));
+
+                if (videoRef.current.currentTime > 10) {
+                  const removeStart = 0;
+                  const removeEnd = videoRef.current.currentTime - 10;
+                  sourceBufferRef.current.remove(removeStart, removeEnd);
+                }
+              } catch (error) {
+                console.error("Error appending buffer:", error);
+              }
+            };
+            reader.readAsArrayBuffer(videoBlob);
+          }
         } else {
           const data = JSON.parse(event.data);
-          await handleWebSocketMessage(data);
+
+          if (data.type === 'chat_message') {
+            const newComment = {
+              content: data.content,
+              user: data.user,
+              timestamp: new Date(data.timestamp)
+            };
+
+            setComments(prevComments => {
+              const isDuplicate = prevComments.some(comment =>
+                comment.timestamp.getTime() === newComment.timestamp.getTime()
+              );
+
+              if (!isDuplicate) {
+                return [...prevComments, newComment];
+              }
+              return prevComments;
+            });
+          } else if (data.viewers_count !== undefined) {
+            setViews(data.viewers_count);
+          }
         }
       };
 
       socket.onclose = () => {
         console.log('WebSocket connection closed.');
-        reconnectWebSocket();
+        setTimeout(() => {
+          socketRef.current = createNewWebSocket();
+        }, 1000);
       };
 
       socket.onerror = (error) => {
@@ -48,72 +89,6 @@ const LiveViewerPage = () => {
       };
 
       return socket;
-    };
-
-    const handleVideoStream = (blob) => {
-      const videoBlob = new Blob([blob], { type: 'video/webm' });
-
-      if (isSourceBufferReady && sourceBufferRef.current && !sourceBufferRef.current.updating) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const arrayBuffer = reader.result;
-          try {
-            sourceBufferRef.current.appendBuffer(new Uint8Array(arrayBuffer));
-            manageBufferOverflow();
-          } catch (error) {
-            console.error("Error appending buffer:", error);
-          }
-        };
-        reader.readAsArrayBuffer(videoBlob);
-      }
-    };
-
-    const manageBufferOverflow = () => {
-      if (videoRef.current.currentTime > 10) {
-        const removeStart = 0;
-        const removeEnd = videoRef.current.currentTime - 10;
-        sourceBufferRef.current.remove(removeStart, removeEnd);
-      }
-    };
-
-    const handleWebSocketMessage = async (data) => {
-      if (data.type === 'chat_message') {
-        addNewComment(data);
-      } else if (data.type === 'stream_info') {
-        await fetchStreamerInfo(Number(data.user_id));
-      } else if (data.viewers_count !== undefined) {
-        setViews(data.viewers_count);
-      }
-    };
-
-    const addNewComment = (data) => {
-      const newComment = {
-        content: data.content,
-        user: data.user,
-        timestamp: new Date(data.timestamp)
-      };
-
-      setComments(prevComments => {
-        const isDuplicate = prevComments.some(comment =>
-          comment.timestamp.getTime() === newComment.timestamp.getTime()
-        );
-
-        if (!isDuplicate) {
-          return [...prevComments, newComment];
-        }
-        return prevComments;
-      });
-    };
-
-    const fetchStreamerInfo = async (userId) => {
-        const res = await authAPI(await getAccessToken()).get(endpoints.user(userId));
-        setStreamer(res.data);
-    };
-
-    const reconnectWebSocket = () => {
-      setTimeout(() => {
-        socketRef.current = createNewWebSocket();
-      }, 1000);
     };
 
     socketRef.current = createNewWebSocket();
@@ -166,7 +141,7 @@ const LiveViewerPage = () => {
   useEffect(() => {
     const loadLiveStream = async () => {
       try {
-        let res = await API.get(endpoints['live-stream'](id));
+        let res = await authAPI(await getAccessToken()).get(endpoints['live-stream'](id));
         setLiveStream(res.data);
       } catch (error) {
         console.error(error);
@@ -174,50 +149,35 @@ const LiveViewerPage = () => {
     }
 
     loadLiveStream();
-  }, [id]);
+  }, [id, getAccessToken]);
 
-  const handleCommentSubmit = () => {
-    if (newComment.trim() && socketRef.current) {
-      const commentData = {
-        type: 'chat_message',
-        content: newComment,
-        user: JSON.stringify({
-          id: user.id,
-          name: user.name,
-          avatar: user.avatar
-        }),
-        timestamp: new Date()
-      };
+  const goToArtist = () => navigate(`/profile/${liveStream.user.id}/`)
+  const follow = () => { 
 
-      socketRef.current.send(JSON.stringify(commentData));
-      setNewComment('');
-    }
-  };
-
-  const goToArtist = () => { }
-  const follow = () => { }
+  }
 
   return (
-    <Page title={'Live Viewer'}>
+    <Page title={liveStream?.title || 'Phiên trực tuyến'}>
       <div className='row'>
-        <div className="video-container col-md-8">
-          <video ref={videoRef} className="video-js vjs-default-skin" controls preload="auto" />
+        <div className="video-container col-md-8 text-start">
+          <video ref={videoRef} className="video-js vjs-default-skin mb-2" controls preload="auto" />
           <span className='views'><i class="fa-solid fa-eye"></i> {views}</span>
+          <h4>{liveStream?.title}</h4>
           <div className="d-flex align-items-center cursor-pointer" style={{ gap: '12px' }}>
             <img onClick={goToArtist}
-              src={streamer?.avatar}
-              alt={streamer?.name}
+              src={liveStream?.user.avatar}
+              alt={liveStream?.user.name}
               width={40}
               height={40}
               className='rounded-circle' />
             <div className='d-flex text-start' style={{ flexDirection: 'column' }}
               onClick={goToArtist}>
-              <h6 className='m-0'>{streamer?.name}</h6>
-              <p className='m-0'>{streamer?.followers} người theo dõi</p>
+              <h6 className='m-0'>{liveStream?.user.name}</h6>
+              <p className='m-0'>{liveStream?.user.followers} người theo dõi</p>
             </div>
-            {user.id !== streamer?.id &&
-              <button className={`follow-button ${streamer?.followed && 'followed'}`} onClick={follow}>
-                {streamer?.followed ? (<>
+            {user.id !== liveStream?.user.id &&
+              <button className={`follow-button ${liveStream?.user.followed && 'followed'}`} onClick={follow}>
+                {liveStream?.user.followed ? (<>
                   <i class="fa-solid fa-user-check"></i>
                   <p className='text-black m-0'> Đã theo dõi</p>
                 </>) : (<>
@@ -228,37 +188,11 @@ const LiveViewerPage = () => {
           </div>
         </div>
         <div className='col-md-4'>
-          <div className="comments-section">
-            <h5>Bình luận</h5>
-            <div className="comments-box">
-              {comments.length > 0 ? (
-                comments.map((comment, index) => (
-                  <div key={index} className="comment">
-                    <div className="comment-header">
-                      <img
-                        src={comment.user.avatar}
-                        alt={`Avatar of ${comment.user.name}`}
-                        className="comment-avatar" />
-                      <strong>{comment.user.name}</strong>
-                    </div>
-                    <p className="text-dark m-0">{comment.content}</p>
-                    <small>{new Date(comment.timestamp).toLocaleTimeString()}</small>
-                  </div>
-                ))
-              ) : (
-                <p className="text-dark">Chưa có bình luận nào</p>
-              )}
-            </div>
-
-            <div className="comment-input">
-              <input
-                type="text"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Nhập bình luận..." />
-              <button onClick={handleCommentSubmit}>Gửi</button>
-            </div>
-          </div>
+          <CommentSection
+            comments={comments}
+            socketRef={socketRef}
+            user={user}
+            liveStream={liveStream} />
         </div>
       </div>
     </Page>

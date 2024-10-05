@@ -233,3 +233,13 @@ label {
 .permissions-item {
   width: calc(50% - 10px);
 }
+
+@media (max-width: 576px) {
+  .w-sm-90 {
+    width: 90% !important;
+  }
+}
+
+.form-group .form-control {
+  padding-right: 35px;
+}

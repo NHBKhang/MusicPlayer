@@ -1,7 +1,8 @@
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_save, post_delete, pre_save
 from django.dispatch import receiver
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.postgres.search import SearchVector
 from .models import UserInfo, User, Song, Playlist, Like, Follow, Comment, Notification, MusicVideo, LiveStream
 import cloudinary
 import cloudinary.uploader
@@ -145,3 +146,14 @@ def create_follow_notification(sender, instance, **kwargs):
                 object_id=instance.followed.id,
                 content_object=instance.followed
             )
+
+
+@receiver(pre_save, sender=Song)
+def update_search_vector(sender, instance, **kwargs):
+    instance.search_vector = (
+        SearchVector('title') +
+        SearchVector('artists') +
+        SearchVector('genres__name') +
+        SearchVector('lyrics') +
+        SearchVector('description')
+    )

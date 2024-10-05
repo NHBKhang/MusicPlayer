@@ -9,3 +9,12 @@
     flex-wrap: wrap;
     gap: 10px
 }
+
+.item {
+    margin: 10px 5px;
+    width: 100%;
+}
+
+.search-bar .form-control {
+    padding-right: 45px;
+}

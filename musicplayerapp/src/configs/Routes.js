@@ -1,11 +1,19 @@
 import {
     DownloadPage,
     HomePage,
-    LibraryPage, LivePage, LiveStreamPage, LiveVideoPage, LiveViewerPage, LoginPage,
+    LibraryPage,
+    LivePage, LiveStreamPage, LiveVideoPage, LiveViewerPage,
+    LoginPage,
     PageNotFound,
-    PaymentCancelPage,
-    PaymentSuccessPage, PlaylistDetailsPage, PremiumSubscriptionPage, ProfilePage,
-    SearchPage, SetPasswordPage, SettingsPage, SignupPage, SongDetailsPage,
+    PaymentCancelPage, PaymentSuccessPage,
+    PlaylistDetailsPage,
+    PremiumSubscriptionPage,
+    ProfilePage,
+    SearchPage,
+    SetPasswordPage,
+    SettingsPage,
+    SignupPage,
+    SongDetailsPage,
     UploadPage,
     VideoDetailsPage
 } from "../pages";
@@ -132,7 +140,7 @@ export const routes = {
         require: true,
         controlShow: false
     },
-    PremiumSubscription: {
+    premiumSubscription: {
         url: '/premium/',
         component: PremiumSubscriptionPage,
         require: true,

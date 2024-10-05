@@ -164,13 +164,19 @@ const SearchPage = () => {
             label: 'Tất cả',
             content: (
                 <div className='search-container'>
-                    {data.all?.map(item => item.type === 'song' ? (
-                        <SongItem key={item.id} song={item} state={{ isModalOpen, setIsModalOpen }} />
-                    ) : (item.type === 'artist' ? (
-                        <ArtistItem key={item.id} artist={item} state={{ isModalOpen, setIsModalOpen }} />
-                    ) : (
-                        <PlaylistItem key={item.id} playlist={item} />
-                    )))}
+                    {data.all?.map(item =>
+                        <div className='item'>
+                            {item.type === 'song' ?
+                                (
+                                    <SongItem key={item.id} song={item} state={{ isModalOpen, setIsModalOpen }} />
+                                ) : (item.type === 'artist' ? (
+                                    <ArtistItem key={item.id} artist={item} state={{ isModalOpen, setIsModalOpen }} />
+                                ) : (
+                                    <PlaylistItem key={item.id} playlist={item} />
+                                ))
+                            }
+                        </div>)
+                    }
                     {page.all > 0 && (
                         <div ref={el => loadMoreRefs.current.all = el} className="load-more-container">
                             {loading.all && <p>Loading...</p>}

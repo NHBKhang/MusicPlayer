@@ -5,9 +5,7 @@ import os
 import subprocess
 from django.conf import settings
 from botocore.exceptions import NoCredentialsError, ClientError
-import openai
 
-openai.api_key = settings.OPENAI_API_KEY
 
 def stats():
     return Genre.objects.annotate(counter=Count('songs')).values('id', 'name', 'counter')
@@ -56,16 +54,3 @@ def revenue_stats(month=None, date=None):
     transactions = Transaction.objects.filter(filter_conditions, status=Transaction.COMPLETED)
 
     return transactions.values('song__title', 'amount_in_vnd').order_by('-amount_in_vnd')[:20]
-
-
-def enhance_search_query(query):
-    prompt = f"Rewrite this search query to optimize it for a song search system: '{query}'"
-
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=prompt,
-        max_tokens=50
-    )
-
-    enhanced_query = response.choices[0].text.strip()
-    return enhanced_query

@@ -121,6 +121,12 @@ class PlaylistAdmin(admin.ModelAdmin):
             return mark_safe(f"<img width='300' src='/static/{playlist.image}' />")
 
 
+class LiveStreamAdmin(admin.ModelAdmin):
+    list_display = ['id', 'session_id', 'title', 'user', 'file', 'start_time', 'end_time', 'is_active']
+    search_fields = ['id', 'title', 'user']
+    readonly_fields = ['session_id', 'file', 'start_time', 'end_time', 'is_active']
+
+
 admin_site.register(User, UserAdmin)
 admin_site.register(Genre)
 admin_site.register(Song, SongAdmin)
@@ -136,6 +142,7 @@ admin_site.register(PremiumTransaction)
 admin_site.register(MusicVideo)
 admin_site.register(Notification)
 admin_site.register(LiveStream)
+admin_site.register(LiveStreamComment)
 admin_site.register(Application)
 admin_site.register(AccessToken)
 admin_site.register(RefreshToken)

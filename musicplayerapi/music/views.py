@@ -12,6 +12,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 from botocore.exceptions import NoCredentialsError
 import boto3
+import random
 
 
 class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveAPIView):
@@ -137,9 +138,9 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
         q = self.request.query_params.get('q')
         if q:
-            # enhanced_query = utils.enhance_search_query(q)
             queryset = queryset.filter(Q(title__icontains=q) |
-                                       Q(artists__icontains=q))
+                                       Q(artists__icontains=q) |
+                                       Q(lyrics__icontains=q))
 
         genre = self.request.query_params.get('genre')
         if genre and genre != '0':
@@ -376,7 +377,7 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
 
 class PlaylistViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
-    queryset = Playlist.objects.filter(active=True, is_public=True).all()
+    queryset = Playlist.objects.filter(active=True, is_public=True).order_by('-id').all()
     serializer_class = serializers.PlaylistSerializer
     pagination_class = paginators.PlaylistPaginator
     permission_classes = [perms.PlaylistOwner]
@@ -474,6 +475,8 @@ class MixedSearchView(APIView):
                 artists, many=True, context={'request': self.request})
 
             combined_results += [{'type': 'artist', **item} for item in artist_serializer.data]
+
+        random.shuffle(combined_results)
 
         paginator = paginators.CombinedResultsPaginator()
         paginated_results = paginator.paginate_queryset(combined_results, request)
@@ -584,7 +587,7 @@ class ReadOnlySongViewSet(viewsets.ReadOnlyModelViewSet):
         return queryset.distinct()
 
 
-class LiveStreamViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
+class LiveStreamViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveAPIView):
     queryset = LiveStream.objects.filter(is_active=True).order_by('-id').all()
     serializer_class = serializers.LiveStreamSerializer
     lookup_field = 'session_id'

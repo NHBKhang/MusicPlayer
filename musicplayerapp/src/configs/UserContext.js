@@ -113,9 +113,36 @@ export const UserProvider = ({ children }) => {
 
     };
 
-    const saveUser = (user) => {
-        setUser(user);
-        localStorage.setItem('user', JSON.stringify(user));
+    const saveUser = (data, append = false) => {
+        let updatedUser;
+        if (append) {
+            updatedUser = {
+                ...user,
+                ...data
+            };
+        } else {
+            updatedUser = data;
+        }
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+    }
+
+    const checkPremiumActive = () => {
+        const currentDate = new Date();
+
+        try {
+            console.info(user)
+            if (user.premium && user.premium.start_date && user.premium.end_date) {
+                const startDate = new Date(user.premium.start_date);
+                const endDate = new Date(user.premium.end_date);
+
+                return currentDate >= startDate && currentDate <= endDate;
+            }
+
+            return false;
+        } catch (error) {
+            return false;
+        }
     }
 
     return (
@@ -124,7 +151,8 @@ export const UserProvider = ({ children }) => {
             login, loginWithToken,
             logout,
             getAccessToken,
-            saveUser
+            saveUser,
+            checkPremiumActive
         }}>
             {children}
         </UserContext.Provider>

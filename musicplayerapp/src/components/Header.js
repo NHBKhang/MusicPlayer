@@ -10,7 +10,7 @@ import Modal from "./Modal";
 const Header = () => {
     const [query, setQuery] = useState('');
     const [visible, setVisible] = useState(false);
-    const { user, logout } = useUser();
+    const { user, logout, checkPremiumActive } = useUser();
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -48,7 +48,7 @@ const Header = () => {
 
     const onLiveStreamClick = (e) => {
         e.preventDefault();
-        if (user.is_premium) {
+        if (checkPremiumActive()) {
             navigate('/live-stream/');
         } else {
             setVisible(true);

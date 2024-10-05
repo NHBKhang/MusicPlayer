@@ -14,6 +14,12 @@ class UserInfoSerializer(serializers.ModelSerializer):
         }
 
 
+class PremiumSubscriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PremiumSubscription
+        fields = ['start_date', 'end_date']
+
+
 class PublicUserSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField(read_only=True)
     info = UserInfoSerializer(read_only=True)
@@ -47,6 +53,8 @@ class PublicUserSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(PublicUserSerializer):
+    premium = serializers.SerializerMethodField(read_only=True)
+
     def create(self, validated_data):
         data = validated_data.copy()
 
@@ -56,10 +64,14 @@ class UserSerializer(PublicUserSerializer):
 
         return user
 
+    def get_premium(self, user):
+        if user.premium_subscription:
+            return PremiumSubscriptionSerializer(user.premium_subscription).data
+        return None
+
     class Meta:
         model = PublicUserSerializer.Meta.model
-        fields = (PublicUserSerializer.Meta.fields +
-                  ['email', 'password'])
+        fields = PublicUserSerializer.Meta.fields + ['email', 'password', 'premium']
         extra_kwargs = {
             'password': {
                 'write_only': True
@@ -69,7 +81,6 @@ class UserSerializer(PublicUserSerializer):
 
 class AuthenticatedUserSerializer(PublicUserSerializer):
     followed = serializers.SerializerMethodField()
-    is_premium = serializers.SerializerMethodField()
 
     def get_followed(self, user):
         request = self.context.get('request')
@@ -77,15 +88,9 @@ class AuthenticatedUserSerializer(PublicUserSerializer):
             return user.followers.filter(follower=request.user, active=True).exists()
         return False
 
-    def get_is_premium(self, user):
-        request = self.context.get('request')
-        if request and request.user.is_authenticated:
-            return user.premium_subscription.check_is_active()
-        return False
-
     class Meta:
         model = PublicUserSerializer.Meta.model
-        fields = PublicUserSerializer.Meta.fields + ['followed', 'is_premium']
+        fields = PublicUserSerializer.Meta.fields + ['followed']
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -460,11 +465,11 @@ class ReadOnlySongSerializer(serializers.ModelSerializer):
 class LiveStreamSerializer(serializers.ModelSerializer):
     class Meta:
         model = LiveStream
-        fields = ['id', 'session_id', 'title']
+        fields = ['id', 'session_id', 'title', 'user']
 
 
 class LiveStreamDetailsSerializer(LiveStreamSerializer):
-    user = PublicUserSerializer(read_only=True)
+    user = AuthenticatedUserSerializer(read_only=True)
 
     class Meta:
         model = LiveStreamSerializer.Meta.model

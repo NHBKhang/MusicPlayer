@@ -223,7 +223,7 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
                                     />
                                 </Form.Group>
                                 <Form.Group controlId="formDescription">
-                                    <Form.Label className='text-dark mt-2'>Description</Form.Label>
+                                    <Form.Label className='text-dark mt-2'>Mô tả</Form.Label>
                                     <Form.Control
                                         as="textarea"
                                         rows={3}
@@ -256,7 +256,7 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
                                     </div>
                                 </Form.Group>
                                 {isPublic === 3 && <Form.Group controlId="formReleaseDateTime">
-                                    <Form.Label className='text-dark mt-2'>Thời gian phát trực tiếp</Form.Label>
+                                    <Form.Label className='text-dark mt-2'>Thời gian phát hành</Form.Label>
                                     <Form.Group className="d-flex" style={{ gap: '20px' }}>
                                         <Form.Control
                                             type="date"

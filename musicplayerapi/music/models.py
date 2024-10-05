@@ -11,6 +11,9 @@ from django.utils import timezone
 from music.validate import validate_audio_file, validate_video_file
 from datetime import datetime
 import imghdr
+import random
+import string
+import re
 
 
 class ImageBaseModel(models.Model):
@@ -29,6 +32,14 @@ class ImageBaseModel(models.Model):
 
 class User(AbstractUser):
     avatar = CloudinaryField(null=True, blank=True, resource_type='image')
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['username'], name='user_username_idx'),
+            models.Index(fields=['email'], name='user_email_idx'),
+            models.Index(fields=['first_name'], name='user_first_name_idx'),
+            models.Index(fields=['last_name'], name='user_last_name_idx'),
+        ]
 
     def __str__(self):
         return self.get_name()
@@ -114,6 +125,14 @@ class Song(ImageBaseModel, BaseModel):
     is_public = models.IntegerField(choices=IS_PUBLIC_CHOICES, default=PUBLIC)
     release_date = models.DateTimeField(blank=True, null=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['title', 'artists']),
+            models.Index(fields=['lyrics', 'description']),
+            models.Index(fields=['title', 'artists', 'lyrics', 'description'], name='fulltext_idx',
+                         db_tablespace='fulltext'),
+        ]
+
     def __str__(self):
         return self.title
 
@@ -160,6 +179,12 @@ class Playlist(BaseModel, ImageBaseModel):
     is_public = models.BooleanField(default=True)
     playlist_type = models.IntegerField(choices=PLAYLIST_TYPE_CHOICES, default=PLAYLIST)
     published_date = models.DateField(null=True, blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['title'], name='playlist_title_idx'),
+            models.Index(fields=['creator'], name='playlist_creator_idx'),
+        ]
 
     def __str__(self):
         return f"{self.title} ({self.get_playlist_type_display()})"
@@ -351,7 +376,7 @@ class MusicVideo(Video):
 
 
 class LiveStream(models.Model):
-    session_id = models.CharField(max_length=50, unique=True)
+    session_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=100, null=True, blank=True)
     file = models.FileField(upload_to='live_streams/', null=True, blank=True)
@@ -360,15 +385,30 @@ class LiveStream(models.Model):
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"Live Stream {self.session_id} by {self.user.username}"
+        return f"Live Stream {self.session_id} by {self.user.get_name()}"
 
     def save(self, *args, **kwargs):
+        if not self.session_id or not self.is_valid_session_id(self.session_id):
+            session_prefix = 'session-'
+            random_suffix = ''.join(random.choices(string.ascii_letters + string.digits, k=9))
+            self.session_id = session_prefix + random_suffix
+
+            while LiveStream.objects.filter(session_id=self.session_id).exists():
+                random_suffix = ''.join(random.choices(string.ascii_letters + string.digits, k=9))
+                self.session_id = session_prefix + random_suffix
+
         if not self.title:
             self.title = self.__str__()
+
         super().save(*args, **kwargs)
 
+    @staticmethod
+    def is_valid_session_id(session_id):
+        pattern = r"^session-[a-zA-Z0-9]{9}$"
+        return bool(re.match(pattern, session_id))
 
-class LiveStreamChat(models.Model):
+
+class LiveStreamComment(models.Model):
     content = models.CharField(max_length=512)
     timestamp = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='live_stream_chats')

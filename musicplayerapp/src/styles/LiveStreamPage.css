@@ -35,11 +35,13 @@ button.live-button {
     z-index: 100;
 }
 
-.session-id-container {
+.session-container {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 7px;
+    flex-wrap: wrap;
+    margin: auto;
+    width: 100%;
 }
 
 .copy-icon {
@@ -61,7 +63,7 @@ button.live-button {
 
 .comments-box {
     min-height: 250px;
-    max-height: 300px;
+    max-height: 400px;
     overflow-y: auto;
     scrollbar-width: none;
     margin-bottom: 15px;
@@ -109,6 +111,19 @@ button.live-button {
     line-height: 1.5;
 }
 
+.comment.owner {
+    background-color: #e0ffe0;
+    border: 1px solid #007bff;
+}
+
+.comment.owner p {
+    color: #007bff;
+}
+
+.comment.owner strong {
+    color: #007bff;
+}
+
 .comments-section .comment-input {
     display: flex;
     align-items: center;
@@ -150,5 +165,7 @@ button.live-button {
     border-radius: 5px;
     padding: 5px;
     min-width: 75px;
+    margin: auto;
+    text-align: center;
     background-color: rgba(211, 211, 211, 0.8);
 }

@@ -8,6 +8,7 @@ import SongModal from "./SongModal";
 import AddToPlaylistModal from "./AddToPlaylistModal";
 import Modal from "./Modal";
 import '../styles/SongItem.css';
+import LoginRequiredModal from "./LoginRequiredModal";
 
 const SongItem = ({ song, state }) => {
     const setIsModalOpen = state?.setIsModalOpen;
@@ -76,7 +77,8 @@ const SongItem = ({ song, state }) => {
                         </button>
                         <Options
                             item={item} navigate={navigate}
-                            setItem={setItem} getAccessToken={getAccessToken} />
+                            setItem={setItem} getAccessToken={getAccessToken}
+                            user={user} />
                     </div>
                     <div>
                         <span className="me-4">
@@ -92,12 +94,13 @@ const SongItem = ({ song, state }) => {
     )
 };
 
-export const Options = ({ item, navigate, setItem, getAccessToken }) => {
+export const Options = ({ item, navigate, setItem, getAccessToken, user }) => {
     const [showOptions, setShowOptions] = useState(false);
     const [visible, setVisible] = useState({
         delete: false,
         edit: false,
         add: false,
+        login: false
     });
     const optionsRef = useRef(null);
 
@@ -153,8 +156,12 @@ export const Options = ({ item, navigate, setItem, getAccessToken }) => {
                 {showOptions && (
                     <div className="options-dropdown">
                         <ul>
-                            <li onClick={() => updateVisible('add', true)}>
-                                Thêm vào playlist</li>
+                            <li onClick={() => {
+                                if (user)
+                                    updateVisible('add', true)
+                                else
+                                    updateVisible('login', true)
+                            }}>Thêm vào playlist</li>
                             {item.access?.is_downloadable &&
                                 <li>
                                     <a style={{ color: 'inherit' }}
@@ -183,6 +190,9 @@ export const Options = ({ item, navigate, setItem, getAccessToken }) => {
                 visible={visible.add}
                 song={item}
                 onClose={() => updateVisible('add', false)} />
+            <LoginRequiredModal
+                visible={visible.login}
+                onClose={() => updateVisible('login', false)} />
         </>
     )
 }

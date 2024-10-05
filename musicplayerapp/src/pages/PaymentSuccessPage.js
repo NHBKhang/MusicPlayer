@@ -10,7 +10,7 @@ const PaymentSuccessPage = () => {
     const [data, setData] = useState(null);
     const [type, setType] = useState(null);
     const navigate = useNavigate();
-    const { saveUser, user } = useUser();
+    const { saveUser } = useUser();
     const queryParams = new URLSearchParams(window.location.search);
     const paymentId = queryParams.get('paymentId');
     const PayerID = queryParams.get('PayerID');
@@ -49,7 +49,12 @@ const PaymentSuccessPage = () => {
             navigate(`/download/?songId=${data?.id}`);
         } else {
             navigate('/');
-            saveUser({ ...user, is_premium: true });
+            saveUser({
+                premium: {
+                    start_date: data.start_date,
+                    end_date: data.end_date
+                }
+            }, true);
         }
     };
 

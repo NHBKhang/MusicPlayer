@@ -66,7 +66,6 @@ const VideoDetailsPage = () => {
                         <VideoPlayer src={video.file} />
                     </div>
                     <h4>{video.title}</h4>
-                    <p className="description">{video.description}</p>
                     <div className="d-flex align-items-center cursor-pointer" style={{ gap: '12px' }}>
                         <img onClick={goToArtist}
                             src={video.uploader.avatar}
@@ -90,7 +89,7 @@ const VideoDetailsPage = () => {
                                 </>)}
                             </button>}
                     </div>
-                    <p>{video.description}</p>
+                    <p className="description">{video.description}</p>
                 </div>
             </div>
             <div className='col-md-3'>

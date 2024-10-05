@@ -49,7 +49,7 @@ const TabView = () => {
 
 const Upload = () => {
     usePageTitle("Upload");
-    const { getAccessToken, user } = useUser();
+    const { getAccessToken, user, checkPremiumActive } = useUser();
     const [songs, setSongs] = useState([]);
     const [videos, setVideos] = useState([]);
     const [uploadStatus, setUploadStatus] = useState('');
@@ -100,7 +100,7 @@ const Upload = () => {
                 description: '',
                 isPublic: 1,
                 isUpload: false,
-                error: user.is_premium || file.size <= maxSize ? null : maxSizeError
+                error: checkPremiumActive() || file.size <= maxSize ? null : maxSizeError
             }));
 
         const newVideos = acceptedFiles
@@ -113,12 +113,12 @@ const Upload = () => {
                 song: 0,
                 isPublic: 1,
                 isUpload: false,
-                error: user.is_premium || file.size <= maxSize ? null : maxSizeError
+                error: checkPremiumActive() || file.size <= maxSize ? null : maxSizeError
             }));
 
         setSongs((prevSongs) => [...prevSongs, ...newSongs]);
         setVideos((prevVideos) => [...prevVideos, ...newVideos]);
-    }, [user.is_premium]);
+    }, [checkPremiumActive]);
 
     const handleUpload = async (media, index, isVideo = false) => {
         if (media.isUpload || media.error) return;

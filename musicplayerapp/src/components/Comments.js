@@ -161,7 +161,7 @@ const Comments = ({ comments, setComments, user, state }) => {
                     </div>
                 </div>
             </> : <>
-                <p>Hãy đăng nhập để bình luận</p>
+                <p>Hãy <a className='text-primary' href='/login/'>đăng nhập</a> để bình luận</p>
             </>}
         </div>
     );

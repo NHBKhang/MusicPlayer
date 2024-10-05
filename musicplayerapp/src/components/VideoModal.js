@@ -125,7 +125,7 @@ const VideoModal = ({ visible, video, onSaveChange, onClose }) => {
                     </Form.Group>
                     <Form.Group style={{ maxWidth: '600px', width: '100%' }}>
                         <Form.Group controlId="formTitle">
-                            <Form.Label className='text-dark mt-2'>Tên bài hát</Form.Label>
+                            <Form.Label className='text-dark mt-2'>Tên MV</Form.Label>
                             <Form.Control
                                 type="text"
                                 value={title}
@@ -143,7 +143,7 @@ const VideoModal = ({ visible, video, onSaveChange, onClose }) => {
                             {errors.song && <Form.Text className="text-danger">{errors.song}</Form.Text>}
                         </Form.Group>
                         <Form.Group controlId="formDescription">
-                            <Form.Label className='text-dark mt-2'>Description</Form.Label>
+                            <Form.Label className='text-dark mt-2'>Mô tả</Form.Label>
                             <Form.Control
                                 as="textarea"
                                 rows={3}

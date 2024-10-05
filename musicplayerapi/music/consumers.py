@@ -1,14 +1,13 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
+from asgiref.sync import sync_to_async
 from django.core.files.base import ContentFile
 from urllib.parse import parse_qs
 import json
 from datetime import datetime
-from music.serializers import LiveStreamDetailsSerializer
 
 stream_buffers = {}
 viewers_count = {}
-live_streams = {}
 
 
 class LiveStreamConsumer(AsyncWebsocketConsumer):
@@ -36,7 +35,6 @@ class LiveStreamConsumer(AsyncWebsocketConsumer):
 
                 await self.send_existing_stream()
                 await self.update_viewers_count()
-                await self.send_stream_info()
 
     async def disconnect(self, close_code):
         if self.user_id:
@@ -58,16 +56,26 @@ class LiveStreamConsumer(AsyncWebsocketConsumer):
 
             if message_type == 'chat_message':
                 content = message_data.get('content')
-                user_info = json.loads(message_data.get('user'))
+                user = json.loads(message_data.get('user'))
                 timestamp = message_data.get('timestamp')
+                live_stream_id = message_data.get('live_stream_id')
+
+                from music.models import LiveStreamComment
+                await sync_to_async(LiveStreamComment.objects.create)(
+                    user_id=user['id'],
+                    timestamp=timestamp,
+                    content=content,
+                    live_stream_id=live_stream_id
+                )
 
                 await self.channel_layer.group_send(
                     self.group_name,
                     {
                         'type': 'chat_data',
                         'content': content,
-                        'user': user_info,
-                        'timestamp': timestamp
+                        'user': user,
+                        'timestamp': timestamp,
+                        'live_stream_id': live_stream_id
                     }
                 )
         if bytes_data:
@@ -91,24 +99,10 @@ class LiveStreamConsumer(AsyncWebsocketConsumer):
             'viewers_count': len(viewers)
         })
 
-    async def send_stream_info(self):
-        live_stream = await live_streams[self.session_id]
-
-        if live_stream:
-            await self.channel_layer.group_send(self.group_name, {
-                'type': 'stream_info',
-                'live_stream': LiveStreamSerializer(live_stream).data
-            })
-
     @database_sync_to_async
     def start_live_stream(self):
-        from music.models import LiveStream
-        live_stream = LiveStream.objects.create(session_id=self.session_id, user_id=self.user_id)
-
         if self.session_id not in stream_buffers:
             stream_buffers[self.session_id] = bytearray()
-        if self.session_id not in live_streams:
-            live_streams[self.session_id] = live_stream
 
     @database_sync_to_async
     def stop_live_stream(self):
@@ -133,13 +127,10 @@ class LiveStreamConsumer(AsyncWebsocketConsumer):
             print(f"Error sending stream data: {e}")
 
     async def chat_data(self, event):
-        from models import LiveStreamChat
         try:
             content = event['content']
             user = event['user']
             timestamp = event['timestamp']
-            LiveStreamChat.objects.create(user_id=user['id'], timestamp=timestamp, content=content,
-                                          live_stream_id=live_streams[self.session_id].id)
 
             await self.send(text_data=json.dumps({
                 'type': 'chat_message',
@@ -160,13 +151,3 @@ class LiveStreamConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps({'viewers_count': viewers_count}))
         except Exception as e:
             print(f"Error sending viewers count: {e}")
-
-    async def stream_info(self, event):
-        try:
-            live_stream = event['live_stream']
-            await self.send(text_data=json.dumps({
-                'type': 'stream_info',
-                'live_stream': LiveStreamDetailsSerializer(live_stream).data
-            }))
-        except Exception as e:
-            print(f"Error sending streamer info: {e}")

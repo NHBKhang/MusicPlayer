@@ -5,25 +5,37 @@ import { SongControls } from './components';
 import { useUser } from './configs/UserContext';
 
 const App = () => {
-  const { user } = useUser();
+  const { user, checkPremiumActive } = useUser();
+  const checkPremium = checkPremiumActive();
 
   return (
     <div className="App">
       <Router>
         <Routes>
-          {Object.values(routes).map((route, index) =>
-            (user || !route.required) && (user.is_premium || !route.premium) && (
-              <Route
-                key={index}
-                path={route.url}
-                element={<>
-                  <route.component />
-                  {route.controlShow && <SongControls />}
-                </>
-                }
-              />
-            )
-          )}
+          {Object.values(routes).map((route, index) => {
+            // Check if user exists or if the route does not require a user
+            const isUserRequired = user || !route.require;
+
+            // Check if the user has premium access or if the route does not require premium
+            const hasPremiumAccess = checkPremium || !route.premium;
+
+            if (isUserRequired && hasPremiumAccess) {
+              return (
+                <Route
+                  key={index}
+                  path={route.url}
+                  element={
+                    <>
+                      <route.component />
+                      {route.controlShow && <SongControls />}
+                    </>
+                  }
+                />
+              );
+            }
+
+            return null;
+          })}
         </Routes>
       </Router>
     </div>
