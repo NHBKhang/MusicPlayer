@@ -8,6 +8,7 @@ import ReactSelect from 'react-select';
 import { ImageUpload, LoginRequiredModal, SongItem, VideoItem } from '../components';
 import '../styles/UploadPage.css';
 import { usePageTitle } from '../components/PageTitle';
+import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 
 const UploadPage = () => (
     <Page>
@@ -253,7 +254,7 @@ const Upload = () => {
             <div className="upload-notification">
                 <p className='m-0'>Dung lượng tối đa cho mỗi file là 30MB. Nâng cấp lên Premium để tải lên tệp lớn hơn.</p>
                 <button className="premium-button" onClick={() => window.open('/premium/', '_blank')}>
-                    Đăng ký Premium
+                    Đăng ký Premium <WorkspacePremiumIcon style={{ color: 'gold' }} />
                 </button>
             </div>
             <div

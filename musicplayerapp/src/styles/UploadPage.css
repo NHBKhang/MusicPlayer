@@ -92,7 +92,7 @@
     border: 2px solid #ff5722;
     font-weight: 500;
     cursor: pointer;
-    background-color: whitesmoke;
+    background-color: rgba(245, 245, 245, 0.9);
     margin-top: 10px;
     transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out, border-color 0.3s ease-in-out;
 }
