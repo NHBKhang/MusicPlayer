@@ -11,6 +11,10 @@ const Modal = ({
     title = null
 }) => {
     if (!visible) return null;
+    const confirm = () => {
+        onConfirm();
+        onCancel();
+    }
 
     return (
         <div className="modal-overlay">
@@ -18,7 +22,7 @@ const Modal = ({
                 {title && <h5 className='text-dark'>{title}</h5>}
                 <p>{label}</p>
                 <div className="modal-buttons">
-                    <button onClick={onConfirm}>{confirmText}</button>
+                    <button onClick={confirm}>{confirmText}</button>
                     <button onClick={onCancel}>{cancelText}</button>
                 </div>
             </div>

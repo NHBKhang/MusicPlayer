@@ -72,7 +72,7 @@ class UserSerializer(PublicUserSerializer):
 
     def get_is_2fa_enabled(self, user):
         from django_otp.plugins.otp_totp.models import TOTPDevice
-        return TOTPDevice.objects.filter(user=user).exists()
+        return TOTPDevice.objects.filter(user=user, confirmed=True).exists()
 
     class Meta:
         model = PublicUserSerializer.Meta.model

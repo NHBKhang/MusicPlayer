@@ -39,6 +39,8 @@ export const endpoints = {
     'live-stream': (streamId) => `/live-streams/${streamId}/`,
     'enable-2fa': '/auth/2fa/enable/',
     'verify-2fa': '/auth/2fa/verify/',
+    'disable-2fa': '/auth/2fa/disable/',
+    'resend-2fa-qr': '/auth/2fa/resend-qr/',
 }
 
 export const authAPI = (accessToken) =>

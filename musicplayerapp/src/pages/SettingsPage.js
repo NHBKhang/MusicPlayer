@@ -3,6 +3,7 @@ import Page from ".";
 import '../styles/SettingsPage.css';
 import { useUser } from "../configs/UserContext";
 import { authAPI, endpoints } from "../configs/API";
+import { Modal } from "../components";
 import { List, ListItem, ListItemText, Divider, Collapse, Typography, IconButton, TextField, Button, Box, CircularProgress, Switch } from "@mui/material";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import PrivacyTipIcon from '@mui/icons-material/PrivacyTip';
@@ -18,6 +19,10 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import TwoFactorAuthIcon from '@mui/icons-material/VerifiedUser';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import ContactSupportIcon from '@mui/icons-material/ContactSupport';
+import FeedbackIcon from '@mui/icons-material/Feedback';
+import NotificationImportantIcon from '@mui/icons-material/NotificationImportant';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 
 const SettingsPage = () => {
     const [currentPage, setCurrentPage] = useState('main');
@@ -120,18 +125,37 @@ const SettingsPage = () => {
     );
 };
 
+// ACCOUNT SETTINGS
 const AccountSettings = ({ goBack }) => {
     const [activeItem, setActiveItem] = useState(0);
+    const [visible, setVisible] = useState(false);
     const { user, getAccessToken, saveUser } = useUser();
 
     const backToAccount = () => {
         setActiveItem(0);
     }
 
+    const disable2FA = async () => {
+        try {
+            const res = await authAPI(await getAccessToken()).post(endpoints["disable-2fa"]);
+            if (res.status === 204) {
+                saveUser({ is_2fa_enabled: false }, true);
+            }
+        } catch (error) {
+            console.error(error);
+            if (error.response?.data?.detail) {
+                alert(error.response?.data?.detail);
+            } else {
+                alert(error.message);
+            }
+        }
+    };
+
     if (activeItem === 1)
         return <ChangePassword
             backToAccount={backToAccount}
-            getAccessToken={getAccessToken} />
+            getAccessToken={getAccessToken}
+            is_2fa_enabled={user.is_2fa_enabled} />
     if (activeItem === 2)
         return <TwoFactorAuth
             backToAccount={backToAccount}
@@ -162,9 +186,9 @@ const AccountSettings = ({ goBack }) => {
             </ListItem>
             <Divider style={{ backgroundColor: '#444' }} />
 
-            <ListItem button onClick={() => {
+            <ListItem button onClick={async () => {
                 if (user.is_2fa_enabled)
-                    return;
+                    setVisible(true);
                 else
                     setActiveItem(2)
             }}>
@@ -176,15 +200,23 @@ const AccountSettings = ({ goBack }) => {
                     checked={user.is_2fa_enabled}
                     color="primary" />
             </ListItem>
+
+            <Modal
+                title="Xác nhận tắt tính năng bảo mật"
+                label="Bạn có chắc chắn muốn vô hiệu hóa xác thực hai lớp? Việc này sẽ giảm mức độ bảo mật cho tài khoản của bạn."
+                visible={visible}
+                onConfirm={disable2FA}
+                onCancel={() => setVisible(false)} />
         </List>
     );
 };
 
-const ChangePassword = ({ backToAccount, getAccessToken }) => {
+const ChangePassword = ({ backToAccount, getAccessToken, is_2fa_enabled }) => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [password, setPassword] = useState({});
     const [showPassword, setShowPassword] = useState({});
+    const [token, setToken] = useState('');
 
     const updatedPassword = (field, value) => {
         setPassword(current => ({ ...current, [field]: value }));
@@ -203,6 +235,11 @@ const ChangePassword = ({ backToAccount, getAccessToken }) => {
         }
 
         try {
+            if (is_2fa_enabled) {
+                await authAPI(await getAccessToken()).post(endpoints["verify-2fa"],
+                    { token: token });
+            }
+
             let res = await authAPI(await getAccessToken()).post(endpoints["set-password"],
                 {
                     current_password: password.current,
@@ -238,7 +275,7 @@ const ChangePassword = ({ backToAccount, getAccessToken }) => {
                 backgroundColor: 'rgba(42, 42, 42, 0.8)',
                 borderRadius: 2,
                 boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
-                maxWidth: 400,
+                maxWidth: 500,
                 margin: '0 auto',
             }}>
             <Typography variant="h5" align="center" gutterBottom style={{ color: '#fff' }}>
@@ -314,6 +351,23 @@ const ChangePassword = ({ backToAccount, getAccessToken }) => {
                     ),
                 }} />
 
+            {is_2fa_enabled && password?.current && password?.new && password?.confirm &&
+                <TextField
+                    label="Mã xác thực"
+                    type='text'
+                    fullWidth
+                    margin="normal"
+                    required
+                    value={token}
+                    onChange={(e) => setToken(e.target.value)}
+                    InputLabelProps={{
+                        style: { color: '#fff' },
+                    }}
+                    InputProps={{
+                        style: { color: '#fff' },
+                    }} />
+            }
+
             {error && (
                 <Typography variant="body2" color="error" align="center">
                     {error}
@@ -341,11 +395,12 @@ const ChangePassword = ({ backToAccount, getAccessToken }) => {
 const TwoFactorAuth = ({ backToAccount, getAccessToken, saveUser }) => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [QRLoading, setQRLoading] = useState(false);
     const [qrCode, setQrCode] = useState('');
     const [verificationCode, setVerificationCode] = useState('');
 
     useEffect(() => {
-        const toggle2FA = async () => {
+        const enable2FA = async () => {
             try {
                 const res = await authAPI(await getAccessToken()).post(endpoints["enable-2fa"]);
                 if (res.status === 201) {
@@ -362,7 +417,7 @@ const TwoFactorAuth = ({ backToAccount, getAccessToken, saveUser }) => {
             }
         };
 
-        toggle2FA();
+        enable2FA();
     }, [getAccessToken]);
 
     const handle2FAVerify = async (e) => {
@@ -387,6 +442,21 @@ const TwoFactorAuth = ({ backToAccount, getAccessToken, saveUser }) => {
         }
     };
 
+    const handleResendQRCode = async (e) => {
+        e.preventDefault();
+        setQRLoading(true);
+
+        try {
+            let res = await authAPI(await getAccessToken()).get(endpoints["resend-2fa-qr"]);
+            if (res.status === 202) setQrCode(res.data.qr_code);
+        } catch (error) {
+            console.error(error);
+            setError(error.response?.data?.detail || error.message);
+        } finally {
+            setQRLoading(false);
+        }
+    }
+
     return (
         <Box
             component="form"
@@ -396,21 +466,28 @@ const TwoFactorAuth = ({ backToAccount, getAccessToken, saveUser }) => {
                 backgroundColor: 'rgba(42, 42, 42, 0.8)',
                 borderRadius: 2,
                 boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
-                maxWidth: 400,
+                maxWidth: 500,
                 margin: '0 auto',
             }}>
             <Typography variant="h5" align="center" gutterBottom style={{ color: '#fff' }}>
                 Xác thực 2 lớp
             </Typography>
 
-            {qrCode && (
+            {qrCode ? (
                 <Box mt={2} textAlign="center">
                     <img src={qrCode} alt="QR Code for 2FA" style={{ maxWidth: '100%', height: 'auto' }} className="mb-2" />
                     <Typography variant="body2" style={{ color: '#fff', marginTop: 8 }}>
                         Quét mã QR bằng ứng dụng xác thực của bạn.
                     </Typography>
                 </Box>
-            )}
+            ) :
+                <Button
+                    variant="contained"
+                    onClick={handleResendQRCode}
+                    sx={{ mt: 2, backgroundColor: 'rgba(255, 255, 255, 0.2)', color: '#fff' }}>
+                    {QRLoading ? <CircularProgress size={25} /> : 'Gửi lại mã QR'}
+                </Button>
+            }
 
             <TextField
                 label="Mã xác thực"
@@ -451,6 +528,91 @@ const TwoFactorAuth = ({ backToAccount, getAccessToken, saveUser }) => {
     );
 }
 
+// PRIVACY SETTINGS
+const PrivacySettings = ({ goBack }) => {
+    const [open, setOpen] = useState(false);
+
+    return (
+        <List
+            style={{
+                border: '1px solid #444',
+                borderRadius: '8px',
+                backgroundColor: 'rgba(42, 42, 42, 0.5)',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+            }}>
+            <ListItem button onClick={goBack}>
+                <IconButton edge="start" style={{ color: '#fff' }}>
+                    <ArrowBackIcon />
+                </IconButton>
+                <ListItemText primary="Quay lại" primaryTypographyProps={{ style: { color: '#fff' } }} />
+
+            </ListItem>
+            <Divider style={{ backgroundColor: '#444' }} />
+
+            <ListItem button onClick={() => setOpen(!open)}>
+                <IconButton edge="start" style={{ color: '#fff' }}>
+                    <PrivacyTipIcon />
+                </IconButton>
+                <ListItemText primary="Chính sách & Quyền riêng tư" primaryTypographyProps={{ style: { color: '#fff' } }} />
+                <IconButton edge="end" style={{ color: '#fff' }}>
+                    {open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                </IconButton>
+            </ListItem>
+            <Collapse in={open} timeout="auto" unmountOnExit className="text-start">
+                <Typography className="settings-typography">
+                    <Typography variant="h5" gutterBottom>
+                        Chính Sách và Quyền Riêng Tư
+                    </Typography>
+                    <Typography variant="body1" paragraph>
+                        <strong>Giới thiệu:</strong> Chào mừng bạn đến với SoundScape! Chúng tôi rất coi trọng quyền riêng tư của bạn và cam kết bảo vệ thông tin cá nhân khi bạn sử dụng dịch vụ của chúng tôi.
+                    </Typography>
+                    <Typography variant="body1" paragraph>
+                        <strong>Thông tin chúng tôi thu thập:</strong> Chúng tôi thu thập thông tin cá nhân từ bạn trong quá trình bạn tạo tài khoản, sử dụng dịch vụ, và tương tác với nền tảng của chúng tôi. Thông tin này bao gồm tên, địa chỉ email, và các sở thích nghe nhạc của bạn.
+                    </Typography>
+                    <Typography variant="body1" paragraph>
+                        <strong>Mục đích sử dụng thông tin:</strong> Thông tin của bạn được sử dụng để:
+                        <ul>
+                            <li>Cung cấp và cải thiện dịch vụ nghe nhạc.</li>
+                            <li>Cá nhân hóa trải nghiệm của bạn bằng cách đề xuất nội dung phù hợp.</li>
+                            <li>Đảm bảo an toàn tài khoản thông qua xác thực hai lớp (2FA).</li>
+                            <li>Thông báo cho bạn về các cập nhật và tin tức quan trọng.</li>
+                        </ul>
+                    </Typography>
+                    <Typography variant="body1" paragraph>
+                        <strong>Bảo mật thông tin:</strong> Chúng tôi thực hiện các biện pháp bảo mật nghiêm ngặt để bảo vệ thông tin cá nhân của bạn khỏi các truy cập trái phép. Chúng tôi cam kết rằng thông tin của bạn sẽ không được bán hay chia sẻ với bên thứ ba mà không có sự đồng ý của bạn.
+                    </Typography>
+                    <Typography variant="body1" paragraph>
+                        <strong>Quyền của bạn:</strong> Bạn có quyền:
+                        <ul>
+                            <li>Truy cập và chỉnh sửa thông tin tài khoản của mình.</li>
+                            <li>Yêu cầu xóa tài khoản hoặc ngừng sử dụng dịch vụ.</li>
+                            <li>Từ chối việc thu thập và sử dụng thông tin cá nhân cho các mục đích khác.</li>
+                        </ul>
+                    </Typography>
+                    <Typography variant="body1" paragraph>
+                        <strong>Cookie và công nghệ theo dõi:</strong> Chúng tôi sử dụng cookie để nâng cao trải nghiệm người dùng và theo dõi việc sử dụng dịch vụ. Bạn có thể điều chỉnh cài đặt cookie trong trình duyệt của mình.
+                    </Typography>
+                    <Typography variant="body1" paragraph>
+                        <strong>Thay đổi chính sách:</strong> Chúng tôi có quyền thay đổi chính sách này bất cứ lúc nào và sẽ thông báo rõ ràng cho bạn về các thay đổi.
+                    </Typography>
+                    <Typography variant="body1" paragraph>
+                        <strong>Liên hệ với chúng tôi:</strong> Nếu bạn có bất kỳ câu hỏi nào về chính sách này, vui lòng liên hệ với chúng tôi qua email: nhbkhang12@gmail.com
+                    </Typography>
+                </Typography>
+            </Collapse>
+            <Divider style={{ backgroundColor: '#444' }} />
+
+            <ListItem button>
+                <IconButton edge="start" style={{ color: '#fff' }}>
+                    <DeleteIcon />
+                </IconButton>
+                <ListItemText primary="Xóa tài khoản và dữ liệu" primaryTypographyProps={{ style: { color: '#fff' } }} />
+            </ListItem>
+        </List>
+    )
+};
+
+// NOTIFICATION SETTINGS
 const NotificationSettings = ({ goBack }) => {
     return (
         <List
@@ -467,10 +629,34 @@ const NotificationSettings = ({ goBack }) => {
                 <ListItemText primary="Quay lại" primaryTypographyProps={{ style: { color: '#fff' } }} />
             </ListItem>
             <Divider style={{ backgroundColor: '#444' }} />
+
+            <ListItem button>
+                <IconButton edge="start" style={{ color: '#fff' }}>
+                    <NotificationsIcon />
+                </IconButton>
+                <ListItemText primary="Thông báo chung" primaryTypographyProps={{ style: { color: '#fff' } }} />
+            </ListItem>
+            <Divider style={{ backgroundColor: '#444' }} />
+
+            <ListItem button>
+                <IconButton edge="start" style={{ color: '#fff' }}>
+                    <NotificationImportantIcon />
+                </IconButton>
+                <ListItemText primary="Thông báo quan trọng" primaryTypographyProps={{ style: { color: '#fff' } }} />
+            </ListItem>
+            <Divider style={{ backgroundColor: '#444' }} />
+
+            <ListItem button>
+                <IconButton edge="start" style={{ color: '#fff' }}>
+                    <ErrorOutlineIcon />
+                </IconButton>
+                <ListItemText primary="Thông báo lỗi" primaryTypographyProps={{ style: { color: '#fff' } }} />
+            </ListItem>
         </List>
     )
 };
 
+// HELP SETTINGS
 const HelpSettings = ({ goBack }) => {
     return (
         <List
@@ -487,45 +673,34 @@ const HelpSettings = ({ goBack }) => {
                 <ListItemText primary="Quay lại" primaryTypographyProps={{ style: { color: '#fff' } }} />
             </ListItem>
             <Divider style={{ backgroundColor: '#444' }} />
-        </List>
-    )
-};
 
-const PrivacySettings = ({ goBack }) => {
-    return (
-        <List
-            style={{
-                border: '1px solid #444',
-                borderRadius: '8px',
-                backgroundColor: 'rgba(42, 42, 42, 0.5)',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-            }}>
-            <ListItem button onClick={goBack}>
+            <ListItem button>
                 <IconButton edge="start" style={{ color: '#fff' }}>
-                    <ArrowBackIcon />
+                    <HelpIcon />
                 </IconButton>
-                <ListItemText primary="Quay lại" primaryTypographyProps={{ style: { color: '#fff' } }} />
+                <ListItemText primary="Câu hỏi thường gặp" primaryTypographyProps={{ style: { color: '#fff' } }} />
             </ListItem>
             <Divider style={{ backgroundColor: '#444' }} />
 
             <ListItem button>
                 <IconButton edge="start" style={{ color: '#fff' }}>
-                    <PrivacyTipIcon />
+                    <ContactSupportIcon />
                 </IconButton>
-                <ListItemText primary="Chính sách quyền riêng tư" primaryTypographyProps={{ style: { color: '#fff' } }} />
+                <ListItemText primary="Liên hệ hỗ trợ" primaryTypographyProps={{ style: { color: '#fff' } }} />
             </ListItem>
             <Divider style={{ backgroundColor: '#444' }} />
 
             <ListItem button>
                 <IconButton edge="start" style={{ color: '#fff' }}>
-                    <DeleteIcon />
+                    <FeedbackIcon />
                 </IconButton>
-                <ListItemText primary="Xóa tài khoản và dữ liệu" primaryTypographyProps={{ style: { color: '#fff' } }} />
+                <ListItemText primary="Gửi phản hồi" primaryTypographyProps={{ style: { color: '#fff' } }} />
             </ListItem>
         </List>
     )
 };
 
+// ABOUT SETTINGS
 const AboutSettings = ({ goBack }) => {
     const [open, setOpen] = useState({
         app: false,
@@ -562,9 +737,22 @@ const AboutSettings = ({ goBack }) => {
             </ListItem>
             <Collapse in={open.app} timeout="auto" unmountOnExit>
                 <Typography variant="body1" className="settings-typography">
-                    Ứng dụng này là một nền tảng nghe nhạc trực tuyến giúp người dùng khám phá và thưởng thức âm nhạc
-                    yêu thích. Bạn có thể tìm kiếm, nghe và tạo danh sách phát cá nhân từ một thư viện âm nhạc phong phú.
-                    Ứng dụng hỗ trợ các tính năng như nhận diện bài hát, bình luận, đánh giá, và chia sẻ nhạc với bạn bè.
+                    <strong>Tên ứng dụng:</strong> SoundScape
+                    <br />
+                    <strong>Phiên bản:</strong> 1.0.0
+                    <br />
+                    <strong>Ngày phát hành:</strong> 10 tháng 10, 2024
+                    <br />
+                    <strong>Tính năng mới:</strong>
+                    <ul>
+                        <li>Hỗ trợ xác thực hai lớp (2FA) để bảo mật tài khoản người dùng.</li>
+                        <li>Chức năng nhận diện bài hát thông minh.</li>
+                        <li>Có thể tạo và chia sẻ danh sách phát cá nhân.</li>
+                        <li>Khả năng bình luận và đánh giá các bài hát.</li>
+                    </ul>
+                    <strong>Chính sách bảo mật:</strong> Ứng dụng cam kết bảo vệ thông tin cá nhân của người dùng theo tiêu chuẩn cao nhất và tuân thủ các quy định về bảo mật thông tin.
+                    <br />
+                    <strong>Liên hệ hỗ trợ:</strong> Nếu bạn gặp bất kỳ vấn đề gì, vui lòng liên hệ với chúng tôi qua email support@soundscape.com.
                 </Typography>
             </Collapse>
             <Divider style={{ backgroundColor: '#444' }} />
@@ -580,14 +768,35 @@ const AboutSettings = ({ goBack }) => {
             </ListItem>
             <Collapse in={open.me} timeout="auto" unmountOnExit>
                 <Typography variant="body1" className="settings-typography">
-                    Nhà phát triển ứng dụng: Nguyễn Hà Bảo Khang. Chúng tôi chuyên tạo ra các giải pháp công nghệ sáng tạo,
-                    mang lại trải nghiệm nghe nhạc tốt nhất cho người dùng. Đừng ngần ngại liên hệ với chúng tôi nếu có bất kỳ câu hỏi hoặc góp ý nào.
+                    <strong>Nhà phát triển ứng dụng:</strong> Nguyễn Hà Bảo Khang. Chúng tôi là một nhóm chuyên gia đam mê công nghệ và âm nhạc, cam kết mang đến cho người dùng những trải nghiệm nghe nhạc tốt nhất qua ứng dụng SoundScape. Với sứ mệnh kết nối con người qua âm nhạc, chúng tôi tin rằng âm nhạc không chỉ là một phần trong cuộc sống mà còn là một ngôn ngữ toàn cầu giúp xóa nhòa mọi khoảng cách giữa các nền văn hóa và thế hệ.
+                    <br />
+                    <br />
+                    Ứng dụng của chúng tôi được thiết kế với tâm huyết nhằm cung cấp cho người dùng một không gian tuyệt vời để khám phá, thưởng thức và chia sẻ âm nhạc. Tại SoundScape, người dùng có thể tìm kiếm hàng triệu bài hát từ các thể loại khác nhau, từ nhạc pop, rock, jazz đến nhạc cổ điển và hơn thế nữa. Chúng tôi đã tạo ra một thư viện âm nhạc phong phú, nơi bạn có thể dễ dàng tìm thấy những bản nhạc yêu thích của mình cũng như khám phá những tác phẩm mới lạ, đầy cảm hứng từ các nghệ sĩ trên toàn thế giới.
+                    <br />
+                    <br />
+                    Chúng tôi hiểu rằng mỗi người dùng đều có sở thích và gu âm nhạc riêng, vì vậy chúng tôi đã triển khai các tính năng cá nhân hóa thông minh. Hệ thống gợi ý của chúng tôi sẽ giúp bạn tìm kiếm những bài hát và danh sách phát phù hợp nhất với tâm trạng và sở thích của bạn, giúp bạn dễ dàng khám phá những âm thanh mới và những trải nghiệm mới.
+                    <br />
+                    <br />
+                    Không chỉ dừng lại ở việc thưởng thức âm nhạc, chúng tôi cũng khuyến khích người dùng tương tác và chia sẻ quan điểm của họ về các bài hát thông qua các bình luận và đánh giá. Đây không chỉ là một nền tảng nghe nhạc mà còn là một cộng đồng yêu thích âm nhạc, nơi bạn có thể kết nối với những người có cùng sở thích, cùng nhau khám phá những xu hướng mới trong âm nhạc và chia sẻ những trải nghiệm của riêng mình.
+                    <br />
+                    <br />
+                    Đội ngũ phát triển của chúng tôi luôn nỗ lực cải tiến và tối ưu hóa ứng dụng, đảm bảo rằng người dùng luôn có trải nghiệm tốt nhất. Chúng tôi lắng nghe phản hồi của bạn và thực hiện các cập nhật thường xuyên để nâng cao hiệu suất và tính năng của ứng dụng. Sự hài lòng của bạn là động lực lớn nhất để chúng tôi không ngừng phát triển.
+                    <br />
+                    <br />
+                    Để đảm bảo an toàn và bảo mật cho người dùng, chúng tôi đã tích hợp nhiều tính năng bảo mật như xác thực hai lớp (2FA), nhằm bảo vệ thông tin cá nhân của bạn. Chúng tôi cam kết rằng mọi thông tin của bạn sẽ được bảo mật và không bao giờ bị chia sẻ cho bên thứ ba mà không có sự đồng ý của bạn.
+                    <br />
+                    <br />
+                    Nếu bạn có bất kỳ câu hỏi nào, hoặc muốn chia sẻ ý kiến và góp ý của mình về ứng dụng, xin đừng ngần ngại liên hệ với chúng tôi qua email: <a href="mailto:nhbkhang12@gmail.com">nhbkhang12@gmail.com</a>. Chúng tôi rất trân trọng mọi phản hồi từ bạn, vì đó chính là cơ hội để chúng tôi cải thiện và phát triển.
+                    <br />
+                    <br />
+                    Cuối cùng, chúng tôi muốn gửi lời cảm ơn chân thành đến bạn vì đã lựa chọn SoundScape làm bạn đồng hành trong hành trình âm nhạc của mình. Hãy cùng nhau khám phá và tận hưởng những giai điệu tuyệt vời, tạo nên những kỷ niệm đáng nhớ và kết nối sâu sắc hơn qua âm nhạc. Chúng tôi rất mong chờ được đồng hành cùng bạn trên con đường khám phá âm nhạc này, và hy vọng rằng SoundScape sẽ là nơi bạn tìm thấy niềm vui và sự kết nối qua những giai điệu yêu thích của mình.
                 </Typography>
             </Collapse>
         </List>
     )
 };
 
+// PREMIUM SETTINGS
 const PremiumSettings = ({ goBack }) => {
     const { user } = useUser();
 

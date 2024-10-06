@@ -52,23 +52,11 @@ class TwoFactorAuthViewSet(viewsets.ViewSet):
 
         try:
             if TOTPDevice.objects.filter(user=user).exists():
-                return Response({"detail": "2FA is already enabled."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"detail": "2FA is already enabled."}, status=status.HTTP_202_ACCEPTED)
 
             device = TOTPDevice.objects.create(user=user, name="SoundScape")
 
-            custom_label = "SoundScape"
-            params = {
-                'secret': base64.b32encode(device.bin_key).decode('utf-8'),
-                'algorithm': 'SHA1',
-                'digits': device.digits,
-                'period': device.step,
-            }
-            urlencoded_params = urlencode(params)
-
-            issuer = "SoundScape"
-            label = f"{custom_label}:{user.username}"
-            url = f"otpauth://totp/{quote(label)}?{urlencoded_params}&issuer={quote(issuer)}"
-
+            url = self.create_2fa_url(device, user)
             img = qrcode.make(url)
             buffered = BytesIO()
             img.save(buffered, format="PNG")
@@ -94,3 +82,53 @@ class TwoFactorAuthViewSet(viewsets.ViewSet):
             return Response({"status": "verified"}, status=status.HTTP_200_OK)
         else:
             return Response({"status": "invalid"}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['post'], url_path='disable')
+    def disable_2fa(self, request):
+        user = request.user
+
+        try:
+            device = TOTPDevice.objects.filter(user=user).first()
+            device.confirm = False
+            device.save()
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            print(e)
+            return Response({"detail": "An error occurred while enabling 2FA."}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['get'], url_path='resend-qr')
+    def resend_qr(self, request):
+        user = request.user
+
+        try:
+            device, created = TOTPDevice.objects.get_or_create(user=user, name="SoundScape")
+
+            img = qrcode.make(self.create_2fa_url(device, user))
+            buffered = BytesIO()
+            img.save(buffered, format="PNG")
+            img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+
+            return Response({
+                "qr_code": f"data:image/png;base64,{img_str}"
+            }, status=status.HTTP_202_ACCEPTED)
+        except Exception as e:
+            print(e)
+            return Response({"detail": "An error occurred while enabling 2FA."}, status=status.HTTP_400_BAD_REQUEST)
+
+    @staticmethod
+    def create_2fa_url(device, user):
+        custom_label = "SoundScape"
+        params = {
+            'secret': base64.b32encode(device.bin_key).decode('utf-8'),
+            'algorithm': 'SHA1',
+            'digits': device.digits,
+            'period': device.step,
+        }
+        urlencoded_params = urlencode(params)
+
+        issuer = "SoundScape"
+        label = f"{custom_label}:{user.username}"
+        url = f"otpauth://totp/{quote(label)}?{urlencoded_params}&issuer={quote(issuer)}"
+
+        return url

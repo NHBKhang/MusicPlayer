@@ -23,7 +23,7 @@ const LoginPage = () => {
     useEffect(() => {
         if (currentUser)
             navigate('/');
-    }, []);
+    }, [currentUser, navigate]);
 
     const onLogin = async (e) => {
         e.preventDefault();
