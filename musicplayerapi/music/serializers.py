@@ -54,6 +54,7 @@ class PublicUserSerializer(serializers.ModelSerializer):
 
 class UserSerializer(PublicUserSerializer):
     premium = serializers.SerializerMethodField(read_only=True)
+    is_2fa_enabled = serializers.SerializerMethodField(read_only=True)
 
     def create(self, validated_data):
         data = validated_data.copy()
@@ -69,9 +70,13 @@ class UserSerializer(PublicUserSerializer):
             return PremiumSubscriptionSerializer(user.premium_subscription).data
         return None
 
+    def get_is_2fa_enabled(self, user):
+        from django_otp.plugins.otp_totp.models import TOTPDevice
+        return TOTPDevice.objects.filter(user=user).exists()
+
     class Meta:
         model = PublicUserSerializer.Meta.model
-        fields = PublicUserSerializer.Meta.fields + ['email', 'password', 'premium']
+        fields = PublicUserSerializer.Meta.fields + ['email', 'password', 'premium', 'is_2fa_enabled']
         extra_kwargs = {
             'password': {
                 'write_only': True

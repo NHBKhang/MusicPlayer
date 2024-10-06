@@ -37,6 +37,8 @@ export const endpoints = {
     'readonly-songs': '/readonly-songs/',
     'live-streams': '/live-streams/',
     'live-stream': (streamId) => `/live-streams/${streamId}/`,
+    'enable-2fa': '/auth/2fa/enable/',
+    'verify-2fa': '/auth/2fa/verify/',
 }
 
 export const authAPI = (accessToken) =>

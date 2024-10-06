@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'oauth2_provider',
     'music',
     'channels',
+    'django_otp',
+    'django_otp.plugins.otp_totp',
 ]
 
 MIDDLEWARE = [
@@ -58,6 +60,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'oauth2_provider.middleware.OAuth2TokenMiddleware',
+    'django_otp.middleware.OTPMiddleware',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True

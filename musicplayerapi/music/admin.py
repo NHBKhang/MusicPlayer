@@ -8,6 +8,7 @@ from django.utils.timezone import now
 from music.models import *
 from music import utils
 from oauth2_provider.models import Application, IDToken, AccessToken, RefreshToken, Grant
+from django_otp.plugins.otp_totp.models import TOTPDevice
 import cloudinary
 
 
@@ -148,3 +149,4 @@ admin_site.register(AccessToken)
 admin_site.register(RefreshToken)
 admin_site.register(Grant)
 admin_site.register(IDToken)
+admin_site.register(TOTPDevice)

@@ -4,6 +4,7 @@ import { useUser } from '../configs/UserContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { GoogleButton, FacebookButton } from '../components';
 import { usePageTitle } from '../components/PageTitle';
+import { authAPI, endpoints } from '../configs/API';
 
 const LoginPage = () => {
     usePageTitle("Log in");
@@ -12,26 +13,43 @@ const LoginPage = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [showPassword, setShowPassword] = useState(false);
-    const { login, user } = useUser();
+    const [code, setCode] = useState('');
+    const [user, setUser] = useState(null);
+    const { login, getAccessToken, saveUser, user: currentUser } = useUser();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const next = searchParams.get('next') || '/';
 
     useEffect(() => {
-        if (user)
+        if (currentUser)
             navigate('/');
-    }, [user, navigate]);
+    }, []);
 
     const onLogin = async (e) => {
         e.preventDefault();
         setLoading(true);
 
         try {
-            await login(username, password);
-            navigate(next);
+            if (user) {
+                let res = await authAPI(await getAccessToken()).post(endpoints["verify-2fa"],
+                    { token: code });
+
+                if (res.status === 200) {
+                    navigate(next);
+                    saveUser(user);
+                }
+            } else {
+                let u = await login(username, password);
+                setUser(u);
+
+                if (!u.is_2fa_enabled) {
+                    navigate(next);
+                    saveUser(u);
+                }
+            }
         } catch (error) {
-            setError(error.response?.data?.error_description);
-            console.info(error);
+            console.error(error);
+            setError(error.response?.data?.detail || error.message);
         } finally {
             setLoading(false);
         }
@@ -58,7 +76,8 @@ const LoginPage = () => {
                                         id="username"
                                         value={username}
                                         onChange={(e) => setUsername(e.target.value)}
-                                        required />
+                                        required
+                                        disabled={user} />
                                     <div className="form-icon">
                                         <i class="fa-solid fa-user"></i>
                                     </div>
@@ -71,13 +90,26 @@ const LoginPage = () => {
                                         id="password"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        required />
+                                        required
+                                        disabled={user} />
                                     <button
                                         className="form-icon" type='button'
                                         onClick={() => setShowPassword(!showPassword)}>
                                         {showPassword ? <i class="fa-solid fa-eye"></i> : <i class="fa-solid fa-eye-slash"></i>}
                                     </button>
                                 </div>
+                                {user &&
+                                    <div className="form-group mb-3">
+                                        <label htmlFor="password" className='input-label'>Mã xác thực</label>
+                                        <input
+                                            type='text'
+                                            className="form-control"
+                                            id="password"
+                                            value={code}
+                                            onChange={(e) => setCode(e.target.value)}
+                                            required />
+                                    </div>
+                                }
                                 <div className="error-text">{error}</div>
                                 <button
                                     type="submit"

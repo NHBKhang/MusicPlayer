@@ -28,7 +28,8 @@ export const UserProvider = ({ children }) => {
                 "grant_type": "password"
             });
 
-            loginWithToken(res.data);
+            let user = await loginWithToken(res.data);
+            return user;
         } catch (error) {
             throw error;
         }
@@ -44,18 +45,15 @@ export const UserProvider = ({ children }) => {
 
         try {
             const res = await authAPI(token.access_token).get(endpoints['current-user']);
-            setUser(res.data);
-            localStorage.setItem('user', JSON.stringify(res.data));
+            return res.data;
         } catch (error) {
             const refreshedAccessToken = await refreshAccessToken();
             if (refreshedAccessToken) {
                 const res = await authAPI(refreshedAccessToken).get(endpoints['current-user']);
-                setUser(res.data);
-                localStorage.setItem('user', JSON.stringify(res.data));
+                return res.data;
             } else {
                 logout();
             }
-            throw error;
         }
     };
 
@@ -131,7 +129,6 @@ export const UserProvider = ({ children }) => {
         const currentDate = new Date();
 
         try {
-            console.info(user)
             if (user.premium && user.premium.start_date && user.premium.end_date) {
                 const startDate = new Date(user.premium.start_date);
                 const endDate = new Date(user.premium.end_date);

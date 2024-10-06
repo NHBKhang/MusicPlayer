@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Page from ".";
 import '../styles/SettingsPage.css';
 import { useUser } from "../configs/UserContext";
-import { List, ListItem, ListItemText, Divider, Collapse, Typography, IconButton } from "@mui/material";
+import { authAPI, endpoints } from "../configs/API";
+import { List, ListItem, ListItemText, Divider, Collapse, Typography, IconButton, TextField, Button, Box, CircularProgress, Switch } from "@mui/material";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import PrivacyTipIcon from '@mui/icons-material/PrivacyTip';
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -15,6 +16,8 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import DeleteIcon from '@mui/icons-material/Delete';
 import TwoFactorAuthIcon from '@mui/icons-material/VerifiedUser';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 const SettingsPage = () => {
     const [currentPage, setCurrentPage] = useState('main');
@@ -118,6 +121,23 @@ const SettingsPage = () => {
 };
 
 const AccountSettings = ({ goBack }) => {
+    const [activeItem, setActiveItem] = useState(0);
+    const { user, getAccessToken, saveUser } = useUser();
+
+    const backToAccount = () => {
+        setActiveItem(0);
+    }
+
+    if (activeItem === 1)
+        return <ChangePassword
+            backToAccount={backToAccount}
+            getAccessToken={getAccessToken} />
+    if (activeItem === 2)
+        return <TwoFactorAuth
+            backToAccount={backToAccount}
+            getAccessToken={getAccessToken}
+            saveUser={saveUser} />
+
     return (
         <List
             style={{
@@ -134,22 +154,302 @@ const AccountSettings = ({ goBack }) => {
             </ListItem>
             <Divider style={{ backgroundColor: '#444' }} />
 
-            <ListItem button>
+            <ListItem button onClick={() => setActiveItem(1)}>
                 <IconButton edge="start" style={{ color: '#fff' }}>
                     <VpnKeyIcon />
                 </IconButton>
                 <ListItemText primary="Đổi mật khẩu" primaryTypographyProps={{ style: { color: '#fff' } }} />
-            </ListItem><Divider style={{ backgroundColor: '#444' }} />
+            </ListItem>
+            <Divider style={{ backgroundColor: '#444' }} />
 
-            <ListItem button>
+            <ListItem button onClick={() => {
+                if (user.is_2fa_enabled)
+                    return;
+                else
+                    setActiveItem(2)
+            }}>
                 <IconButton edge="start" style={{ color: '#fff' }}>
                     <TwoFactorAuthIcon />
                 </IconButton>
                 <ListItemText primary="Xác thực 2 lớp (2FA)" primaryTypographyProps={{ style: { color: '#fff' } }} />
+                <Switch
+                    checked={user.is_2fa_enabled}
+                    color="primary" />
             </ListItem>
         </List>
-    )
+    );
 };
+
+const ChangePassword = ({ backToAccount, getAccessToken }) => {
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [password, setPassword] = useState({});
+    const [showPassword, setShowPassword] = useState({});
+
+    const updatedPassword = (field, value) => {
+        setPassword(current => ({ ...current, [field]: value }));
+    }
+
+    const toggleShowPassword = (field) => {
+        setShowPassword(current => ({ ...current, [field]: !current[field] }));
+    };
+
+    const handlePasswordChangeSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        if (password.new !== password.confirm) {
+            setError('Mật khẩu mới không khớp.');
+            return;
+        }
+
+        try {
+            let res = await authAPI(await getAccessToken()).post(endpoints["set-password"],
+                {
+                    current_password: password.current,
+                    new_password: password.new
+                }, {
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+
+            if (res.status === 204) {
+                backToAccount();
+            }
+        } catch (error) {
+            console.error(error);
+            if (error.response?.data?.detail) {
+                setError(error.response?.data?.detail);
+            } else {
+                setError(error.message);
+            }
+        } finally {
+            setPassword({ current: '', new: '', confirm: '' });
+            setLoading(false);
+        }
+    };
+
+    return (
+        <Box
+            component="form"
+            onSubmit={handlePasswordChangeSubmit}
+            sx={{
+                padding: 3,
+                backgroundColor: 'rgba(42, 42, 42, 0.8)',
+                borderRadius: 2,
+                boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
+                maxWidth: 400,
+                margin: '0 auto',
+            }}>
+            <Typography variant="h5" align="center" gutterBottom style={{ color: '#fff' }}>
+                Đổi mật khẩu
+            </Typography>
+
+            <TextField
+                label="Mật khẩu hiện tại"
+                type={showPassword?.current ? 'text' : 'password'}
+                fullWidth
+                margin="normal"
+                required
+                value={password?.current}
+                onChange={(e) => updatedPassword('current', e.target.value)}
+                InputLabelProps={{
+                    style: { color: '#fff' },
+                }}
+                InputProps={{
+                    style: { color: '#fff' },
+                    endAdornment: (
+                        <IconButton
+                            onClick={() => toggleShowPassword('current')}
+                            edge="end"
+                            style={{ color: '#fff' }}>
+                            {showPassword?.current ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                    ),
+                }} />
+
+            <TextField
+                label="Mật khẩu mới"
+                type={showPassword?.new ? 'text' : 'password'}
+                fullWidth
+                margin="normal"
+                required
+                value={password?.new}
+                onChange={(e) => updatedPassword('new', e.target.value)}
+                InputLabelProps={{
+                    style: { color: '#fff' },
+                }}
+                InputProps={{
+                    style: { color: '#fff' },
+                    endAdornment: (
+                        <IconButton
+                            onClick={() => toggleShowPassword('new')}
+                            edge="end"
+                            style={{ color: '#fff' }}>
+                            {showPassword?.new ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                    ),
+                }} />
+
+            <TextField
+                label="Xác nhận mật khẩu"
+                type={showPassword?.confirm ? 'text' : 'password'}
+                fullWidth
+                margin="normal"
+                required
+                value={password?.confirm}
+                onChange={(e) => updatedPassword('confirm', e.target.value)}
+                InputLabelProps={{
+                    style: { color: '#fff' },
+                }}
+                InputProps={{
+                    style: { color: '#fff' },
+                    endAdornment: (
+                        <IconButton
+                            onClick={() => toggleShowPassword('confirm')}
+                            edge="end"
+                            style={{ color: '#fff' }}>
+                            {showPassword?.confirm ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                    ),
+                }} />
+
+            {error && (
+                <Typography variant="body2" color="error" align="center">
+                    {error}
+                </Typography>
+            )}
+
+            <Box display="flex" justifyContent={loading ? 'center' : 'space-between'} mt={2}>
+                {loading ? (
+                    <CircularProgress size={24} />
+                ) : (
+                    <>
+                        <Button variant="contained" color="primary" type="submit">
+                            Đổi mật khẩu
+                        </Button>
+                        <Button variant="outlined" onClick={backToAccount}>
+                            Quay lại
+                        </Button>
+                    </>
+                )}
+            </Box>
+        </Box>
+    );
+}
+
+const TwoFactorAuth = ({ backToAccount, getAccessToken, saveUser }) => {
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [qrCode, setQrCode] = useState('');
+    const [verificationCode, setVerificationCode] = useState('');
+
+    useEffect(() => {
+        const toggle2FA = async () => {
+            try {
+                const res = await authAPI(await getAccessToken()).post(endpoints["enable-2fa"]);
+                if (res.status === 201) {
+                    setQrCode(res.data.qr_code);
+                    setError('');
+                }
+            } catch (error) {
+                console.error(error);
+                if (error.response?.data?.detail) {
+                    alert(error.response?.data?.detail);
+                } else {
+                    alert(error.message);
+                }
+            }
+        };
+
+        toggle2FA();
+    }, [getAccessToken]);
+
+    const handle2FAVerify = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+
+        try {
+            let res = await authAPI(await getAccessToken()).post(endpoints["verify-2fa"],
+                { token: verificationCode });
+            if (res.status === 200) {
+                saveUser({ is_2fa_enabled: true }, true);
+                setQrCode('');
+                setVerificationCode('');
+                backToAccount();
+            }
+        } catch (error) {
+            console.error(error);
+            setError(error.response?.data?.detail || error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <Box
+            component="form"
+            onSubmit={handle2FAVerify}
+            sx={{
+                padding: 3,
+                backgroundColor: 'rgba(42, 42, 42, 0.8)',
+                borderRadius: 2,
+                boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
+                maxWidth: 400,
+                margin: '0 auto',
+            }}>
+            <Typography variant="h5" align="center" gutterBottom style={{ color: '#fff' }}>
+                Xác thực 2 lớp
+            </Typography>
+
+            {qrCode && (
+                <Box mt={2} textAlign="center">
+                    <img src={qrCode} alt="QR Code for 2FA" style={{ maxWidth: '100%', height: 'auto' }} className="mb-2" />
+                    <Typography variant="body2" style={{ color: '#fff', marginTop: 8 }}>
+                        Quét mã QR bằng ứng dụng xác thực của bạn.
+                    </Typography>
+                </Box>
+            )}
+
+            <TextField
+                label="Mã xác thực"
+                type="text"
+                fullWidth
+                margin="normal"
+                required
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value)}
+                InputLabelProps={{
+                    style: { color: '#fff' },
+                }}
+                InputProps={{
+                    style: { color: '#fff' },
+                }} />
+
+            {error && (
+                <Typography variant="body2" color="error" align="center">
+                    {error}
+                </Typography>
+            )}
+
+            <Box display="flex" justifyContent={loading ? 'center' : 'space-between'} mt={2}>
+                {loading ? (
+                    <CircularProgress size={24} />
+                ) : (
+                    <>
+                        <Button variant="contained" color="primary" type="submit">
+                            Xác thực
+                        </Button>
+                        <Button variant="outlined" onClick={backToAccount}>
+                            Quay lại
+                        </Button>
+                    </>
+                )}
+            </Box>
+        </Box>
+    );
+}
 
 const NotificationSettings = ({ goBack }) => {
     return (

@@ -31,11 +31,14 @@ const SetPasswordPage = () => {
         setError(null);
 
         try {
-            await authAPI(await getAccessToken())
+            let res = await authAPI(await getAccessToken())
                 .post(endpoints['set-password'],
                     { new_password: password });
-            setPassword('');
-            navigate('/');
+
+            if (res.status === 204) {
+                setPassword('');
+                navigate('/');
+            }
         } catch (error) {
             setError(error.response?.data?.error || 'Lỗi không xác định');
         } finally {

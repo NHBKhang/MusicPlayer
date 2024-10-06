@@ -11,3 +11,16 @@
     - Lệnh tạo scheme SQL: 
         ##
             CREATE SCHEMA musicdb DEFAULT CHARACTER SET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    - Lệnh chạy ReactJS: 
+        ##
+            npm start
+    - Lệnh chạy Django: 
+        ##
+            python manage.py runserver
+    - Lệnh chạy Django với Daphne: 
+        ##
+            daphne -p 8000 musicplayerapi.asgi:application
+    - Lệnh chạy Redis server (cmd): 
+        ##
+            redis-server
+
