@@ -163,6 +163,7 @@ const LiveStreamPage = () => {
                             </div>
                             {isStreaming && (
                                 <div className="session-container">
+                                    <p className="m-0">Lượt xem: <strong>{views}</strong></p>
                                     <div>
                                         <p className="m-0">Session ID: <strong>{liveStream.session_id}</strong></p>
                                         <span
@@ -172,7 +173,6 @@ const LiveStreamPage = () => {
                                             <i className="fa-solid fa-copy"></i>
                                         </span>
                                     </div>
-                                    <p className="m-0">Lượt xem: <strong>{views}</strong></p>
                                 </div>
                             )}
                         </div>

@@ -14,6 +14,7 @@ import {
     SettingsPage,
     SignupPage,
     SongDetailsPage,
+    SupportPage,
     UploadPage,
     VideoDetailsPage
 } from "../pages";
@@ -144,6 +145,12 @@ export const routes = {
         url: '/premium/',
         component: PremiumSubscriptionPage,
         require: true,
+        controlShow: false
+    },
+    support: {
+        url: '/support/',
+        component: SupportPage,
+        require: false,
         controlShow: false
     }
 }

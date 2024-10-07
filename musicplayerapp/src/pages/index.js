@@ -59,3 +59,4 @@ export { default as LiveStreamPage } from './LiveStreamPage';
 export { default as LiveViewerPage } from './LiveViewerPage';
 export { default as SettingsPage } from './SettingsPage';
 export { default as PremiumSubscriptionPage } from './PremiumSubscriptionPage';
+export { default as SupportPage } from './SupportPage';
