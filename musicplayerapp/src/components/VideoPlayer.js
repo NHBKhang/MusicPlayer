@@ -67,7 +67,7 @@ const VideoPlayer = memo(({ src, live = false, releaseDate = null }) => {
 
     return (
         <div>
-            <video id="video-player" className="video-js vjs-default-skin" controls width="640" height="360" />
+            <video id="video-player" className="video-js vjs-default-skin w-100 h-100" controls />
         </div>
     );
 });

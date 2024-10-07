@@ -60,40 +60,42 @@ const VideoDetailsPage = () => {
 
     return (
         <Page title={`${video.title}`}>
-            <div className="video-details-page row">
-                <div className='col-lg-9 text-start'>
-                    <div className="video-container">
-                        <VideoPlayer src={video.file} />
-                    </div>
-                    <h4>{video.title}</h4>
-                    <div className="d-flex align-items-center cursor-pointer" style={{ gap: '12px' }}>
-                        <img onClick={goToArtist}
-                            src={video.uploader.avatar}
-                            alt={video.uploader.name}
-                            width={40}
-                            height={40}
-                            className='rounded-circle' />
-                        <div className='d-flex' style={{ flexDirection: 'column' }}
-                            onClick={goToArtist}>
-                            <h6 className='m-0'>{video.uploader.name}</h6>
-                            <p className='m-0'>{video.uploader.followers} người theo dõi</p>
+            <div className='video-details-page'>
+                <div className="row mt-4">
+                    <div className='col-md-8 text-start'>
+                        <div className="video-container">
+                            <VideoPlayer src={video.file} />
                         </div>
-                        {user.id !== video.uploader.id &&
-                            <button className={`follow-button ${video.followed && 'followed'}`} onClick={follow}>
-                                {video?.followed ? (<>
-                                    <i class="fa-solid fa-user-check"></i>
-                                    <p className='text-black m-0'> Đã theo dõi</p>
-                                </>) : (<>
-                                    <i class="fa-solid fa-user-plus"></i>
-                                    <p className='text-black m-0'> Theo dõi</p>
-                                </>)}
-                            </button>}
+                        <h4>{video.title}</h4>
+                        <div className="d-flex align-items-center cursor-pointer" style={{ gap: '12px' }}>
+                            <img onClick={goToArtist}
+                                src={video.uploader.avatar}
+                                alt={video.uploader.name}
+                                width={40}
+                                height={40}
+                                className='rounded-circle' />
+                            <div className='d-flex' style={{ flexDirection: 'column' }}
+                                onClick={goToArtist}>
+                                <h6 className='m-0'>{video.uploader.name}</h6>
+                                <p className='m-0'>{video.uploader.followers} người theo dõi</p>
+                            </div>
+                            {user.id !== video.uploader.id &&
+                                <button className={`follow-button ${video.followed && 'followed'}`} onClick={follow}>
+                                    {video?.followed ? (<>
+                                        <i class="fa-solid fa-user-check"></i>
+                                        <p className='text-black m-0'> Đã theo dõi</p>
+                                    </>) : (<>
+                                        <i class="fa-solid fa-user-plus"></i>
+                                        <p className='text-black m-0'> Theo dõi</p>
+                                    </>)}
+                                </button>}
+                        </div>
+                        <p className="description">{video.description}</p>
                     </div>
-                    <p className="description">{video.description}</p>
-                </div>
-            </div>
-            <div className='col-md-3'>
+                    <div className='col-md-4'>
 
+                    </div>
+                </div>
             </div>
         </Page>
     );

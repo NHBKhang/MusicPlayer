@@ -88,6 +88,7 @@ const Upload = () => {
         const maxMB = 30;
         const maxSize = maxMB * 1024 * 1024;
         const maxSizeError = `Dung lượng file vượt quá giới hạn ${maxMB}MB`;
+        const isPremium = checkPremiumActive();
 
         const newSongs = acceptedFiles
             .filter(file => file.type.includes('audio'))
@@ -101,7 +102,7 @@ const Upload = () => {
                 description: '',
                 isPublic: 1,
                 isUpload: false,
-                error: checkPremiumActive() || file.size <= maxSize ? null : maxSizeError
+                error: isPremium || file.size <= maxSize ? null : maxSizeError
             }));
 
         const newVideos = acceptedFiles
@@ -114,7 +115,7 @@ const Upload = () => {
                 song: 0,
                 isPublic: 1,
                 isUpload: false,
-                error: checkPremiumActive() || file.size <= maxSize ? null : maxSizeError
+                error: isPremium || file.size <= maxSize ? null : maxSizeError
             }));
 
         setSongs((prevSongs) => [...prevSongs, ...newSongs]);
@@ -251,12 +252,12 @@ const Upload = () => {
     return (
         <div>
             <h3 className='my-4'>Upload nhạc</h3>
-            <div className="upload-notification">
+            {!checkPremiumActive() &&<div className="upload-notification">
                 <p className='m-0'>Dung lượng tối đa cho mỗi file là 30MB. Nâng cấp lên Premium để tải lên tệp lớn hơn.</p>
                 <button className="premium-button" onClick={() => window.open('/premium/', '_blank')}>
                     Đăng ký Premium <WorkspacePremiumIcon style={{ color: 'gold' }} />
                 </button>
-            </div>
+            </div>}
             <div
                 {...getRootProps()}
                 style={{

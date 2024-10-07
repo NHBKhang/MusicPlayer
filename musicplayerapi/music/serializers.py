@@ -9,9 +9,6 @@ class UserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserInfo
         fields = ['display_name', 'bio', 'verified']
-        extra_kwargs = {
-            'display_name': {'write_only': True}
-        }
 
 
 class PremiumSubscriptionSerializer(serializers.ModelSerializer):

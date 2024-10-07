@@ -152,16 +152,18 @@ const LiveViewerPage = () => {
   }, [id, getAccessToken]);
 
   const goToArtist = () => navigate(`/profile/${liveStream.user.id}/`)
-  const follow = () => { 
+  const follow = () => {
 
   }
 
   return (
     <Page title={liveStream?.title || 'Phiên trực tuyến'}>
       <div className='row'>
-        <div className="video-container col-md-8 text-start">
-          <video ref={videoRef} className="video-js vjs-default-skin mb-2" controls preload="auto" />
-          <span className='views'><i class="fa-solid fa-eye"></i> {views}</span>
+        <div className="col-md-8 text-start">
+          <div className='video-container '>
+            <video ref={videoRef} className="video-js vjs-default-skin mb-2" controls preload="auto" />
+            <span className='views'><i class="fa-solid fa-eye"></i> {views}</span>
+          </div>
           <h4>{liveStream?.title}</h4>
           <div className="d-flex align-items-center cursor-pointer" style={{ gap: '12px' }}>
             <img onClick={goToArtist}

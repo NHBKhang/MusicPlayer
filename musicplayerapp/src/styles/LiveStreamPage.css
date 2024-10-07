@@ -160,7 +160,7 @@ button.live-button {
 
 .video-container .views {
     position: absolute;
-    left: 12px;
+    left: 0;
     border: 1px solid whitesmoke;
     border-radius: 5px;
     padding: 5px;
