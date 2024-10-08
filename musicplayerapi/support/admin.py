@@ -1,3 +1,5 @@
-from django.contrib import admin
+from music.admin import admin_site
+from support.models import *
 
-# Register your models here.
+admin_site.register(Feedback)
+admin_site.register(SupportTicket)

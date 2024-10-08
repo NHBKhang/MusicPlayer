@@ -14,6 +14,8 @@ import {
     SettingsPage,
     SignupPage,
     SongDetailsPage,
+    SupportFAQPage,
+    SupportFeedbackPage,
     SupportPage,
     UploadPage,
     VideoDetailsPage
@@ -150,6 +152,18 @@ export const routes = {
     support: {
         url: '/support/',
         component: SupportPage,
+        require: false,
+        controlShow: false
+    },
+    supportFAQ: {
+        url: '/support/faq/',
+        component: SupportFAQPage,
+        require: false,
+        controlShow: false
+    },
+    supportFeedback: {
+        url: '/support/feedback/',
+        component: SupportFeedbackPage,
         require: false,
         controlShow: false
     }

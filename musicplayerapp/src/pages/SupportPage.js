@@ -1,29 +1,29 @@
 import React, { useEffect, useRef, useState } from 'react';
 import '../styles/SupportPage.css';
 import API, { endpoints } from '../configs/API';
+import { usePageTitle } from '../components/PageTitle';
 
 const SupportPage = () => {
+    usePageTitle("Hỗ trợ");
     const [searchQuery, setSearchQuery] = useState('');
-    const [isChatOpen, setIsChatOpen] = useState(false);
-
-    const toggleChatBox = () => {
-        setIsChatOpen(!isChatOpen);
-    };
 
     const handleSearch = (event) => {
         setSearchQuery(event.target.value);
     };
 
     return (
-        <div>
-            <Header />
+        <SupportContainer>
             <div className="support-page-container">
+                <img
+                    src='/space-laptop.jpg'
+                    alt='support-bg'
+                    className='support-image' />
                 {/* Thanh tìm kiếm */}
                 <section className="search-section">
-                    <h1 className="main-title">How can we help?</h1>
+                    <h1 className="main-title">Chúng tôi có thể giúp gì?</h1>
                     <input
                         type="text"
-                        placeholder="Search for answers"
+                        placeholder="Tìm câu trả lời"
                         value={searchQuery}
                         onChange={handleSearch}
                         className="search-input"
@@ -59,7 +59,10 @@ const SupportPage = () => {
 
                 {/* Câu hỏi thường gặp (FAQ) */}
                 <section className="faq-section">
-                    <h2 className="section-title">Câu Hỏi Thường Gặp</h2>
+                    <div className='faq-header'>
+                        <h2 className="section-title">Câu Hỏi Thường Gặp</h2>
+                        <a href='/support/faq/'>Xem thêm...</a>
+                    </div>
                     <div className="faq-item">
                         <h3 className="faq-question">Làm thế nào để tôi đặt lại mật khẩu của mình?</h3>
                         <p className="faq-answer">
@@ -73,13 +76,28 @@ const SupportPage = () => {
                         </p>
                     </div>
                     <div className="faq-item">
-                        <h3 className="faq-question">Làm thế nào tôi có thể quản lý các đăng ký của mình?</h3>
+                        <h3 className="faq-question">Làm thế nào tôi có thể quản lý các đăng ký Premium của mình?</h3>
                         <p className="faq-answer">
-                            Vào cài đặt tài khoản của bạn để quản lý và cập nhật các đăng ký.
+                            Vào cài đặt tài khoản của bạn để quản lý và cập nhật các đăng ký Premium của bạn.
                         </p>
                     </div>
                 </section>
             </div>
+        </SupportContainer>
+    );
+};
+
+export const SupportContainer = ({ children }) => {
+    const [isChatOpen, setIsChatOpen] = useState(false);
+
+    const toggleChatBox = () => {
+        setIsChatOpen(!isChatOpen);
+    };
+
+    return (
+        <div>
+            <Header />
+            <div className='support-container'>{children}</div>
             <Footer />
             <button className="toggle-chat-btn" onClick={toggleChatBox}>
                 <div className="toggle-icon">
@@ -98,7 +116,7 @@ const SupportPage = () => {
                 <ChatBox />
             </div>
         </div>
-    );
+    )
 };
 
 const Header = () => {
@@ -111,6 +129,7 @@ const Header = () => {
             <nav className="nav-links">
                 <a href="/support">Trang chủ</a>
                 <a href="/support/feedback/">Phản hồi</a>
+                <a href="/support/ticket/">Phiếu Hỗ Trợ</a>
             </nav>
         </header>
     );

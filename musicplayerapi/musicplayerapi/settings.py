@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'channels',
     'django_otp',
     'django_otp.plugins.otp_totp',
+    'support'
 ]
 
 MIDDLEWARE = [

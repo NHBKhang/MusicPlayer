@@ -1,5 +1,5 @@
 from django.db.models import Count, Q
-from music.models import Genre, Stream, Transaction, Notification
+from music.models import Genre, Stream, SongTransaction, Notification, Transaction
 import boto3
 import os
 import subprocess
@@ -51,6 +51,6 @@ def revenue_stats(month=None, date=None):
         except ValueError:
             pass
 
-    transactions = Transaction.objects.filter(filter_conditions, status=Transaction.COMPLETED)
+    transactions = SongTransaction.objects.filter(filter_conditions, status=Transaction.COMPLETED)
 
     return transactions.values('song__title', 'amount_in_vnd').order_by('-amount_in_vnd')[:20]

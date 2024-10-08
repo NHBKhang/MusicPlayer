@@ -7,6 +7,14 @@
     position: relative;
 }
 
+.support-image {
+    height: 400px;
+    width: 100%;
+    padding: 0 25px;
+    margin-bottom: 15px;
+    object-fit: cover;
+}
+
 /* Định dạng tiêu đề chính */
 .main-title {
     text-align: center;
@@ -23,7 +31,7 @@
 
 .search-input {
     width: 60%;
-    padding: 10px 15px;
+    padding: 10px 20px;
     border-radius: 25px;
     border: 1px solid #555;
     font-size: 18px;
@@ -84,6 +92,22 @@
 }
 
 /* Định dạng phần FAQ */
+.faq-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.faq-header a {
+    font-size: 1.05em;
+    cursor: pointer;
+}
+
+.faq-header a:hover {
+    color: rgb(0, 119, 255) !important;
+    text-decoration: underline;
+}
+
 .faq-section {
     margin-bottom: 40px;
 }
@@ -117,13 +141,16 @@
 
 .header-container .logo {
     display: flex;
-    justify-content: center;
-    justify-items: center;
+    align-items: center;
 }
 
 .header-container .logo h1 {
     font-size: 24px;
     color: #1db954;
+}
+
+.header-container .nav-links {
+    display: flex;
 }
 
 .header-container .nav-links a {
@@ -136,6 +163,26 @@
 .header-container .nav-links a:hover {
     color: #1db954;
 }
+
+@media (max-width: 600px) {
+    .header-container {
+        flex-direction: column;
+        align-items: center;
+        padding: 15px;
+    }
+
+    .header-container .nav-links {
+        flex-direction: column;
+        margin-top: 0;
+    }
+
+    .header-container .nav-links a {
+        margin-left: 0;
+        margin-top: 7px;
+        font-size: 16px;
+    }
+}
+
 
 /* Footer  */
 .footer-container {
@@ -183,7 +230,7 @@
     right: 25px;
     z-index: 1000;
     opacity: 0;
-    transform: translateY(100px);
+    transform: translateY(150%);
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
@@ -355,4 +402,144 @@
 .visible {
     opacity: 1;
     transform: scale(1) rotate(0deg);
+}
+
+/* FAQ Page  */
+.faq-page {
+    padding: 20px;
+    padding: 40px;
+    margin: auto;
+    min-height: calc(100vh - 190px);
+    background-color: #1e1e1e;
+    text-align: justify;
+}
+
+.faq-page h1 {
+    font-size: 2.5rem;
+}
+
+.faq-page .faq-list {
+    margin-top: 20px;
+    padding: 20px 0;
+}
+
+.faq-page .faq-item {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+}
+
+.faq-page .faq-question {
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    color: #1db954;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.faq-page .toggle-icon {
+    font-size: 30px;
+    padding: 0 15px;
+    color: #e1e1e1;
+    margin-left: 10px;
+}
+
+.faq-page .faq-answer {
+    margin-top: 10px;
+    color: #ececec;
+    font-size: 1.2rem;
+}
+
+/* Feedback Page  */
+.feedback-page {
+    padding: 20px;
+    background-color: #1e1e1e;
+    min-height: calc(100vh - 190px);
+    color: #fff;
+}
+
+.feedback-page h1 {
+    margin-bottom: 20px;
+    color: #1db954;
+}
+
+.feedback-page form {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    /* Space between avatar and text area */
+}
+
+.feedback-page img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+/* Textarea styling */
+.feedback-page textarea {
+    flex-grow: 1;
+    /* Textarea will take up remaining space */
+    padding: 15px;
+    border-radius: 8px;
+    border: none;
+    background-color: #333;
+    color: white;
+    font-size: 16px;
+    resize: none;
+    outline: none;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.feedback-page textarea:focus {
+    border: 2px solid #1db954;
+}
+
+/* Submit button styling */
+.feedback-page button[type="submit"] {
+    padding: 12px;
+    background-color: #1db954;
+    width: 88px;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.feedback-page button[type="submit"]:hover {
+    background-color: #17a746;
+}
+
+.feedback-page table {
+    width: 100%;
+    margin-top: 30px;
+    border-collapse: collapse;
+}
+
+.feedback-page th,
+.feedback-page td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.feedback-page th {
+    background-color: #333;
+    color: #fff;
+}
+
+.feedback-page button {
+    background-color: #1db954;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.feedback-page button:hover {
+    background-color: #17a746;
 }

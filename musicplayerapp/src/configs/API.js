@@ -42,6 +42,7 @@ export const endpoints = {
     'disable-2fa': '/auth/2fa/disable/',
     'resend-2fa-qr': '/auth/2fa/resend-qr/',
     'dialogflow-response': '/support/dialogflow/response/',
+    'feedback': 'support/feedback/',
 }
 
 export const authAPI = (accessToken) =>

@@ -674,7 +674,15 @@ const HelpSettings = ({ goBack }) => {
             </ListItem>
             <Divider style={{ backgroundColor: '#444' }} />
 
-            <ListItem button onClick={() => window.open('/support/', '_blank')}>
+            <ListItem button onClick={() => window.open('/support/faq/', '_blank')}>
+                <IconButton edge="start" style={{ color: '#fff' }}>
+                    <HelpIcon />
+                </IconButton>
+                <ListItemText primary="Trung tâm hỗ trợ" primaryTypographyProps={{ style: { color: '#fff' } }} />
+            </ListItem>
+            <Divider style={{ backgroundColor: '#444' }} />
+
+            <ListItem button onClick={() => window.open('/support/faq/', '_blank')}>
                 <IconButton edge="start" style={{ color: '#fff' }}>
                     <HelpIcon />
                 </IconButton>
@@ -682,7 +690,7 @@ const HelpSettings = ({ goBack }) => {
             </ListItem>
             <Divider style={{ backgroundColor: '#444' }} />
 
-            <ListItem button onClick={() => window.open('/support/', '_blank')}>
+            <ListItem button onClick={() => window.open('/support/tickets/', '_blank')}>
                 <IconButton edge="start" style={{ color: '#fff' }}>
                     <ContactSupportIcon />
                 </IconButton>

@@ -60,3 +60,5 @@ export { default as LiveViewerPage } from './LiveViewerPage';
 export { default as SettingsPage } from './SettingsPage';
 export { default as PremiumSubscriptionPage } from './PremiumSubscriptionPage';
 export { default as SupportPage } from './SupportPage';
+export { default as SupportFAQPage } from './SupportFaqPage';
+export { default as SupportFeedbackPage } from './SupportFeedbackPage';

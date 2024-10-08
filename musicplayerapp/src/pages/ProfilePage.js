@@ -72,7 +72,9 @@ const ProfilePage = () => {
                             {`${profile?.first_name ?? ''} ${profile?.last_name ?? ''}`}
                         </p>
                     </div>
-                    {profile?.info?.bio && <div className="profile-bio"><p>{profile?.info?.bio}</p></div>}
+                    {profile?.info?.bio && <div className="profile-bio w-100"><p>
+                        {profile?.info?.bio}
+                    </p></div>}
                 </div>
                 <div className="info-container">
                     <div className="info-item">
@@ -285,6 +287,7 @@ const UserProfileTabs = ({ profile, getAccessToken, state }) => {
                                 playlist={item} />
                         );
                     }
+                    return null;
                 })}
 
                 {page[tabKeys[activeTab]] > 0 && (
