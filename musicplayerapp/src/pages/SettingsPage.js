@@ -674,7 +674,7 @@ const HelpSettings = ({ goBack }) => {
             </ListItem>
             <Divider style={{ backgroundColor: '#444' }} />
 
-            <ListItem button>
+            <ListItem button onClick={() => window.open('/support/', '_blank')}>
                 <IconButton edge="start" style={{ color: '#fff' }}>
                     <HelpIcon />
                 </IconButton>
@@ -682,7 +682,7 @@ const HelpSettings = ({ goBack }) => {
             </ListItem>
             <Divider style={{ backgroundColor: '#444' }} />
 
-            <ListItem button>
+            <ListItem button onClick={() => window.open('/support/', '_blank')}>
                 <IconButton edge="start" style={{ color: '#fff' }}>
                     <ContactSupportIcon />
                 </IconButton>
@@ -690,7 +690,7 @@ const HelpSettings = ({ goBack }) => {
             </ListItem>
             <Divider style={{ backgroundColor: '#444' }} />
 
-            <ListItem button>
+            <ListItem button onClick={() => window.open('/support/feedback/', '_blank')}>
                 <IconButton edge="start" style={{ color: '#fff' }}>
                     <FeedbackIcon />
                 </IconButton>

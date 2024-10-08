@@ -465,14 +465,22 @@ class ReadOnlySongSerializer(serializers.ModelSerializer):
 
 
 class LiveStreamSerializer(serializers.ModelSerializer):
+    user = AuthenticatedUserSerializer(read_only=True)
+
     class Meta:
         model = LiveStream
         fields = ['id', 'session_id', 'title', 'user']
 
+    def create(self, validated_data):
+        user = self.context['request'].user
+        if user and user.is_authenticated:
+            validated_data['user'] = user
+        live = super().create(validated_data)
+
+        return live
+
 
 class LiveStreamDetailsSerializer(LiveStreamSerializer):
-    user = AuthenticatedUserSerializer(read_only=True)
-
     class Meta:
         model = LiveStreamSerializer.Meta.model
-        fields = LiveStreamSerializer.Meta.fields + ['user', 'file']
+        fields = LiveStreamSerializer.Meta.fields + ['file']

@@ -105,6 +105,7 @@ const Header = () => {
     return (
         <header className="header-container">
             <a className="logo" href='/'>
+                <img src="/logo.png" height={35} className="me-2 ms-1" alt="logo" />
                 <h1>SoundScape</h1>
             </a>
             <nav className="nav-links">
@@ -214,10 +215,10 @@ const ChatBox = () => {
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Type your message..."
+                    placeholder="Nhập tin nhắn..."
                     className="chat-input" />
                 <button onClick={handleSendMessage} className="send-button">
-                    Send
+                    Gửi
                 </button>
             </div>
         </div>

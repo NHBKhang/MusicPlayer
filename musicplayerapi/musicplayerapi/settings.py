@@ -246,4 +246,4 @@ CHANNEL_LAYERS = {
 }
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", None)
-GOOGLE_APPLICATION_CREDENTIALS = "C/Users/KHANG/Desktop/" + f'{os.environ.get("GOOGLE_APPLICATION_FILE_NAME")}.json'
+GOOGLE_APPLICATION_CREDENTIALS = "C:/Users/KHANG/Downloads/" + f'{os.environ.get("GOOGLE_APPLICATION_FILE_NAME")}.json'

@@ -62,7 +62,7 @@ const LoginPage = () => {
                     <div className='mb-5 fs-2'>
                         <a className="navbar-brand p-1 m-1" href="/">
                             <img src="/logo.png" height={50} className="me-2 ms-1" alt="logo" />
-                            <strong>SoundScape</strong></a>
+                            <strong className="logo-name">SoundScape</strong></a>
                     </div>
                     <form onSubmit={onLogin}>
                         <div className="card bg-dark">

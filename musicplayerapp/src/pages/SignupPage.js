@@ -70,7 +70,7 @@ const SignupPage = () => {
                     <div className='mb-5 fs-1 cursor-pointer'>
                         <a className="navbar-brand p-1 m-0" href="/">
                             <img src="/logo.png" height={70} className="me-1" alt="logo" />
-                            <strong>SoundScape</strong></a>
+                            <strong className="logo-name">SoundScape</strong></a>
                     </div>
                     <form onSubmit={onSignup}>
                         <div className="card bg-dark">

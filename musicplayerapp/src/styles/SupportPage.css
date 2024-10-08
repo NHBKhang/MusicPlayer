@@ -23,7 +23,7 @@
 
 .search-input {
     width: 60%;
-    padding: 10px;
+    padding: 10px 15px;
     border-radius: 25px;
     border: 1px solid #555;
     font-size: 18px;
@@ -69,6 +69,7 @@
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     text-align: center;
+    cursor: pointer;
 }
 
 .category-title {
@@ -112,6 +113,12 @@
     background-color: #2a2a2a;
     color: #f0f0f0;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.header-container .logo {
+    display: flex;
+    justify-content: center;
+    justify-items: center;
 }
 
 .header-container .logo h1 {
@@ -184,8 +191,8 @@
 .chat-header {
     padding: 10px;
     font-size: 20px;
-    font-weight: bold;
-    background-color: #1db954;
+    font-weight: 600;
+    background: linear-gradient(90deg, #0ea47c, #b1e884, #1db954);
     text-align: center;
     border-radius: 8px 8px 0 0;
 }
@@ -202,15 +209,25 @@
 
 .chat-message-container {
     display: flex;
+    align-items: baseline;
+    flex-direction: row;
     gap: 10px;
+    text-align: justify;
+}
+
+.chat-message-container img {
+    align-self: flex-end;
+    margin-bottom: 10px;
 }
 
 /* Tin nhắn của người dùng */
+.user-message {
+    justify-content: flex-end;
+}
+
 .user-message .chat-message {
     background-color: #1db954;
     color: white;
-    align-self: flex-end;
-    justify-content: flex-end;
     margin-right: 10px;
 }
 
@@ -219,7 +236,6 @@
     background-color: #555;
     color: white;
     align-self: flex-start;
-    position: relative;
 }
 
 /* Khi không có logo */
@@ -258,7 +274,7 @@
 
 .chat-input {
     flex-grow: 1;
-    padding: 10px;
+    padding: 10px 15px;
     border-radius: 20px;
     border: none;
     outline: none;
@@ -284,8 +300,8 @@
 .chat-messages {
     flex-grow: 1;
     overflow-y: auto;
-    padding: 10px;
-    scrollbar-width: thin;
+    padding: 15px 10px;
+    scrollbar-width: none;
 }
 
 /* Khi ChatBox được mở */
@@ -297,7 +313,7 @@
 /* CSS cho nút toggle */
 .toggle-chat-btn {
     text-align: center;
-    font-size: 25px;
+    font-size: 30px;
     width: 55px;
     height: 55px;
     background-color: #1db954;
