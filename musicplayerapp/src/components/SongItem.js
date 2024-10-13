@@ -38,8 +38,8 @@ const SongItem = ({ song, state }) => {
     return (
         <div className="track-item cursor-pointer">
             <span className="date">{moment(item.created_date).fromNow()}</span>
-            <div className="cover-container">
-                <img src={item.image} alt={item.title} className="track-cover" onClick={goToDetails} />
+            <div className="cover-container" onClick={goToDetails} >
+                <img src={item.image} alt={item.title} className="track-cover"/>
                 <div className="cover-wrapper"></div>
                 <i class="fa-solid fa-music"></i>
             </div>

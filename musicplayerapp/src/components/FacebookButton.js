@@ -7,7 +7,7 @@ import FacebookLogin from '@greatsumini/react-facebook-login';
 
 const FacebookButton = () => {
     const navigate = useNavigate();
-    const { loginWithToken } = useUser();
+    const { loginWithToken, saveUser } = useUser();
 
     const handleLoginSuccess = async (response) => {
         try {
@@ -16,8 +16,8 @@ const FacebookButton = () => {
                 access_token: accessToken
             });
 
-            const { user, token, created } = res.data;
-            loginWithToken(token);
+            const { token, created } = res.data;
+            let user = await loginWithToken(token);
 
             if (created)
                 navigate('/set-password/', {
@@ -26,8 +26,10 @@ const FacebookButton = () => {
                         token: token
                     }
                 });
-            else
+            else {
+                saveUser(user)
                 navigate('/');
+            }
         } catch (error) {
             console.error(error);
             alert(`Đăng nhập thất bại. Vui lòng kiểm tra thông tin và thử lại.\nDetails: ${error}`);

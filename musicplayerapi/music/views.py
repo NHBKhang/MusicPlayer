@@ -31,7 +31,6 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
         queries = self.queryset
 
         if self.request.user.is_authenticated and self.action in ['list']:
-            print("cc")
             queries = queries.exclude(id=self.request.user.id)
 
         q = self.request.query_params.get('q')
@@ -341,14 +340,16 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
     def download(self, request, pk=None):
         try:
             song = self.get_object()
-            if not song.file:
-                return Response({"detail": "Song file not found."}, status=status.HTTP_404_NOT_FOUND)
-            if not song.access.is_downloadable:
-                raise exceptions.NotDownloadableException()
-            if not request.user.is_authenticated:
+            if request.user.is_authenticated:
+                if song.uploader != request.user:
+                    if not song.file:
+                        return Response({"detail": "Song file not found."}, status=status.HTTP_404_NOT_FOUND)
+                    if not song.access.is_downloadable:
+                        raise exceptions.NotDownloadableException()
+                    if not song.access.is_free and not request.user.has_purchased(song):
+                        raise exceptions.PurchaseRequiredException()
+            else:
                 raise exceptions.AnonymousException()
-            if not song.access.is_free and not request.user.has_purchased(song):
-                raise exceptions.PurchaseRequiredException()
 
             s3_bucket = settings.AWS_STORAGE_BUCKET_NAME
             s3_key = song.file.name

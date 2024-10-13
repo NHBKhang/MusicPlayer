@@ -1,12 +1,45 @@
-.video-container {
+.video-details-page .video-container {
     margin-bottom: 10px;
     width: 100%;
 }
 
-video {
-    height: auto;
+.video-details-page .video-js {
     border: 1px solid #ddd;
     border-radius: 8px;
+}
+
+@media (max-width: 576px) {
+    .video-details-page .video-js {
+        height: 320px !important;
+    }
+}
+
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) {
+    .video-details-page .video-js {
+        height: 320px !important;
+    }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+    .video-details-page .video-js {
+        height: 300px !important;
+    }
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+    .video-details-page .video-js {
+        height: 410px !important;
+    }
+}
+
+/* Extra large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+    .video-details-page .video-js {
+        height: 520px !important;
+    }
 }
 
 .description {

@@ -747,16 +747,18 @@ const AboutSettings = ({ goBack }) => {
                 <Typography variant="body1" className="settings-typography">
                     <strong>Tên ứng dụng:</strong> SoundScape
                     <br />
-                    <strong>Phiên bản:</strong> 1.0.0
+                    <strong>Phiên bản:</strong> 1.0.5
                     <br />
                     <strong>Ngày phát hành:</strong> 10 tháng 10, 2024
                     <br />
                     <strong>Tính năng mới:</strong>
                     <ul>
+                        <li>Echo Support AI: chatbox hỗ trợ người dùng.</li>
                         <li>Hỗ trợ xác thực hai lớp (2FA) để bảo mật tài khoản người dùng.</li>
                         <li>Chức năng nhận diện bài hát thông minh.</li>
                         <li>Có thể tạo và chia sẻ danh sách phát cá nhân.</li>
                         <li>Khả năng bình luận và đánh giá các bài hát.</li>
+                        <li>Sửa lỗi.</li>
                     </ul>
                     <strong>Chính sách bảo mật:</strong> Ứng dụng cam kết bảo vệ thông tin cá nhân của người dùng theo tiêu chuẩn cao nhất và tuân thủ các quy định về bảo mật thông tin.
                     <br />

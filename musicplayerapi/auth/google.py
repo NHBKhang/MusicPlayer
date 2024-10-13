@@ -35,12 +35,6 @@ class GoogleViewSet(viewsets.ViewSet):
             access_token, refresh_token = utils.create_user_token(user=user)
 
             return Response({
-                'user': {
-                    'id': user.id,
-                    'username': user.username,
-                    'email': user.email,
-                    'name': user.first_name,
-                },
                 'created': created,
                 'token': {
                     'access_token': access_token.token,

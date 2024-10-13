@@ -192,7 +192,7 @@ const SongDetailsPage = () => {
                         </div>
                         <div className="text-start">
                             <Options
-                                item={song} navigate={navigate}
+                                item={song} navigate={navigate} user={user}
                                 setItem={setSong} getAccessToken={getAccessToken} />
                         </div>
                         <br />

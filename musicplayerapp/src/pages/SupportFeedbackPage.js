@@ -70,8 +70,8 @@ const FeedbackTable = ({ feedbackList }) => {
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Content</th>
-                    <th>Created At</th>
+                    <th>Phản hồi</th>
+                    <th>Ngày gửi</th>
                 </tr>
             </thead>
             <tbody>

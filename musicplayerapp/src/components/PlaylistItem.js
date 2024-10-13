@@ -59,12 +59,11 @@ const PlaylistItem = ({ playlist }) => {
 
     return (
         <div className="playlist-item cursor-pointer">
-            <div className="cover-container">
+            <div className="cover-container" onClick={goToDetails} >
                 <img
                     src={item?.image ?? (item?.details && item.details[0]?.song?.image)}
                     alt={item?.title}
-                    className="track-cover"
-                    onClick={goToDetails} />
+                    className="track-cover" />
                 <div className="cover-wrapper"></div>
                 <i class="fa-solid fa-list"></i>
             </div>

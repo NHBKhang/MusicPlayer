@@ -24,7 +24,6 @@ const DownloadPage = () => {
             try {
                 const res = await authAPI(await getAccessToken()).get(endpoints.song(songId));
                 setSong(res.data);
-                console.log(res.data)
             } catch (err) {
                 setError('Error loading song data');
             } finally {
@@ -142,7 +141,7 @@ const DownloadPage = () => {
             <div className="container-fluid header bg-dark">
                 <div className="navbar-brand cursor-pointer" onClick={() => navigate('/')}>
                     <img src="/logo.png" height={40} className="me-2 ms-1" alt="logo" />
-                    <strong>SoundScape</strong>
+                    <strong className='logo-name'>SoundScape</strong>
                 </div>
                 {user ? <div className="account">
                     <img
@@ -178,7 +177,7 @@ const DownloadPage = () => {
                         Tải xuống {song.access?.is_free && 'miễn phí'}
                     </button>}
                 {downloadError && <p className='text-danger'>{downloadError}</p>}
-                {!song.access?.is_free &&
+                {!song.access?.is_free && user.id !== song.uploader.id &&
                     <div className="payment-options">
                         {song.has_purchased ? <h6 className='text-success mt-2 mb-3'>
                             Bạn đã thanh toán cho bài hát này

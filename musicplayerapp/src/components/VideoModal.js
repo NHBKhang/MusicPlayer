@@ -113,7 +113,7 @@ const VideoModal = ({ visible, video, onSaveChange, onClose }) => {
     return (
         <Modal show={visible} onHide={onClose}>
             <Modal.Header closeButton>
-                <Modal.Title>Chỉnh sửa bài hát</Modal.Title>
+                <Modal.Title>Chỉnh sửa video</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Form className='d-flex flex-wrap justify-content-center' style={{ gap: '50px' }}>

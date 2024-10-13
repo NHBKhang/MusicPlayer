@@ -63,8 +63,11 @@ class UserSerializer(PublicUserSerializer):
         return user
 
     def get_premium(self, user):
-        if user.premium_subscription:
-            return PremiumSubscriptionSerializer(user.premium_subscription).data
+        try:
+            if user.premium_subscription:
+                return PremiumSubscriptionSerializer(user.premium_subscription).data
+        except Exception:
+            return None
         return None
 
     def get_is_2fa_enabled(self, user):

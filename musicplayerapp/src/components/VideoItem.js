@@ -58,10 +58,10 @@ const VideoItem = ({ video, state }) => {
     return (
         <div className="track-item cursor-pointer">
             <span className="date">{moment(item.created_date).fromNow()}</span>
-            <div className="cover-container">
+            <div className="cover-container" onClick={goToDetails} >
                 <img src={item.session_id ?
                     'https://img.freepik.com/vektoren-premium/live-stream-symbol-und-videouebertragung-streaming-von-online-uebertragungen_212474-689.jpg' :
-                    item.image} alt={item.title} className="track-cover" onClick={goToDetails} />
+                    item.image} alt={item.title} className="track-cover"/>
                 <div className="cover-wrapper"></div>
                 <i class="fa-solid fa-video"></i>
             </div>

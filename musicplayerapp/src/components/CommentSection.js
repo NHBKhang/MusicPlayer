@@ -43,7 +43,7 @@ const CommentSection = ({ comments, socketRef, user, liveStream }) => {
                     comments.map((comment, index) => (
                         <div
                             key={index}
-                            className={`comment ${comment.user.id === user.id && 'owner'}`}>
+                            className={`comment ${comment.user.id === liveStream.user.id && 'owner'}`}>
                             <div className="comment-header">
                                 <img
                                     src={comment.user.avatar}

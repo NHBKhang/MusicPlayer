@@ -184,7 +184,8 @@ class PayPalViewSet(viewsets.ViewSet):
                     'amount': transaction.amount_in_vnd,
                     'transaction_date': transaction.transaction_date,
                     'method': transaction.payment_method
-                }
+                },
+                'type': 'song'
             }, status=status.HTTP_200_OK)
         else:
             transaction.status = TransactionStatus.FAILED
@@ -214,7 +215,8 @@ class PayPalViewSet(viewsets.ViewSet):
                     'transaction_date': transaction.transaction_date,
                     'amount': transaction.amount_in_vnd,
                     'method': transaction.payment_method
-                }
+                },
+                'type': 'premium'
             }, status=status.HTTP_200_OK)
         else:
             transaction.status = TransactionStatus.FAILED
