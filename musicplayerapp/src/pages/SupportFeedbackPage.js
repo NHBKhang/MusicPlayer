@@ -27,9 +27,13 @@ const SupportFeedbackPage = () => {
     return (
         <SupportContainer>
             <div className="feedback-page">
-                <h1>Phản hồi của bạn</h1>
-                <FeedbackForm addFeedback={addFeedback} getAccessToken={getAccessToken} user={user} />
-                <FeedbackTable feedbackList={feedbackList} />
+                <h1 className='mt-4 mb-5'>Phản hồi của bạn</h1>
+                {user ? <>
+                    <FeedbackForm addFeedback={addFeedback} getAccessToken={getAccessToken} user={user} />
+                    <FeedbackTable feedbackList={feedbackList} />
+                </> : <p>
+                    Vui lòng <a className='text-primary' href='/login/?next=/support/feedback/'>đăng nhập</a> để gửi phản hồi
+                </p>}
             </div>
         </SupportContainer>
     );

@@ -17,6 +17,7 @@ import {
     SupportFAQPage,
     SupportFeedbackPage,
     SupportPage,
+    SupportTicketPage,
     UploadPage,
     VideoDetailsPage
 } from "../pages";
@@ -164,6 +165,12 @@ export const routes = {
     supportFeedback: {
         url: '/support/feedback/',
         component: SupportFeedbackPage,
+        require: false,
+        controlShow: false
+    },
+    supportTicket: {
+        url: '/support/tickets/',
+        component: SupportTicketPage,
         require: false,
         controlShow: false
     }

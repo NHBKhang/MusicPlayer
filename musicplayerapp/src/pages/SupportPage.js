@@ -129,7 +129,7 @@ const Header = () => {
             <nav className="nav-links">
                 <a href="/support">Trang chủ</a>
                 <a href="/support/feedback/">Phản hồi</a>
-                <a href="/support/ticket/">Phiếu Hỗ Trợ</a>
+                <a href="/support/tickets/">Phiếu Hỗ Trợ</a>
             </nav>
         </header>
     );

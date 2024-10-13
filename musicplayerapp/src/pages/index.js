@@ -62,3 +62,4 @@ export { default as PremiumSubscriptionPage } from './PremiumSubscriptionPage';
 export { default as SupportPage } from './SupportPage';
 export { default as SupportFAQPage } from './SupportFaqPage';
 export { default as SupportFeedbackPage } from './SupportFeedbackPage';
+export { default as SupportTicketPage } from './SupportTicketPage';

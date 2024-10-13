@@ -29,6 +29,12 @@ class SupportTicketViewSet(viewsets.ModelViewSet):
     queryset = SupportTicket.objects.all()
     serializer_class = serializers.SupportTicketSerializer
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset().filter(user=self.request.user)
+        serializer = self.get_serializer(queryset, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class FeedbackViewSet(viewsets.ViewSet, generics.ListCreateAPIView):
     queryset = Feedback.objects.all()

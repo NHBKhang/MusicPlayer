@@ -43,6 +43,7 @@ export const endpoints = {
     'resend-2fa-qr': '/auth/2fa/resend-qr/',
     'dialogflow-response': '/support/dialogflow/response/',
     'feedback': 'support/feedback/',
+    'tickets': 'support/tickets/',
 }
 
 export const authAPI = (accessToken) =>
