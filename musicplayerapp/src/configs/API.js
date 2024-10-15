@@ -21,6 +21,7 @@ export const endpoints = {
     'playlist': (playlistId) => `/playlists/${playlistId}/`,
     'music-videos': '/music-videos/',
     'music-video': (videoId) => `/music-videos/${videoId}/`,
+    'related-videos': (videoId) => `/music-videos/${videoId}/related/`,
     'live-video': (videoId) => `/music-videos/${videoId}/live/`,
     'live-videos': '/music-videos/live-videos/',
     'related-playlists': (playlistId) => `/playlists/${playlistId}/related/`,

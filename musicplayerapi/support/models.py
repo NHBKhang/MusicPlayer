@@ -22,7 +22,7 @@ class SupportTicket(models.Model):
         (1, 'Medium'),
         (2, 'High'),
     ]
-s
+
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     subject = models.CharField(max_length=255)
     description = models.TextField()

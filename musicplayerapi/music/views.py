@@ -102,7 +102,7 @@ class GenreViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retrie
 
 
 class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
-    queryset = Song.objects.filter(active=True).order_by('-id').all()
+    queryset = Song.objects.filter(active=True, is_public=Song.PUBLIC).order_by('-id').all()
     serializer_class = serializers.SongSerializer
     pagination_class = paginators.SongPaginator
     permission_classes = [perms.SongOwner]
@@ -159,6 +159,11 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
         uploader = self.request.query_params.get('uploader')
         if uploader:
             queryset = queryset.filter(uploader_id=uploader)
+
+        if self.request.user and self.request.user.is_authenticated:
+            private_queryset = Song.objects.filter(
+                Q(is_public=Song.PRIVATE) | Q(is_public=Song.SCHEDULED), uploader=self.request.user)
+            queryset = queryset | private_queryset
 
         return queryset.distinct()
 
@@ -324,15 +329,26 @@ class SongViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
             return Response({'detail': 'Nothing here'}, status=status.HTTP_204_NO_CONTENT)
 
         song = self.get_object()
-        try:
-            access, created = SongAccess.objects.get_or_create(song=song, defaults=request.data)
 
-            serializer = serializers.SongAccessSerializer(access, data=request.data, partial=True)
+        try:
+            access = SongAccess.objects.filter(song=song).first()
+
+            if request.method == 'POST' and access:
+                return Response({'detail': 'Access already exists. Use PATCH to update.'},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            if request.method == 'POST':
+                serializer = serializers.SongAccessSerializer(data=request.data)
+            else:
+                serializer = serializers.SongAccessSerializer(access, data=request.data, partial=True)
 
             if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
+                serializer.save(song=song)
+                status_code = status.HTTP_201_CREATED if request.method == 'POST' else status.HTTP_200_OK
+                return Response(serializer.data, status=status_code)
+
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -512,7 +528,7 @@ class MusicVideoViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.R
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     def get_serializer_class(self):
-        if self.action in ['update', 'partial_update', 'retrieve']:
+        if self.action in ['update', 'partial_update', 'retrieve', 'create']:
             if self.request.user.is_authenticated:
                 return serializers.AuthenticatedMusicVideoSerializer
             return serializers.DetailsMusicVideoSerializer
@@ -572,6 +588,45 @@ class MusicVideoViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.R
         )
         serializer = serializers.DetailsMusicVideoSerializer(live_videos, many=True)
         return Response(serializer.data)
+
+    @action(methods=['get'], url_path='related', detail=True)
+    def related(self, request, pk=None):
+        try:
+            video = self.get_object()
+        except MusicVideo.DoesNotExist:
+            return Response({'detail': 'Video not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        related_video_ids = set()
+
+        if video.song and video.song.genres.exists():
+            genre_related_videos = MusicVideo.objects.filter(
+                song__genres__in=video.song.genres.all()
+            ).exclude(id=video.id).values_list('id', flat=True)[:10]
+            related_video_ids.update(genre_related_videos)
+
+        if len(related_video_ids) < 3 and video.title:
+            artist_related_videos = MusicVideo.objects.filter(
+                title__icontains=video.title
+            ).exclude(id=video.id).values_list('id', flat=True)[:3]
+            related_video_ids.update(artist_related_videos)
+
+        if len(related_video_ids) < 3:
+            additional_videos_needed = 3 - len(related_video_ids)
+            additional_videos = MusicVideo.objects.exclude(
+                id__in=related_video_ids.union({video.id})
+            ).values_list('id', flat=True)[:additional_videos_needed]
+            related_video_ids.update(additional_videos)
+
+        final_related_videos = MusicVideo.objects.filter(
+            id__in=related_video_ids).distinct().order_by('-created_date')[:10]
+
+        if self.request.user.is_authenticated:
+            serializer = serializers.AuthenticatedMusicVideoSerializer(final_related_videos, many=True,
+                                                                       context={'request': self.request})
+        else:
+            serializer = serializers.MusicVideoSerializer(final_related_videos, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ReadOnlySongViewSet(viewsets.ReadOnlyModelViewSet):

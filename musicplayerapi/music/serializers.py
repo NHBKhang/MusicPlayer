@@ -46,12 +46,12 @@ class PublicUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'name', 'avatar', 'username', 'first_name', 'last_name', 'info', 'followers', 'following',
-                  'songs', 'last_login']
-
-
-class UserSerializer(PublicUserSerializer):
-    premium = serializers.SerializerMethodField(read_only=True)
-    is_2fa_enabled = serializers.SerializerMethodField(read_only=True)
+                  'songs', 'last_login', 'password']
+        extra_kwargs = {
+            'password': {
+                'write_only': True
+            }
+        }
 
     def create(self, validated_data):
         data = validated_data.copy()
@@ -61,6 +61,11 @@ class UserSerializer(PublicUserSerializer):
         user.save()
 
         return user
+
+
+class UserSerializer(PublicUserSerializer):
+    premium = serializers.SerializerMethodField(read_only=True)
+    is_2fa_enabled = serializers.SerializerMethodField(read_only=True)
 
     def get_premium(self, user):
         try:
@@ -76,12 +81,7 @@ class UserSerializer(PublicUserSerializer):
 
     class Meta:
         model = PublicUserSerializer.Meta.model
-        fields = PublicUserSerializer.Meta.fields + ['email', 'password', 'premium', 'is_2fa_enabled']
-        extra_kwargs = {
-            'password': {
-                'write_only': True
-            }
-        }
+        fields = PublicUserSerializer.Meta.fields + ['email', 'premium', 'is_2fa_enabled']
 
 
 class AuthenticatedUserSerializer(PublicUserSerializer):
@@ -113,17 +113,10 @@ class SongAccessSerializer(serializers.ModelSerializer):
         is_free = data.get('is_free')
         price = data.get('price')
 
-        if is_free and price is not None:
-            raise serializers.ValidationError("Price must be null if the song is free.")
         if not is_free and price is None:
             raise serializers.ValidationError("Price is required if the song is not free.")
 
         return data
-
-    def update(self, instance, validated_data):
-        validated_data['price'] = None if validated_data['price'] == 0 or validated_data['is_free'] \
-            else validated_data['price']
-        return super().update(instance, validated_data)
 
 
 class SongSerializer(serializers.ModelSerializer):
@@ -132,6 +125,7 @@ class SongSerializer(serializers.ModelSerializer):
     streams = serializers.SerializerMethodField()
     access = SongAccessSerializer(read_only=True)
     has_purchased = serializers.SerializerMethodField()
+    mv = serializers.PrimaryKeyRelatedField(read_only=True)
 
     def get_likes(self, song):
         return song.like_set.filter(active=True).count()
@@ -420,7 +414,10 @@ class MusicVideoSerializer(serializers.ModelSerializer):
         if video.image:
             return video.image.url
         else:
-            return video.song.image.url
+            if video.song and video.song.image:
+                return video.song.image.url
+            else:
+                return 'https://www.techsmith.com/blog/wp-content/uploads/2018/01/video-file-formats.png'
 
     def get_is_owner(self, video):
         request = self.context.get('request')

@@ -5,11 +5,12 @@ import '../styles/VideoDetailsPage.css';
 import { useUser } from '../configs/UserContext';
 import Page from '.';
 import { useAudio } from '../configs/AudioContext';
-import { VideoPlayer } from '../components';
+import { VideoItem, VideoPlayer } from '../components';
 
 const VideoDetailsPage = () => {
     const { id } = useParams();
     const [video, setVideo] = useState(null);
+    const [relatedVideos, setRelatedVideos] = useState([]);
     const [loading, setLoading] = useState(true);
     const { getAccessToken, user } = useUser();
     const { isPlaying, pauseSong } = useAudio();
@@ -24,6 +25,7 @@ const VideoDetailsPage = () => {
             try {
                 const res = await authAPI(await getAccessToken()).get(endpoints['music-video'](id));
                 setVideo(res.data);
+                console.info(res.data)
                 setLoading(false);
             } catch (error) {
                 console.error('Failed to fetch video:', error);
@@ -31,7 +33,17 @@ const VideoDetailsPage = () => {
             }
         };
 
+        const loadRelatedVideos = async () => {
+            try {
+                const res = await authAPI(await getAccessToken()).get(endpoints['related-videos'](id));
+                setRelatedVideos(res.data);
+            } catch (error) {
+                console.error('Failed to fetch related video:', error);
+            }
+        };
+
         loadVideo();
+        loadRelatedVideos();
     }, [id, getAccessToken]);
 
     const follow = async () => {
@@ -92,8 +104,11 @@ const VideoDetailsPage = () => {
                         </div>
                         <p className="description">{video.description}</p>
                     </div>
-                    <div className='col-md-4'>
-
+                    <div className='col-md-4 text-start'>
+                        <h5>Các music video khác</h5>
+                        <div className='divider my-1'></div>
+                        {relatedVideos.map(v =>
+                            <VideoItem video={v} />)}
                     </div>
                 </div>
             </div>

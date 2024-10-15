@@ -38,11 +38,13 @@ const VideoItem = ({ video, state }) => {
 
     const onDelete = async () => {
         try {
-            await authAPI(await getAccessToken()).delete(endpoints.playlist(item.id));
+            await authAPI(await getAccessToken()).delete(endpoints["music-video"](item.id));
+            setItem(null);
         } catch (error) {
-            alert("Không thể xóa playlist");
+            alert("Không thể xóa video");
         } finally {
             updateVisible('delete', false);
+            
         }
     };
 
@@ -54,6 +56,8 @@ const VideoItem = ({ video, state }) => {
     }
 
     const goToArtist = () => navigate(`/profile/${user.id}/`)
+
+    if (!item) return <></>
 
     return (
         <div className="track-item cursor-pointer">

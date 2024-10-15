@@ -5,16 +5,17 @@ import API, { endpoints } from '../configs/API';
 import '../App.css';
 import FacebookLogin from '@greatsumini/react-facebook-login';
 
-const FacebookButton = () => {
+const FacebookButton = ({ setLoading }) => {
     const navigate = useNavigate();
     const { loginWithToken, saveUser } = useUser();
 
     const handleLoginSuccess = async (response) => {
+        setLoading(true);
         try {
             const { accessToken } = response;
             const res = await API.post(endpoints['login-facebook'], {
                 access_token: accessToken
-            });
+            }, { timeout: 0 });
 
             const { token, created } = res.data;
             let user = await loginWithToken(token);
@@ -33,6 +34,8 @@ const FacebookButton = () => {
         } catch (error) {
             console.error(error);
             alert(`Đăng nhập thất bại. Vui lòng kiểm tra thông tin và thử lại.\nDetails: ${error}`);
+        } finally {
+            setLoading(false);
         }
     };
 

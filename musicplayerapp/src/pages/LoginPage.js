@@ -129,8 +129,8 @@ const LoginPage = () => {
                     <div className="card bg-dark">
                         <p className='text-white mt-3'>Hoặc đăng nhập bằng tài khoản:</p>
                         <div className='d-flex p-1 pb-4 justify-content-center w-100 flex-wrap'>
-                            <div className='mb-4 justify-content-center d-flex'><GoogleButton /></div>
-                            <div className='mb-1 w-100'><FacebookButton /></div>
+                            <div className='mb-4 justify-content-center d-flex'><GoogleButton setLoading={setLoading} /></div>
+                            <div className='mb-1 w-100'><FacebookButton setLoading={setLoading} /></div>
                         </div>
                     </div>
                 </div>

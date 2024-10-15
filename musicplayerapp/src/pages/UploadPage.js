@@ -152,7 +152,7 @@ const Upload = () => {
             });
             formData.append('lyrics', media.lyrics);
         } else {
-            formData.append('song_id', media.song);
+            if (media.song && media.song !== 0) formData.append('song_id', media.song);
         }
         try {
             const res = await authAPI(await getAccessToken())

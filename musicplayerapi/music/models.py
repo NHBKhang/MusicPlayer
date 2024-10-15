@@ -216,7 +216,6 @@ class Interaction(BaseModel):
     class Meta:
         abstract = True
         ordering = ('-created_date',)
-        unique_together = ('song', 'user')
 
 
 class Stream(models.Model):
@@ -242,6 +241,9 @@ class Like(Interaction):
     def __str__(self):
         return f'{self.user} đã thích {self.song}'
 
+    class Meta:
+        unique_together = ('song', 'user')
+
 
 class SongAccess(models.Model):
     song = models.OneToOneField(Song, on_delete=models.CASCADE, related_name='access')
@@ -250,14 +252,17 @@ class SongAccess(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=0, null=True, blank=True, help_text="Price in VND")
 
     def clean(self):
-        if self.is_downloadable:
-            if self.is_free and self.price is not None:
-                raise ValidationError("Price must be null if the song is free.")
-            if not self.is_free and self.price is None:
-                raise ValidationError("Price is required if the song is not free.")
+        if self.is_downloadable and not self.is_free and self.price is None:
+            raise ValidationError("Price is required if the song is not free.")
 
     def save(self, *args, **kwargs):
         self.clean()
+        if self.is_downloadable:
+            if self.is_free:
+                self.price = None
+        else:
+            self.is_free = False
+            self.price = None
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -368,7 +373,7 @@ class Video(BaseModel, ImageBaseModel):
 
 class MusicVideo(Video):
     file = models.FileField(upload_to='videos/', validators=[validate_video_file])
-    song = models.OneToOneField(Song, on_delete=models.CASCADE, related_name='mv')
+    song = models.OneToOneField(Song, on_delete=models.CASCADE, related_name='mv', null=True, blank=True)
 
     class Meta:
         verbose_name = 'Music Video'

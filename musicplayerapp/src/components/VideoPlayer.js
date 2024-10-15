@@ -1,9 +1,9 @@
-import { memo, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import videojs from 'video.js';
 import 'video.js/dist/video-js.css';
 
-const VideoPlayer = memo(({ src, live = false, releaseDate = null }) => {
+const VideoPlayer = ({ src, live = false, releaseDate = null }) => {
     const [seekableEnd, setSeekableEnd] = useState(0);
     const [player, setPlayer] = useState(null);
     const [startTime, setStartTime] = useState(0);
@@ -67,15 +67,9 @@ const VideoPlayer = memo(({ src, live = false, releaseDate = null }) => {
 
     return (
         <div>
-            <video id="video-player" className="video-js vjs-default-skin w-100 h-100" controls />
+            <video id="video-player" src={src} className="video-js vjs-default-skin w-100 h-100" controls />
         </div>
     );
-});
-
-VideoPlayer.propTypes = {
-    src: PropTypes.string.isRequired,
-    live: PropTypes.bool,
-    releaseDate: PropTypes.string,
 };
 
 export default VideoPlayer;

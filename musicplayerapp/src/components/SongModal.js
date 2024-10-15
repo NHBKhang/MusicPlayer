@@ -47,7 +47,7 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
                             setReleaseDate(releaseDate);
                             setReleaseTime(releaseTime);
                         }
-                        
+
                     } else {
                         setGenres(song.genres?.map(genre => ({
                             value: genre.id,
@@ -95,7 +95,7 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
         const newErrors = {};
         if (!title) newErrors.title = 'Tên bài hát là bắt buộc.';
         if (genres.length === 0) newErrors.genres = 'Bạn phải chọn ít nhất một thể loại.';
-        if (!releaseDate || !releaseTime) newErrors.releaseDateTime = 'Thời gian phát trực tiếp là bắt buộc';
+        if (isPublic === 3 && (!releaseDate || !releaseTime)) newErrors.releaseDateTime = 'Thời gian phát trực tiếp là bắt buộc';
         if (access?.is_downloadable && !access?.is_free && !access?.price) newErrors.price = 'Bạn phải nhập giá tiền cho bài hát này.';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -117,34 +117,28 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
         if (lyrics !== song.lyrics) formData.append('lyrics', lyrics);
         if (description !== song.description) formData.append('description', description);
         if (isPublic !== song.is_public) formData.append('is_public', isPublic);
-        formData.append('release_date', `${releaseDate}T${releaseTime}:00`);
+        if (isPublic === 3 && (!releaseDate || !releaseTime)) formData.append('release_date', `${releaseDate}T${releaseTime}:00`);
 
         try {
             let accessData = new FormData();
-            if (access?.is_downloadable !== song.access?.is_downloadable) accessData.append('is_downloadable', access?.is_downloadable);
-            if (access?.is_free !== song.access?.is_free) accessData.append('is_free', access?.is_free);
-            if (access?.is_free)
-                accessData.append('price', 0);
-            else {
-                if (access?.price !== song.access?.price)
-                    accessData.append('price', Number(access?.price));
-            }
+            console.info(access)
+            accessData.append('is_downloadable', access?.is_downloadable ? 'true' : 'false');
+            accessData.append('is_free', access?.is_free ? 'true' : 'false');
+            accessData.append('price', access?.price ? String(Number(access.price)) : '0');
 
-
-            if (!song.access) {
-                await authAPI(await getAccessToken()).post(
-                    endpoints['song-access'](song.id), accessData, {
-                    headers: {
-                        "Content-Type": "multipart/form-data"
+            try {
+                const apiMethod = access ? 'patch' : 'post';
+                await authAPI(await getAccessToken())[apiMethod](
+                    endpoints['song-access'](song.id),
+                    accessData,
+                    {
+                        headers: {
+                            "Content-Type": "multipart/form-data"
+                        }
                     }
-                });
-            } else {
-                await authAPI(await getAccessToken()).patch(
-                    endpoints['song-access'](song.id), accessData, {
-                    headers: {
-                        "Content-Type": "multipart/form-data"
-                    }
-                });
+                );
+            } catch (error) {
+                console.error("Error in API call:", error);
             }
 
             let res = await authAPI(await getAccessToken()).patch(endpoints.song(song.id),
@@ -219,8 +213,7 @@ const SongModal = ({ visible, song, onSaveChange, onClose }) => {
                                         as="textarea"
                                         rows={3}
                                         value={lyrics}
-                                        onChange={(e) => setLyrics(e.target.value)}
-                                    />
+                                        onChange={(e) => setLyrics(e.target.value)} />
                                 </Form.Group>
                                 <Form.Group controlId="formDescription">
                                     <Form.Label className='text-dark mt-2'>Mô tả</Form.Label>

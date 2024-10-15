@@ -70,7 +70,7 @@ const SearchPage = () => {
                 const res = await authAPI(await getAccessToken()).get(url);
 
                 if (res.data.next === null) updatePage(field, 0);
-                console.info(res.data.results)
+                
                 updateData(field, res.data.results, append);
             } catch (error) {
                 console.error('Failed to load items:', error);

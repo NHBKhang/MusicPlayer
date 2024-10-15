@@ -67,3 +67,11 @@
     text-align: center;
     margin: 20px;
 }
+
+.video-details-page .track-item {
+    border: none;
+}
+
+.video-details-page .cover-container {
+    height: 82px;
+}

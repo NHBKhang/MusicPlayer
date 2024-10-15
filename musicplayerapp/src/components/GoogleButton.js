@@ -4,16 +4,17 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../configs/UserContext';
 import API, { endpoints } from '../configs/API';
 
-const GoogleButton = () => {
+const GoogleButton = ({ setLoading }) => {
     const navigate = useNavigate();
     const { loginWithToken, saveUser } = useUser();
 
     const handleLoginSuccess = async (response) => {
+        setLoading(true);
         try {
             const { credential } = response;
             const res = await API.post(endpoints['login-google'], {
                 id_token: credential
-            });
+            }, { timeout: 0 });
 
             const { token, created } = res.data;
             let user = await loginWithToken(token);
@@ -32,6 +33,8 @@ const GoogleButton = () => {
         } catch (error) {
             console.error(error)
             alert(`Đăng nhập thất bại. Vui lòng kiểm tra thông tin và thử lại.\nDetails: ${error}`);
+        } finally {
+            setLoading(false);
         }
     };
 
